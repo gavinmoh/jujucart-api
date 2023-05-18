@@ -5,7 +5,7 @@
   - low
 
 # use below to define a background cronjob for sidekiq worker
-:schedule:
+# :schedule:
 #  example_task:
 #    # run every minute
 #    cron: "* * * * *"
