@@ -72,10 +72,6 @@ class Api::V1::User::OrderPolicy < ApplicationPolicy
     @user.admin?
   end
 
-  def destroy?
-    @user.admin? && @record.pending?
-  end
-
   class Scope < Scope
     def resolve
       if @user.admin?
