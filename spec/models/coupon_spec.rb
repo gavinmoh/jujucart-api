@@ -6,9 +6,20 @@ RSpec.describe Coupon, type: :model do
     it { should validate_uniqueness_of(:code).case_insensitive }
     it { should validate_presence_of(:name) }
     it { should validate_numericality_of(:redemption_limit).is_greater_than_or_equal_to(0) }
+    it { should validate_presence_of(:start_at) }
+    it { should validate_presence_of(:end_at) }
     it { should validate_presence_of(:discount_by) }
     it { should validate_presence_of(:coupon_type) }
     it { should validate_presence_of(:discount_on) }
+
+    context 'start_at and end_at' do
+      let(:subject) { build(:coupon) }
+      it 'should validate start_at_must_be_before_end_at' do
+        subject.start_at = Time.zone.now + 1.day
+        subject.end_at = Time.zone.now
+        expect(subject).to_not be_valid
+      end
+    end
 
     context 'order_types' do
       let(:subject) { build(:coupon) }
