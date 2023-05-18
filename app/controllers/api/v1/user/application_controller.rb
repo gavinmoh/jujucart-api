@@ -15,7 +15,7 @@ class Api::V1::User::ApplicationController < ApplicationController
     { 
       ip: request.remote_ip.to_s, 
       user_agent: request.user_agent,
-      meta: {
+      metadata: {
         account: {
           id: current_user&.id,
           name: current_user&.name,
