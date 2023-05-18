@@ -1,0 +1,64 @@
+require 'swagger_helper'
+
+RSpec.describe 'api/v1/<%= current_user_scope %>/sessions', type: :request do
+  let(:<%= current_user_scope %>) { create(:<%= current_user_scope %>, password: 'password') }
+
+  path '/api/v1/<%= current_user_scope %>/sign_in' do
+
+    post('Sign in') do
+      tags '<%= rswag_tag_prefix %>Sessions'
+      consumes 'application/json'
+      produces 'application/json'
+      parameter name: :data, in: :body, schema: {
+        type: :object,
+        properties: {
+          <%= current_user_scope %>: {
+            type: :object,
+            properties: {
+              email: { type: :string, example: '<%= current_user_scope %>@test.com' },
+              password: { type: :string, example: 'password' }
+            },
+            required: ['email', 'password']
+          }
+        }
+      }
+      response(200, 'successful', save_request_example: :data) do
+        let(:data) { {
+          <%= current_user_scope %>: {
+              email: <%= current_user_scope %>.email,
+              password: 'password'
+            } 
+        } }
+
+        run_test!
+      end
+
+      response(401, 'unauthorized') do
+        let(:data) { {
+          <%= current_user_scope %>: {
+              email: <%= current_user_scope %>.email,
+              password: 'wrong_password'
+            } 
+          } }
+
+        run_test!        
+      end
+    end
+
+  end
+
+  path '/api/v1/<%= current_user_scope %>/sign_out' do
+
+    delete('Sign out') do
+      tags '<%= rswag_tag_prefix %>Sessions'
+      security [ { bearerAuth: nil } ]
+
+      response(204, 'successful') do
+        
+        let(:Authorization) { bearer_token_for(create(:<%= current_user_scope %>)) }
+
+        run_test!
+      end
+    end
+  end
+end

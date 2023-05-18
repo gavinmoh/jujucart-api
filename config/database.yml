@@ -1,0 +1,28 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: <%= ENV['DEV_DATABASE_NAME'] ||= 'jujucart_api_development' %>
+  host: <%= ENV['DEV_DATABASE_HOST'] %>
+  port: <%= ENV['DEV_DATABASE_PORT'] %>
+  username: <%= ENV['DEV_DATABASE_USERNAME'] %>
+  password: <%= ENV['DEV_DATABASE_PASSWORD'] %>
+
+test:
+  <<: *default
+  database: jujucart_api_test
+  host: <%= ENV['DEV_DATABASE_HOST'] %>
+  port: <%= ENV['DEV_DATABASE_PORT'] %>
+  username: <%= ENV['DEV_DATABASE_USERNAME'] %>
+  password: <%= ENV['DEV_DATABASE_PASSWORD'] %>
+
+production:
+  <<: *default
+  database: jujucart_api_production
+  host: <%= ENV['PRODUCTION_DATABASE_HOST'] %>
+  port: <%= ENV['PRODUCTION_DATABASE_PORT'] %>
+  username: <%= ENV['PRODUCTION_DATABASE_USERNAME'] %>
+  password: <%= ENV['PRODUCTION_DATABASE_PASSWORD'] %>       

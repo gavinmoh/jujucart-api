@@ -1,0 +1,151 @@
+require 'swagger_helper'
+
+RSpec.describe '<%= controller_class_name.underscore %>', type: :request do
+  <%- if current_user_scope -%>
+  # change the create(:user) to respective user model name
+  let(:user) { create(:<%= current_user_scope %>) }
+  let(:Authorization) { bearer_token_for(user) }
+  <%- else -%>
+  # change the create(:user) to respective user model name
+  # let(:user) { create(:user) }
+  # let(:Authorization) { bearer_token_for(user) }
+  <%- end -%>
+  <%- if parent_resource -%>
+  let(:<%= parent_resource %>_id) { create(:<%= parent_resource %>).id }
+  let(:id) { create(:<%= singular_name %>, <%= parent_resource %>_id: <%= parent_resource %>_id).id }
+  <%- else -%>
+  let(:id) { create(:<%= singular_name %>).id }
+  <%- end -%>
+
+  path '/<%= rswag_request_path %>' do
+    <%- if parent_resource -%>
+    parameter name: '<%= parent_resource %>_id', in: :path, type: :string, description: '<%= parent_resource %>_id'    
+    <%- end -%>
+    get('list <%= plural_name.humanize(capitalize: false) %>') do
+      tags '<%= rswag_tag_prefix %><%= plural_name.titleize %>'
+      <%- if current_user_scope -%>
+      security [ { bearerAuth: nil } ]
+      <%- end -%>
+      produces 'application/json'
+
+      parameter name: :page, in: :query, type: :integer, required: false, description: 'Page number'
+      parameter name: :items, in: :query, type: :integer, required: false, description: 'Number of items per page'
+
+      response(200, 'successful') do
+        before do
+          <%- if parent_resource -%>
+          create_list(:<%= singular_name %>, 10, <%= parent_resource %>_id: <%= parent_resource %>_id)
+          <%- else -%>
+          create_list(:<%= singular_name %>, 10)
+          <%- end -%>
+        end
+
+        run_test!
+      end
+
+    end
+
+    post('create <%= plural_name.humanize(capitalize: false) %>') do
+      tags '<%= rswag_tag_prefix %><%= plural_name.titleize %>'
+      produces 'application/json'
+      consumes 'application/json'
+      <%- if current_user_scope -%>
+      security [ { bearerAuth: nil } ]
+      <%- end -%>
+
+      parameter name: :data, in: :body, schema: {
+        type: :object,
+        properties: {
+          <%= singular_name %>: {
+            type: :object,
+            properties: {
+              <%- attributes.each_with_index do |attribute, index| -%>
+              <%- if ['float', 'decimal'].include?(attribute.type) -%>
+              <%= attribute.column_name %>: { type: :number }<%= index == (attributes.size - 1) ? '' : ',' %>
+              <%- elsif ['integer', 'bigint'].include?(attribute.type) -%>
+              <%= attribute.column_name %>: { type: :integer }<%= index == (attributes.size - 1) ? '' : ',' %>
+              <%- else -%>
+              <%= attribute.column_name %>: { type: :string }<%= index == (attributes.size - 1) ? '' : ',' %>
+              <%- end -%>
+              <%- end -%>
+            }
+          }
+        }
+      }
+
+      response(200, 'successful', save_request_example: :data) do
+        let(:data) { { <%= singular_name %>: attributes_for(:<%= singular_name %>) } }
+
+        run_test!
+      end
+    end
+
+  end
+
+  path '/<%= rswag_request_path %>/{id}' do
+    <%- if parent_resource -%>
+    parameter name: '<%= parent_resource %>_id', in: :path, type: :string, description: '<%= parent_resource %>_id'    
+    <%- end -%>
+    parameter name: 'id', in: :path, type: :string, description: 'id'
+
+    get('show <%= plural_name.humanize(capitalize: false) %>') do
+      tags '<%= rswag_tag_prefix %><%= plural_name.titleize %>'
+      produces 'application/json'
+      <%- if current_user_scope -%>
+      security [ { bearerAuth: nil } ]
+      <%- end -%>
+
+      response(200, 'successful') do
+        run_test!
+      end
+    end
+
+    put('update <%= plural_name.humanize(capitalize: false) %>') do
+      tags '<%= rswag_tag_prefix %><%= plural_name.titleize %>'
+      produces 'application/json'
+      consumes 'application/json'
+      <%- if current_user_scope -%>
+      security [ { bearerAuth: nil } ]
+      <%- end -%>
+
+      parameter name: :data, in: :body, schema: {
+        type: :object,
+        properties: {
+          <%= singular_name %>: {
+            type: :object,
+            properties: {
+              <%- attributes.each_with_index do |attribute, index| -%>
+              <%- if ['float', 'decimal'].include?(attribute.type) -%>
+              <%= attribute.column_name %>: { type: :number }<%= index == (attributes.size - 1) ? '' : ',' %>
+              <%- elsif ['integer', 'bigint'].include?(attribute.type) -%>
+              <%= attribute.column_name %>: { type: :integer }<%= index == (attributes.size - 1) ? '' : ',' %>
+              <%- else -%>
+              <%= attribute.column_name %>: { type: :string }<%= index == (attributes.size - 1) ? '' : ',' %>
+              <%- end -%>
+              <%- end -%>
+            }
+          }
+        }
+      }
+
+      response(200, 'successful', save_request_example: :data) do
+        let(:data) { { <%= singular_name %>: attributes_for(:<%= singular_name %>) } }      
+
+        run_test!
+      end
+    end
+
+    delete('delete <%= plural_name.humanize(capitalize: false) %>') do
+      tags '<%= rswag_tag_prefix %><%= plural_name.titleize %>'
+      <%- if current_user_scope -%>
+      security [ { bearerAuth: nil } ]
+      <%- end -%>
+
+      response(204, 'successful') do
+        run_test!
+      end
+    end
+
+    
+  end
+end

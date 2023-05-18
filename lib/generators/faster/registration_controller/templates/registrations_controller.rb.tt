@@ -1,0 +1,23 @@
+<%- if namespaced? -%>
+require_dependency "<%= namespaced_path %>/application_controller"
+
+<%- end -%>
+<% module_namespacing do -%>
+class <%= controller_class_name %>Controller < Devise::RegistrationsController
+  respond_to :json
+
+  private
+    def sign_up_params
+      params.require(:<%= current_user_scope %>).permit(<%= permitted_params %>)
+      # .merge(active: true)
+    end
+
+    def respond_with(resource, _opts = {})
+      if resource.errors.any?
+        render json: ErrorResponse.new(resource), status: :unprocessable_entity
+      else
+        render json: resource, adapter: :json
+      end
+    end
+end
+<% end -%>

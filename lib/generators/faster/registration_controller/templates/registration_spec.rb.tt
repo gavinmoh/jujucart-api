@@ -1,0 +1,39 @@
+require 'swagger_helper'
+
+RSpec.describe 'api/v1/<%= current_user_scope %>/registrations', type: :request do
+
+  path '/api/v1/<%= current_user_scope %>/' do
+
+    post('Register <%= current_user_scope %>') do
+      tags '<%= rswag_tag_prefix %>Registrations'
+      consumes 'application/json'
+      produces 'application/json'
+      parameter name: :data, in: :body, schema: {
+        type: :object,
+        properties: {
+          <%= current_user_scope %>: {
+            type: :object,
+            properties: {
+              <%- attributes.each_with_index do |attribute, index| -%>
+              <%- if ['float', 'decimal'].include?(attribute.type) -%>
+              <%= attribute.column_name %>: { type: :number }<%= index == (attributes.size - 1) ? '' : ',' %>
+              <%- elsif ['integer', 'bigint'].include?(attribute.type) -%>
+              <%= attribute.column_name %>: { type: :integer }<%= index == (attributes.size - 1) ? '' : ',' %>
+              <%- else -%>
+              <%= attribute.column_name %>: { type: :string }<%= index == (attributes.size - 1) ? '' : ',' %>
+              <%- end -%>
+              <%- end -%>
+            }
+          }
+        }
+      }
+
+      response(200, 'successful', save_request_example: :data) do
+        let(:data) { { <%= current_user_scope %>: attributes_for(:<%= current_user_scope %>) } }
+
+        run_test!
+      end
+    end
+  end
+
+end

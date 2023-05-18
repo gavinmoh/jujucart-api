@@ -1,0 +1,119 @@
+<%- if namespaced? -%>
+require_dependency "<%= namespaced_path %>/application_controller"
+
+<%- end -%>
+<% module_namespacing do -%>
+class <%= controller_class_name %>Controller < <%= parent_class_name %>
+  <%- if parent_resource -%>
+  before_action :set_<%= parent_resource %>
+  <%- end -%>
+  before_action :set_<%= singular_name %>, only: [:show, :update, :destroy]
+  before_action :set_<%= plural_name %>, only: [:index]
+  
+  def index
+    @pagy, @<%= plural_name %> = pagy(@<%= plural_name %>)
+    render json: <%= "@#{plural_name}" %>, adapter: :json
+  end
+
+  def show
+    render json: <%= "@#{singular_name}" %>, adapter: :json
+  end
+
+  def create
+    <%- if parent_resource -%>
+    <%- unless skip_pundit? -%>
+    @<%= singular_name %> = <%= "pundit_scope(@#{parent_resource}.#{plural_name}).new(#{singular_name}_params)" %>
+    pundit_authorize(@<%= singular_name %>)
+    <%- else -%>
+    @<%= singular_name %> = <%= "@#{parent_resource}.#{plural_name}.new(#{singular_name}_params)" %>
+    <%- end -%>
+    <%- else -%>
+    <%- unless skip_pundit? -%>
+    @<%= singular_name %> = <%= "pundit_scope(#{singular_name.camelize}).new(#{singular_name}_params)" %>
+    pundit_authorize(@<%= singular_name %>)
+    <%- else -%>
+    @<%= singular_name %> = <%= "#{singular_name.camelize}.new(#{singular_name}_params)" %>
+    <%- end -%>
+    <%- end -%>
+
+    if @<%= singular_name %>.save
+      render json: <%= "@#{singular_name}" %>, adapter: :json
+    else
+      render json: ErrorResponse.new(@<%= singular_name %>), status: :unprocessable_entity
+    end
+  end
+
+  def update
+    if @<%= "#{singular_name}.update(#{singular_name}_params)" %>
+      render json: <%= "@#{singular_name}" %>, adapter: :json
+    else
+      render json: ErrorResponse.new(@<%= singular_name %>), status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    if @<%= singular_name %>.destroy
+      head :no_content
+    else
+      render json: ErrorResponse.new(@<%= singular_name %>), status: :unprocessable_entity
+    end
+  end
+
+  private
+    <%- if parent_resource -%>
+    def set_<%= parent_resource %>
+      <%- unless skip_pundit? -%>
+      @<%= parent_resource %> = policy_scope(<%= parent_resource.camelize %>, policy_scope_class: <%= parent_resource_policy_scope_class_name %>).find(params[:<%= parent_resource %>_id])
+      authorize(@<%= parent_resource %>, policy_class: <%= parent_resource_policy_class_name %>) if @<%= parent_resource -%>
+      <%- else -%>
+      @<%= parent_resource %> = <%= parent_resource.camelize %>.find(params[:<%= parent_resource %>_id])
+      <%- end -%>      
+    end
+
+    <%- end -%>
+    def set_<%= singular_name %>
+      <%- if parent_resource -%>
+      <%- unless skip_pundit? -%>
+      @<%= singular_name %> = pundit_scope(@<%= parent_resource %>.<%= plural_name %>).find(params[:id])
+      pundit_authorize(@<%= singular_name %>) if @<%= singular_name %>
+      <%- else -%>
+      @<%= singular_name %> = @<%= parent_resource %>.<%= plural_name %>.find(params[:id])
+      <%- end -%>
+      <%- else -%>
+      <%- unless skip_pundit? -%>
+      @<%= singular_name %> = pundit_scope(<%= singular_name.camelize %>).find(params[:id])
+      pundit_authorize(@<%= singular_name %>) if @<%= singular_name %>
+      <%- else -%>
+      @<%= singular_name %> = <%= singular_name.camelize %>.find(params[:id])
+      <%- end -%>
+      <%- end -%>
+    end
+
+    def set_<%= plural_name %>
+      <%- unless skip_pundit? -%>
+      pundit_authorize(<%= singular_name.camelize %>)      
+      @<%= plural_name %> = pundit_scope(<%= singular_name.camelize %>.all)
+      <%- else -%>
+      @<%= plural_name %> = <%= singular_name.camelize %>.all
+      <%- end -%>
+    end
+
+    <%- unless skip_pundit? -%>
+    def pundit_scope(scope)
+      policy_scope(scope.all, policy_scope_class: <%= policy_scope_class_name %>)
+    end
+
+    def pundit_authorize(record)
+      authorize(record, policy_class: <%= policy_class_name %>)
+    end
+    <%- end -%>
+
+    def <%= "#{singular_name}_params" %>
+      <%- if attributes_names.empty? -%>
+      params.fetch(:<%= singular_name %>, {})
+      <%- else -%>
+      params.require(:<%= singular_name %>).permit(<%= permitted_params %>)
+      <%- end -%>
+    end
+end
+<% end -%>

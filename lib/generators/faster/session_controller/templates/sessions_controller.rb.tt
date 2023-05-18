@@ -1,0 +1,23 @@
+<%- if namespaced? -%>
+require_dependency "<%= namespaced_path %>/application_controller"
+
+<%- end -%>
+<% module_namespacing do -%>
+class <%= controller_class_name %>Controller < Devise::SessionsController
+  respond_to :json
+
+  private
+    # def sign_in_params
+    #   params.require(:<%= current_user_scope %>).permit(:email, :password)
+    # end
+
+    # directly override devise respond method since we're only using JSON
+    def respond_with(resource, _opts = {})
+      render json: resource, adapter: :json
+    end
+
+    def respond_to_on_destroy
+      head :no_content
+    end
+end
+<% end -%>

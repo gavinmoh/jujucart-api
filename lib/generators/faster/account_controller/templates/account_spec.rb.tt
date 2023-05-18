@@ -1,0 +1,52 @@
+require 'swagger_helper'
+
+RSpec.describe '<%= controller_class_name.underscore %>', type: :request do
+  let(:user) { create(:<%= current_user_scope %>) }
+  let(:Authorization) { bearer_token_for(user) }
+
+  path '/<%= controller_class_name.underscore %>' do
+    
+    get('show <%= plural_name.humanize(capitalize: false) %>') do
+      response(200, 'successful') do
+        tags '<%= rswag_tag_prefix %><%= plural_name.titleize %>'
+        produces 'application/json'
+        security [ { bearerAuth: nil } ]
+
+        run_test!
+      end
+    end
+
+    put('update <%= plural_name.humanize(capitalize: false) %>') do
+      tags '<%= rswag_tag_prefix %><%= plural_name.titleize %>'
+      produces 'application/json'
+      consumes 'application/json'
+      security [ { bearerAuth: nil } ]
+
+      parameter name: :data, in: :body, schema: {
+        type: :object,
+        properties: {
+          account: {
+            type: :object,
+            properties: {
+              <%- attributes.each_with_index do |attribute, index| -%>
+              <%- if ['float', 'decimal'].include?(attribute.type) -%>
+              <%= attribute.column_name %>: { type: :number }<%= index == (attributes.size - 1) ? '' : ',' %>
+              <%- elsif ['integer', 'bigint'].include?(attribute.type) -%>
+              <%= attribute.column_name %>: { type: :integer }<%= index == (attributes.size - 1) ? '' : ',' %>
+              <%- else -%>
+              <%= attribute.column_name %>: { type: :string }<%= index == (attributes.size - 1) ? '' : ',' %>
+              <%- end -%>
+              <%- end -%>
+            }
+          }
+        }
+      }
+
+      response(200, 'successful', save_request_example: :data) do
+        let(:data) { { account: attributes_for(:<%= current_user_scope %>) } }
+        
+        run_test!
+      end
+    end
+  end
+end

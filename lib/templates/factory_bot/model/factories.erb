@@ -1,0 +1,58 @@
+FactoryBot.define do
+  factory :<%= "#{factory_name}#{explicit_class_option}" %> do
+  <%- attributes.each do |attribute| -%>
+    <%- if attribute.reference? -%>
+    <%= attribute.column_name %> { create(:<%= attribute.column_name.chomp('_id') %>).id }
+    <%- else -%>
+    <%- case attribute.column_name -%>
+    <%- when 'username' -%>
+    <%= attribute.column_name %> { Faker::Internet.unique.username }
+    <%- when 'first_name' -%>
+    <%= attribute.column_name %> { Faker::Name.first_name }
+    <%- when 'last_name' -%>
+    <%= attribute.column_name %> { Faker::Name.last_name }
+    <%- when 'fullname' -%>
+    <%= attribute.column_name %> { Faker::Name.name }
+    <%- when /(.*?)_name|name/ -%>
+    <%= attribute.column_name %> { Faker::Lorem.unique.word }
+    <%- when /(.*?)_price|price/ -%>
+    <%= attribute.column_name %> { Faker::Number.within(range: 1..1000).to_s }
+    <%- when 'description' -%>
+    <%= attribute.column_name %> { Faker::Lorem.paragraph }
+    <%- when 'active' -%>
+    <%= attribute.column_name %> { true }
+    <%- when /(.*?)_date|date/ -%>
+    <%= attribute.column_name %> { Faker::Date.in_date_period }
+    <%- when 'email' -%>
+    <%= attribute.column_name %> { Faker::Internet.unique.safe_email }
+    <%- when 'password' -%>
+    <%= attribute.column_name %> { 'password' }
+    <%- when /phone_number|contact_number/ -%>
+    <%= attribute.column_name %> { Faker::PhoneNumber.cell_phone }
+    <%- when 'address' -%>
+    <%= attribute.column_name %> { Faker::Address.street_address }
+    <%- when 'city' -%>
+    <%= attribute.column_name %> { Faker::Address.city }
+    <%- when 'postcode' -%>
+    <%= attribute.column_name %> { Faker::Address.postcode }
+    <%- when 'state' -%>
+    <%= attribute.column_name %> { Faker::Address.state }
+    <%- when 'country' -%>
+    <%= attribute.column_name %> { Faker::Address.country }
+    <%- when /(.*?)_latitude|latitude/ -%>
+    <%= attribute.column_name %> { Faker::Address.latitude }
+    <%- when /(.*?)_longitude|longitude/ -%>
+    <%= attribute.column_name %> { Faker::Address.longitude }
+    <%- when /(.*?)_at/ -%>
+    <%- if attribute.type == 'date' %>
+    <%= attribute.column_name %> { Faker::Date.in_date_period }
+    <%- else -%>
+    <%= attribute.column_name %> { Faker::Time.between(from: Time.zone.now - 30.days, to: Time.zone.now) }
+    <%- end -%>
+    <%- else -%>
+    <%= attribute.column_name %> { '' }
+    <%- end -%>
+    <%- end -%>
+  <%- end -%>
+  end
+end

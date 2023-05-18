@@ -1,0 +1,162 @@
+class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
+  before_action :set_order, only: [:show, :update, :destroy, :pack, :ship, :complete, :checkout, :versions]
+  before_action :set_orders, only: [:index]
+  
+  def index
+    @pagy, @orders = pagy(@orders.order(created_at: :desc))
+    render json: @orders, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+  end
+
+  def show
+    render json: @order, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+  end
+
+  def create
+    @order = pundit_scope(Order).new(create_params)
+    @order.order_type = 'pos'
+    @order.created_by = current_user
+    pundit_authorize(@order)
+    
+    if @order.save
+      render json: @order, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+    else
+      ErrorResponse.new(@order)
+    end
+  end
+
+  def update
+    if @order.pending? && @order.pos?
+      allowed_params = pos_order_params
+    else
+      allowed_params = update_params
+    end
+
+    if @order.update(allowed_params)
+      render json: @order, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+    else
+      ErrorResponse.new(@order)
+    end
+  end
+
+  def checkout
+    if params[:order].present?
+      @order.assign_attributes(checkout_params)
+    end
+    
+    if @order.pos_checkout!
+      render json: @order, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+    else
+      ErrorResponse.new(@order)
+    end
+  end
+
+  def complete
+    begin
+      ActiveRecord::Base.transaction do
+        if params[:order].present? and @order.pos?
+          @payment = @order.payments.create(complete_params.merge(payment_type: 'cash'))
+          @payment.mark_as_success!
+        end
+        @order.complete!
+        raise "can't be completed" unless @order.completed?
+      end
+    rescue => exception
+      @order.errors.add(:base, exception.message)
+    end
+
+
+    if @order.completed?
+      render json: @order, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+    else
+      ErrorResponse.new(@order)
+    end
+  end
+
+  def pack
+    if @order.pack!
+      render json: @order, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+    else
+      ErrorResponse.new(@order)
+    end
+  end
+
+  def ship
+    @order.assign_attributes(ship_params) if params[:order].present?
+    if @order.ship!
+      render json: @order, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+    else
+      ErrorResponse.new(@order)
+    end
+  end
+
+  def destroy
+    if @order.destroy
+      head :no_content
+    else
+      ErrorResponse.new(@order)
+    end
+  end
+
+  def versions
+    @versions = @order.versions
+    render json: { versions: @versions }, status: :ok
+  end
+
+  private
+    def set_order
+      @order = pundit_scope(Order).includes(:customer, :created_by, :store, {line_items: :product}).find(params[:id])
+      pundit_authorize(@order) if @order
+    end
+
+    def set_orders
+      pundit_authorize(Order)      
+      @orders = pundit_scope(Order.where.not(status: 'pending')).includes(:customer, :created_by, :store, {line_items: :product})
+      @orders = status_scopable(@orders)
+      @orders = keyword_queryable(@orders)
+      @orders = @orders.where(store_id: params[:store_id]) if params[:store_id].present?
+      @orders = @orders.where(customer_id: params[:customer_id]) if params[:customer_id].present?
+      @orders = @orders.where(flagged: ActiveModel::Type::Boolean.new.cast(params[:flagged])) if params[:flagged].present?
+      @orders = @orders.where(order_type: params[:order_type]) if params[:order_type].present?
+      @orders = attribute_date_scopable(@orders)
+      @orders = attribute_sortable(@orders)
+    end
+
+    def pundit_scope(scope)
+      policy_scope(scope.all, policy_scope_class: Api::V1::User::OrderPolicy::Scope)
+    end
+
+    def pundit_authorize(record)
+      authorize(record, policy_class: Api::V1::User::OrderPolicy)
+    end
+
+    def pundit_permitted_attributes_for(record)
+      Api::V1::User::OrderPolicy.new(pundit_user, record).permitted_attributes
+    end
+
+    def create_params
+      params.require(:order).permit(:customer_id, :store_id)
+    end
+
+    def update_params
+      params.require(:order).permit(
+        :is_flagged, :flagged_reason, :unit_number, :street_address1, :street_address2, 
+        :postcode, :city, :state, :latitude, :longitude, :courier_name, :tracking_number
+      )
+    end
+
+    def pos_order_params
+      params.require(:order).permit(:customer_id, :redeemed_coin)
+    end
+
+    def checkout_params
+      params.require(:order).permit(:customer_id)
+    end
+
+    def ship_params
+      params.require(:order).permit(:courier_name, :tracking_number)
+    end
+
+    def complete_params
+      params.require(:order).permit(:transaction_reference)
+    end
+end

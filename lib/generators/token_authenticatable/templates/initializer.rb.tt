@@ -1,0 +1,16 @@
+require 'token_authenticatable'
+
+TokenAuthenticatable.configure do |config|
+  # default is never expires
+  # config.token_expires_in = 1.day
+
+  # mandatory, otherwise no token will be dispatched
+  config.creator_requests = [
+    # [ 'POST', '/api/v1/admin/sign_in' ]
+  ]
+
+  # mandatory, otherwise sign out will not have any effect
+  config.revoker_requests = [
+    # [ 'DELETE', '/api/v1/admin/sign_out' ]
+  ]
+end

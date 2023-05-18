@@ -1,0 +1,13 @@
+<% module_namespacing do -%>
+class <%= parent_class_name %> < ApplicationController
+  <%- if current_user_scope -%>
+  before_action :authenticate_<%= current_user_scope %>!
+  <%- if current_user_scope != 'user' -%>
+  # define pundit user here if the default user object is not current_user
+  def pundit_user
+    current_<%= current_user_scope %>
+  end
+  <%- end -%>
+  <%- end -%>
+end
+<%- end -%>
