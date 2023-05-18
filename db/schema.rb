@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_17_102952) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_18_042053) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -31,7 +31,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_17_102952) do
     t.string "role"
     t.string "profile_photo"
     t.index ["email", "type"], name: "index_accounts_on_email_and_type", unique: true, where: "((email IS NOT NULL) AND ((email)::text <> ''::text))"
-    t.index ["email"], name: "index_accounts_on_email", unique: true
     t.index ["phone_number", "type"], name: "index_accounts_on_phone_number_and_type", unique: true, where: "((phone_number IS NOT NULL) AND ((phone_number)::text <> ''::text))"
     t.index ["reset_password_token"], name: "index_accounts_on_reset_password_token", unique: true
   end
@@ -53,6 +52,27 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_17_102952) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["slug"], name: "index_categories_on_slug", unique: true
+  end
+
+  create_table "coupons", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name"
+    t.string "code"
+    t.bigint "redemption_limit", default: 0
+    t.string "order_types", default: [], array: true
+    t.datetime "start_at"
+    t.datetime "end_at"
+    t.string "discount_by"
+    t.bigint "discount_price_cents", default: 0, null: false
+    t.string "discount_price_currency", default: "MYR", null: false
+    t.integer "discount_percentage", default: 0
+    t.bigint "minimum_spend_cents", default: 0, null: false
+    t.string "minimum_spend_currency", default: "MYR", null: false
+    t.bigint "maximum_cap_cents", default: 0, null: false
+    t.string "maximum_cap_currency", default: "MYR", null: false
+    t.string "coupon_type"
+    t.string "discount_on"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "inventories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
