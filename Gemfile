@@ -57,6 +57,7 @@ group :test do
   gem "simplecov", require: false
   gem "bullet"
   gem "rspec-sidekiq", "~> 3.1"
+  gem "shoulda-matchers"
   
   # only enable if it is necessary
   gem "webmock", "~> 3.14"
