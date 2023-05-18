@@ -41,6 +41,9 @@ Rails.application.routes.draw do
           get :total_order,      on: :collection
         end
         resources :coupons
+        resources :wallets, only: [:index, :show] do
+          resources :wallet_transactions, only: [:index, :show]
+        end
       end
     end
   end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_18_042053) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_18_070450) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -289,7 +289,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_18_042053) do
     t.uuid "wallet_id", null: false
     t.string "transaction_type"
     t.bigint "amount"
-    t.uuid "order_id", null: false
+    t.uuid "order_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["order_id"], name: "index_wallet_transactions_on_order_id"
