@@ -1,5 +1,5 @@
 class Api::V1::User::InventorySerializer < ActiveModel::Serializer
-  attributes :id, :product_id, :store_id, :nanoid
+  attributes :id, :product_id, :store_id, :nanoid, :quantity
   attributes :created_at, :updated_at
   has_one :product
   has_one :store

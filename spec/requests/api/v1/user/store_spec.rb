@@ -41,7 +41,8 @@ RSpec.describe 'api/v1/user/stores', type: :request do
             properties: {
               name: { type: :string },
               description: { type: :string },
-              logo: { type: :string }
+              logo: { type: :string },
+              validate_inventory: { type: :boolean }
             }
           }
         }
@@ -84,14 +85,15 @@ RSpec.describe 'api/v1/user/stores', type: :request do
               name: { type: :string },
               description: { type: :string },
               logo: { type: :string },
-              remove_logo: { type: :boolean }
+              remove_logo: { type: :boolean },
+              validate_inventory: { type: :boolean }
             }
           }
         }
       }
 
       response(200, 'successful', save_request_example: :data) do
-        let(:data) { { store: attributes_for(:store) } }      
+        let(:data) { { store: attributes_for(:store, validate_inventory: true) } }      
 
         run_test!
       end

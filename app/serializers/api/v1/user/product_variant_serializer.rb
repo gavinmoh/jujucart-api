@@ -4,5 +4,9 @@ class Api::V1::User::ProductVariantSerializer < ActiveModel::Serializer
              :type, :product_attributes, :product_id
   attributes :created_at, :updated_at
   has_one :product
-  attribute :product_quantiy, if: -> { object['product_quantiy'].present? }
+  attribute :product_quantiy
+
+  def product_quantiy
+    object['product_quantity']
+  end
 end

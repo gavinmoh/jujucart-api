@@ -12,7 +12,8 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
   end
 
   def show
-    render json: @product, adapter: :json, store_id: params[:store_id]
+    @product_variants = @product.product_variants.with_store_quantity(params[:store_id]) if params[:store_id].present?
+    render json: @product, adapter: :json, product_variants: @product_variants, include_store_quantity: params[:store_id].present?
   end
 
   def create
@@ -20,7 +21,7 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
     pundit_authorize(@product)
 
     if @product.save
-      render json: @product, adapter: :json, store_id: params[:store_id]
+      render json: @product, adapter: :json
     else
       render json: ErrorResponse.new(@product), status: :unprocessable_entity
     end
@@ -28,7 +29,7 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
 
   def update
     if @product.update(product_params)
-      render json: @product, adapter: :json, store_id: params[:store_id]
+      render json: @product, adapter: :json, product_variants: @product_variants
     else
       render json: ErrorResponse.new(@product), status: :unprocessable_entity
     end
@@ -44,7 +45,12 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
 
   private
     def set_product
-      @product = pundit_scope(Product).find(params[:id])
+      if params[:store_id].present?
+        product_scope = Product.with_store_quantity(params[:store_id])
+      else
+        product_scope = Product.all
+      end
+      @product = pundit_scope(product_scope).find(params[:id])
       pundit_authorize(@product) if @product
     end
 

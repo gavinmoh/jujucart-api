@@ -128,9 +128,15 @@ RSpec.describe 'api/v1/user/products', type: :request do
 
       response(200, 'successful') do
         before do
-          create(:product_variant, product_id: id, product_attributes: [{name: 'Color', value: 'Red'}])
-          create(:product_variant, product_id: id, product_attributes: [{name: 'Color', value: 'Blue'}])
-          create(:product_variant, product_id: id, product_attributes: [{name: 'Color', value: 'Green'}])
+          variant1 = create(:product_variant, product_id: id, product_attributes: [{name: 'Color', value: 'Red'}])
+          inventory1 = Inventory.find_or_create_by(product_id: variant1.id, store_id: store_id)
+          create(:inventory_transaction, inventory_id: inventory1.id)
+          variant2 = create(:product_variant, product_id: id, product_attributes: [{name: 'Color', value: 'Blue'}])
+          inventory2 = Inventory.find_or_create_by(product_id: variant2.id, store_id: store_id)
+          create(:inventory_transaction, inventory_id: inventory2.id)
+          variant3 = create(:product_variant, product_id: id, product_attributes: [{name: 'Color', value: 'Green'}])
+          inventory3 = Inventory.find_or_create_by(product_id: variant3.id, store_id: store_id)
+          create(:inventory_transaction, inventory_id: inventory3.id)
         end
         run_test!
       end

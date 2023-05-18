@@ -59,6 +59,6 @@ class Api::V1::User::StoresController < Api::V1::User::ApplicationController
     end
 
     def store_params
-      params.require(:store).permit(:name, :description, :logo, :remove_logo)
+      params.require(:store).permit(:name, :description, :logo, :remove_logo, :validate_inventory)
     end
 end
