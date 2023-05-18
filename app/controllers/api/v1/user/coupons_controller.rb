@@ -47,7 +47,16 @@ class Api::V1::User::CouponsController < Api::V1::User::ApplicationController
     def set_coupons
       pundit_authorize(Coupon)      
       @coupons = pundit_scope(Coupon.all)
-      @coupons = @coupons.send(params[:scope]) if params[:scope].present? and ['active', 'scheduled', 'expired'].include?(params[:scope])
+      if params[:scope].present?
+        case params[:scope]
+        when 'active'
+          @coupons = @coupons.active
+        when 'expired'
+          @coupons = @coupons.expired
+        when 'scheduled'
+          @coupons = @coupons.scheduled
+        end
+      end
       @coupons = attribute_sortable(@coupons)
     end
 
