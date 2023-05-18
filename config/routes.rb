@@ -44,6 +44,9 @@ Rails.application.routes.draw do
         resources :wallets, only: [:index, :show] do
           resources :wallet_transactions, only: [:index, :show]
         end
+        resources :promotion_bundles do
+          resources :promotion_bundle_items
+        end
       end
     end
   end

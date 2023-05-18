@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_18_070450) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_18_104735) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -117,8 +117,12 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_18_070450) do
     t.jsonb "product_data", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "discount_cents", default: 0, null: false
+    t.string "discount_currency", default: "MYR", null: false
+    t.uuid "promotion_bundle_id"
     t.index ["order_id"], name: "index_line_items_on_order_id"
     t.index ["product_id"], name: "index_line_items_on_product_id"
+    t.index ["promotion_bundle_id"], name: "index_line_items_on_promotion_bundle_id"
   end
 
   create_table "notification_tokens", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -239,6 +243,29 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_18_070450) do
     t.index ["sku"], name: "index_products_on_sku", unique: true, where: "((sku IS NOT NULL) AND ((sku)::text <> ''::text))"
   end
 
+  create_table "promotion_bundle_items", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "promotion_bundle_id", null: false
+    t.uuid "product_id", null: false
+    t.integer "quantity", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_promotion_bundle_items_on_product_id"
+    t.index ["promotion_bundle_id"], name: "index_promotion_bundle_items_on_promotion_bundle_id"
+  end
+
+  create_table "promotion_bundles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name"
+    t.string "discount_by"
+    t.bigint "discount_price_cents", default: 0, null: false
+    t.string "discount_price_currency", default: "MYR", null: false
+    t.integer "discount_percentage", default: 0
+    t.datetime "start_at"
+    t.datetime "end_at"
+    t.boolean "active", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.string "scope"
@@ -312,6 +339,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_18_070450) do
   add_foreign_key "inventory_transactions", "orders"
   add_foreign_key "line_items", "orders"
   add_foreign_key "line_items", "products"
+  add_foreign_key "line_items", "promotion_bundles"
   add_foreign_key "notification_tokens", "accounts", column: "recipient_id"
   add_foreign_key "notifications", "accounts", column: "recipient_id"
   add_foreign_key "orders", "accounts", column: "created_by_id"
@@ -320,6 +348,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_18_070450) do
   add_foreign_key "payments", "orders"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "products"
+  add_foreign_key "promotion_bundle_items", "products"
+  add_foreign_key "promotion_bundle_items", "promotion_bundles"
   add_foreign_key "sessions", "accounts"
   add_foreign_key "wallet_transactions", "orders"
   add_foreign_key "wallet_transactions", "wallets"

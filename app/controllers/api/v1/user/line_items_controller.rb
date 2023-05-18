@@ -55,7 +55,7 @@ class Api::V1::User::LineItemsController < Api::V1::User::ApplicationController
     end
 
     def set_line_items
-      @line_items = @order.line_items.includes(:product)
+      @line_items = @order.line_items.includes(:product, :promotion_bundle)
       @line_items = attribute_sortable(@line_items)
     end
 

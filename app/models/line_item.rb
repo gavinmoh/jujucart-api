@@ -1,9 +1,11 @@
 class LineItem < ApplicationRecord
   belongs_to :order
   belongs_to :product, optional: true
+  belongs_to :promotion_bundle, optional: true
 
   monetize :unit_price_cents
   monetize :total_price_cents
+  monetize :discount_cents
 
   validates :quantity, numericality: { greater_than_or_equal_to: 1 }
   validate :cannot_add_product_variant_when_product_has_no_variant
