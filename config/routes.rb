@@ -40,6 +40,7 @@ Rails.application.routes.draw do
           get :total_abandoned,  on: :collection
           get :total_order,      on: :collection
         end
+        resources :coupons
       end
     end
   end
