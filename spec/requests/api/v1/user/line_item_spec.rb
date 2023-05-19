@@ -110,7 +110,8 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
         end
 
         it 'should apply discount' do
-          coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, minimum_spend: order.subtotal + Money.new(1))
+          order.reload
+          coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, minimum_spend: order.subtotal + Money.new(100))
           OrderCoupon.create(order: order, coupon_id: coupon.id, code: coupon.code)
           order.reload
 

@@ -52,7 +52,7 @@ RSpec.describe OrderCoupon, type: :model do
         order = create(:order, status: 'pending')
         create_list(:line_item, 2, order: order)
         coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10)
-        order_coupon = create(:order_coupon, coupon: coupon, code: coupon.code, order: order)
+        create(:order_coupon, coupon: coupon, code: coupon.code, order: order)
         calculated_discount = order.subtotal * (coupon.discount_percentage / 100.0)
         order.reload
         expect(order.discount_cents).to eq(calculated_discount.cents)

@@ -368,7 +368,6 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       it 'should not apply discount' do
         create(:assigned_store, user_id: user.id, store_id: store.id)
         create_list(:line_item, 2, order_id: id)
-        order = Order.find(id)
         coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, redemption_limit: 1)
         code = coupon.code
         create(:order_coupon, order_id: create(:order, status: 'confirmed').id, coupon_id: coupon.id, error_code: 'code_valid', is_valid: true)
@@ -411,7 +410,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
 
         expect do
           put apply_coupon_api_v1_user_order_url(id: id), params: { code: code2 }, headers: { Authorization: bearer_token_for(user) }
-        end.not_to change { OrderCoupon.count }
+        end.not_to(change { OrderCoupon.count })
         expect(response).to have_http_status(:ok)
 
         parsed_response = JSON.parse(response.body)
@@ -455,7 +454,6 @@ RSpec.describe 'api/v1/user/orders', type: :request do
         end
 
         run_test! do |response|
-          order = Order.find(id)
           response_body = JSON.parse(response.body)
           expect(response_body.dig('order', 'order_coupon')).to be_nil
           expect(response_body.dig('order', 'discount', 'cents')).to eq(0)
