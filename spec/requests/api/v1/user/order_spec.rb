@@ -291,4 +291,176 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       end
     end    
   end
+
+  path '/api/v1/user/orders/{id}/apply_coupon' do
+    parameter name: 'id', in: :path, type: :string, description: 'id'
+
+    put('apply coupon to orders') do
+      tags 'User Orders'
+      consumes 'application/json'
+      produces 'application/json'
+      security [ { bearerAuth: nil } ]
+
+      parameter name: :data, in: :body, schema: {
+        type: :object,
+        properties: {
+          code: { type: :string }
+        },
+        required: [ 'code' ]
+      }
+
+      let(:user) { create(:user, role: 'cashier') }
+      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending').id }
+
+      before do
+        create(:assigned_store, user_id: user.id, store_id: store.id)
+        create_list(:line_item, 2, order_id: id)
+      end
+      
+      response(200, 'successful', save_request_example: :data) do
+        let(:code) { create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10).code }
+        let(:data) { { code: code } }
+
+        run_test! do |response|
+          order = Order.find(id)
+          response_body = JSON.parse(response.body)
+          expected_discount = order.subtotal * 0.1
+          expect(response_body.dig('order', 'order_coupon')).to be_present
+          expect(response_body.dig('order', 'order_coupon', 'code')).to eq(code)
+          expect(response_body.dig('order', 'order_coupon', 'discount', 'cents')).to eq(expected_discount.cents)
+          expect(response_body.dig('order', 'discount', 'cents')).to eq(expected_discount.cents)
+        end
+      end
+
+      response(404, 'not_found') do
+        let(:data) { { code: SecureRandom.alphanumeric(10) } }
+        run_test!        
+      end
+    end
+
+    context 'when minimum spend is not met' do
+      let(:user) { create(:user, role: 'cashier') }
+      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending').id }
+
+      it 'should not apply discount' do
+        create(:assigned_store, user_id: user.id, store_id: store.id)
+        create_list(:line_item, 2, order_id: id)
+        order = Order.find(id)
+        code = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, minimum_spend: order.subtotal + Money.new(100)).code
+
+        put apply_coupon_api_v1_user_order_url(id: id), params: { code: code }, headers: { Authorization: bearer_token_for(user) }
+        expect(response).to have_http_status(:ok)
+
+        parsed_response = JSON.parse(response.body)
+        expect(parsed_response.dig('order', 'order_coupon')).to be_present
+        expect(parsed_response.dig('order', 'order_coupon', 'code')).to eq(code)
+        expect(parsed_response.dig('order', 'order_coupon', 'is_valid')).to be_falsey
+        expect(parsed_response.dig('order', 'order_coupon', 'error_code')).to eq(OrderCoupon.error_codes[:minimum_spend_not_reached])
+        expect(parsed_response.dig('order', 'order_coupon', 'discount', 'cents')).to eq(0)
+        expect(parsed_response.dig('order', 'discount', 'cents')).to eq(0)        
+      end
+    end
+
+    context 'when code limit reached' do
+      let(:user) { create(:user, role: 'cashier') }
+      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending').id }
+
+      it 'should not apply discount' do
+        create(:assigned_store, user_id: user.id, store_id: store.id)
+        create_list(:line_item, 2, order_id: id)
+        order = Order.find(id)
+        coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, redemption_limit: 1)
+        code = coupon.code
+        create(:order_coupon, order_id: create(:order, status: 'confirmed').id, coupon_id: coupon.id, error_code: 'code_valid', is_valid: true)
+
+        put apply_coupon_api_v1_user_order_url(id: id), params: { code: code }, headers: { Authorization: bearer_token_for(user) }
+        expect(response).to have_http_status(:ok)
+
+        parsed_response = JSON.parse(response.body)
+        expect(parsed_response.dig('order', 'order_coupon')).to be_present
+        expect(parsed_response.dig('order', 'order_coupon', 'code')).to eq(code)
+        expect(parsed_response.dig('order', 'order_coupon', 'is_valid')).to be_falsey
+        expect(parsed_response.dig('order', 'order_coupon', 'error_code')).to eq(OrderCoupon.error_codes[:limit_reached])
+        expect(parsed_response.dig('order', 'order_coupon', 'discount', 'cents')).to eq(0)
+        expect(parsed_response.dig('order', 'discount', 'cents')).to eq(0)        
+      end
+    end
+
+    context 'reapply different coupon' do
+      let(:user) { create(:user, role: 'cashier') }
+      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending').id }
+
+      it 'should apply different coupon' do
+        create(:assigned_store, user_id: user.id, store_id: store.id)
+        create_list(:line_item, 2, order_id: id)
+        order = Order.find(id)
+        code1 = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, minimum_spend: order.subtotal + Money.new(100)).code
+        code2 = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 20).code
+        calculated_discount = order.subtotal * 0.2
+
+        put apply_coupon_api_v1_user_order_url(id: id), params: { code: code1 }, headers: { Authorization: bearer_token_for(user) }
+        expect(response).to have_http_status(:ok)
+
+        parsed_response = JSON.parse(response.body)
+        expect(parsed_response.dig('order', 'order_coupon')).to be_present
+        expect(parsed_response.dig('order', 'order_coupon', 'code')).to eq(code1)
+        expect(parsed_response.dig('order', 'order_coupon', 'is_valid')).to be_falsey
+        expect(parsed_response.dig('order', 'order_coupon', 'error_code')).to eq(OrderCoupon.error_codes[:minimum_spend_not_reached])
+        expect(parsed_response.dig('order', 'order_coupon', 'discount', 'cents')).to eq(0)
+        expect(parsed_response.dig('order', 'discount', 'cents')).to eq(0)
+
+        expect do
+          put apply_coupon_api_v1_user_order_url(id: id), params: { code: code2 }, headers: { Authorization: bearer_token_for(user) }
+        end.not_to change { OrderCoupon.count }
+        expect(response).to have_http_status(:ok)
+
+        parsed_response = JSON.parse(response.body)
+        expect(parsed_response.dig('order', 'order_coupon')).to be_present
+        expect(parsed_response.dig('order', 'order_coupon', 'code')).to eq(code2)
+        expect(parsed_response.dig('order', 'order_coupon', 'is_valid')).to be_truthy
+        expect(parsed_response.dig('order', 'order_coupon', 'error_code')).to eq(OrderCoupon.error_codes[:code_valid])
+        expect(parsed_response.dig('order', 'order_coupon', 'discount', 'cents')).to eq(calculated_discount.cents)
+        expect(parsed_response.dig('order', 'discount', 'cents')).to eq(calculated_discount.cents)
+      end      
+    end
+  end
+
+  path '/api/v1/user/orders/{id}/remove_coupon' do
+    parameter name: 'id', in: :path, type: :string, description: 'id'
+
+    put('remove coupon from orders') do
+      tags 'User Orders'
+      consumes 'application/json'
+      produces 'application/json'
+      security [ { bearerAuth: nil } ]
+
+      parameter name: :data, in: :body, required: false, schema: {
+        type: :object,
+        properties: {
+          code: { type: :string, description: 'Optional' }
+        }
+      }
+
+      let(:user) { create(:user, role: 'cashier') }
+      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending').id }
+      let(:code) { create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10).code }
+      
+      response(200, 'successful', save_request_example: :data) do
+
+        before do
+          create(:assigned_store, user_id: user.id, store_id: store.id)
+          create_list(:line_item, 2, order_id: id)
+          coupon = Coupon.find_by(code: code)
+          OrderCoupon.create(order_id: id, coupon_id: coupon.id, code: coupon.code)
+        end
+
+        run_test! do |response|
+          order = Order.find(id)
+          response_body = JSON.parse(response.body)
+          expect(response_body.dig('order', 'order_coupon')).to be_nil
+          expect(response_body.dig('order', 'discount', 'cents')).to eq(0)
+        end
+      end
+    end
+  end
 end

@@ -1,14 +1,14 @@
 class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
-  before_action :set_order, only: [:show, :update, :destroy, :pack, :ship, :complete, :checkout, :versions]
+  before_action :set_order, only: [:show, :update, :destroy, :pack, :ship, :complete, :checkout, :versions, :apply_coupon, :remove_coupon]
   before_action :set_orders, only: [:index]
   
   def index
     @pagy, @orders = pagy(@orders.order(created_at: :desc))
-    render json: @orders, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+    render json: @orders, adapter: :json, include: included_associations
   end
 
   def show
-    render json: @order, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+    render json: @order, adapter: :json, include: included_associations
   end
 
   def create
@@ -18,7 +18,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     pundit_authorize(@order)
     
     if @order.save
-      render json: @order, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+      render json: @order, adapter: :json, include: included_associations
     else
       ErrorResponse.new(@order)
     end
@@ -32,7 +32,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     end
 
     if @order.update(allowed_params)
-      render json: @order, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+      render json: @order, adapter: :json, include: included_associations
     else
       ErrorResponse.new(@order)
     end
@@ -44,7 +44,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     end
     
     if @order.pos_checkout!
-      render json: @order, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+      render json: @order, adapter: :json, include: included_associations
     else
       ErrorResponse.new(@order)
     end
@@ -66,7 +66,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
 
 
     if @order.completed?
-      render json: @order, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+      render json: @order, adapter: :json, include: included_associations
     else
       ErrorResponse.new(@order)
     end
@@ -74,7 +74,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
 
   def pack
     if @order.pack!
-      render json: @order, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+      render json: @order, adapter: :json, include: included_associations
     else
       ErrorResponse.new(@order)
     end
@@ -83,7 +83,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
   def ship
     @order.assign_attributes(ship_params) if params[:order].present?
     if @order.ship!
-      render json: @order, adapter: :json, include: ['customer', 'created_by', 'store', 'line_items.product']
+      render json: @order, adapter: :json, include: included_associations
     else
       ErrorResponse.new(@order)
     end
@@ -102,15 +102,41 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     render json: { versions: @versions }, status: :ok
   end
 
+  def apply_coupon
+    @coupon = Coupon.active.find_by!(code: coupon_code_params.upcase)
+    @order_coupon = OrderCoupon.find_or_initialize_by(order: @order)
+    @order_coupon.coupon = @coupon
+    @order_coupon.code = coupon_code_params
+    if @order_coupon.save!
+      @order.reload
+      render json: @order, adapter: :json, include: included_associations
+    else
+      ErrorResponse.new(@order_coupon)
+    end
+  end
+
+  def remove_coupon
+    if params[:code].present?
+      @order_coupon = @order.order_coupon.find_by!(code: coupon_code_params)
+      @order_coupon.destroy
+      @order.reload
+      render json: @order, adapter: :json, include: included_associations
+    else
+      OrderCoupon.where(order: @order).destroy_all
+      @order.reload
+      render json: @order, adapter: :json, include: included_associations
+    end
+  end
+
   private
     def set_order
-      @order = pundit_scope(Order).includes(:customer, :created_by, :store, {line_items: :product}).find(params[:id])
+      @order = pundit_scope(Order).includes(:customer, :created_by, :store, :order_coupon, {line_items: :product}).find(params[:id])
       pundit_authorize(@order) if @order
     end
 
     def set_orders
       pundit_authorize(Order)      
-      @orders = pundit_scope(Order.where.not(status: 'pending')).includes(:customer, :created_by, :store, {line_items: :product})
+      @orders = pundit_scope(Order.where.not(status: 'pending')).includes(:customer, :created_by, :store, :order_coupon, {line_items: :product})
       @orders = status_scopable(@orders)
       @orders = keyword_queryable(@orders)
       @orders = @orders.where(store_id: params[:store_id]) if params[:store_id].present?
@@ -119,6 +145,10 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
       @orders = @orders.where(order_type: params[:order_type]) if params[:order_type].present?
       @orders = attribute_date_scopable(@orders)
       @orders = attribute_sortable(@orders)
+    end
+
+    def included_associations
+      ['customer', 'created_by', 'store', 'line_items.product', 'order_coupon']
     end
 
     def pundit_scope(scope)
@@ -158,5 +188,9 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
 
     def complete_params
       params.require(:order).permit(:transaction_reference)
+    end
+
+    def coupon_code_params
+      params.require(:code)
     end
 end

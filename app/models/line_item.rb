@@ -42,10 +42,8 @@ class LineItem < ApplicationRecord
 
     def update_order_price
       return if self.order.destroyed?
-      # self.order.reset_discount
       self.order.reload
-      subtotal = self.order.line_items.inject(Money.new(0)) { |sum, item| sum + item.total_price }
-      self.order.update(subtotal: subtotal)      
+      self.order.recalculate_price
     end
 
     def cannot_add_product_variant_when_product_has_no_variant

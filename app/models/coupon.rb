@@ -1,4 +1,7 @@
 class Coupon < ApplicationRecord
+  has_many :order_coupons, dependent: :nullify
+  has_many :orders, through: :order_coupons
+
   validates :code, presence: true, uniqueness: { case_sensitive: false }
   validates :name, presence: true
   validates :redemption_limit, numericality: { greater_than_or_equal_to: 0 }, allow_nil: false
@@ -30,6 +33,18 @@ class Coupon < ApplicationRecord
   scope :active, -> { where('start_at <= ?', Time.zone.now).where('end_at >= ?', Time.zone.now) }
   scope :scheduled, -> { where('start_at > ?', Time.zone.now) }
   scope :expired, -> { where('end_at < ?', Time.zone.now) }
+
+  def active?
+    self.start_at <= Time.zone.now && self.end_at >= Time.zone.now
+  end
+
+  def expired?
+    self.end_at < Time.zone.now
+  end
+
+  def limit_reached?
+    self.order_coupons.joins(:order).where.not(orders: { status: 'pending'}).where(is_valid: true).count >= self.redemption_limit
+  end
 
   def maximum_capped?
     self.maximum_cap_cents > 0

@@ -5,8 +5,11 @@ class Order < ApplicationRecord
   belongs_to :created_by, class_name: 'User', optional: true
   belongs_to :store
 
-  has_many :line_items, -> { order(name: :asc) }, dependent: :destroy
   has_one  :success_payment, -> { where(status: 'success') }, class_name: 'Payment'
+  has_one  :order_coupon, dependent: :destroy
+  has_one  :coupon, through: :order_coupon
+  has_one  :valid_order_coupon, -> { code_valid.where(is_valid: true) }, class_name: 'OrderCoupon'
+  has_many :line_items, -> { order(name: :asc) }, dependent: :destroy
   has_many :products, through: :line_items
   has_many :payments, dependent: :nullify
   has_many :inventory_transactions, dependent: :destroy
@@ -79,6 +82,21 @@ class Order < ApplicationRecord
       transitions from: [:packed, :shipped], to: :completed,
                   after: [:create_reward_transaction]
     end
+  end
+
+  def recalculate_price(recalculate_discount = true)
+    self.subtotal = Money.new(self.line_items.sum('total_price_cents'))
+
+    if recalculate_discount and self.order_coupon.present?
+      self.order_coupon.calculate_discount(true)
+    end      
+
+    if self.valid_order_coupon.present?
+      self.discount = self.valid_order_coupon.discount
+    else
+      self.discount = Money.new(0)
+    end
+    self.save!
   end
 
   def set_total

@@ -9,5 +9,6 @@ class Api::V1::User::OrderSerializer < ActiveModel::Serializer
   has_one :customer
   has_one :created_by, serializer: Api::V1::User::UserInfoSerializer
   has_one :store
+  has_one :order_coupon
   has_many :line_items
 end

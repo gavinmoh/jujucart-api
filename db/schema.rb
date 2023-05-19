@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_18_104735) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_19_091117) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -152,6 +152,20 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_18_104735) do
     t.index ["read_at"], name: "index_notifications_on_read_at"
     t.index ["recipient_id"], name: "index_notifications_on_recipient_id"
     t.index ["record_type", "record_id"], name: "index_notifications_on_record"
+  end
+
+  create_table "order_coupons", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "order_id", null: false
+    t.uuid "coupon_id"
+    t.string "code"
+    t.bigint "discount_cents", default: 0, null: false
+    t.string "discount_currency", default: "MYR", null: false
+    t.boolean "is_valid", default: true
+    t.string "error_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["coupon_id"], name: "index_order_coupons_on_coupon_id"
+    t.index ["order_id"], name: "index_order_coupons_on_order_id"
   end
 
   create_table "orders", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -342,6 +356,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_18_104735) do
   add_foreign_key "line_items", "promotion_bundles"
   add_foreign_key "notification_tokens", "accounts", column: "recipient_id"
   add_foreign_key "notifications", "accounts", column: "recipient_id"
+  add_foreign_key "order_coupons", "coupons"
+  add_foreign_key "order_coupons", "orders"
   add_foreign_key "orders", "accounts", column: "created_by_id"
   add_foreign_key "orders", "accounts", column: "customer_id"
   add_foreign_key "orders", "stores"

@@ -1,6 +1,11 @@
 require 'rails_helper'
 
 RSpec.describe Coupon, type: :model do
+  describe 'associations' do
+    it { should have_many(:order_coupons).dependent(:nullify) }
+    it { should have_many(:orders).through(:order_coupons) }
+  end
+
   describe 'validations' do
     it { should validate_presence_of(:code) }
     it { should validate_uniqueness_of(:code).case_insensitive }
@@ -86,6 +91,56 @@ RSpec.describe Coupon, type: :model do
   end
 
   describe 'methods' do
+    context 'active?' do
+      let(:subject) { build(:coupon) }
+
+      it 'should return true if current time is within start_at and end_at' do
+        subject.start_at = Time.zone.now - 1.day
+        subject.end_at = Time.zone.now + 1.day
+        expect(subject.active?).to eq(true)
+      end
+
+      it 'should return false if current time is not within start_at and end_at' do
+        subject.start_at = Time.zone.now + 1.day
+        subject.end_at = Time.zone.now + 2.days
+        expect(subject.active?).to eq(false)
+      end
+    end
+
+    context 'expired?' do
+      let(:subject) { build(:coupon) }
+
+      it 'should return true if current time is after end_at' do
+        subject.end_at = Time.zone.now - 1.day
+        expect(subject.expired?).to eq(true)
+      end
+
+      it 'should return false if current time is before end_at' do
+        subject.end_at = Time.zone.now + 1.day
+        expect(subject.expired?).to eq(false)
+      end
+    end
+
+    context 'limit_reached?' do
+      let(:subject) { create(:coupon) }
+
+      before do
+        3.times do
+          create(:order_coupon, coupon_id: subject.id, code: subject.code, is_valid: true, error_code: 'code_valid', order_id: create(:order, status: 'confirmed').id)
+        end
+      end
+
+      it 'should return true if order_coupons count is more than or equal to redemption_limit' do
+        subject.redemption_limit = 2
+        expect(subject.limit_reached?).to eq(true)
+      end
+
+      it 'should return false if order_coupons count is less than redemption_limit' do
+        subject.redemption_limit = 4
+        expect(subject.limit_reached?).to eq(false)
+      end
+    end
+
     context 'maximum_capped?' do
       let(:subject) { build(:coupon) }
       it 'should return true if maximum_cap_cents > 0' do

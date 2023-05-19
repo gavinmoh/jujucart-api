@@ -72,6 +72,22 @@ class Api::V1::User::OrderPolicy < ApplicationPolicy
     @user.admin?
   end
 
+  def apply_coupon?
+    if @user.admin?
+      true
+    elsif @user.cashier?
+      @record.pos? and @record.pending? and @user.assigned_stores.exists?(store_id: @record.store_id)
+    end
+  end
+
+  def remove_coupon?
+    if @user.admin?
+      true
+    elsif @user.cashier?
+      @record.pos? and @record.pending? and @user.assigned_stores.exists?(store_id: @record.store_id)
+    end
+  end
+
   class Scope < Scope
     def resolve
       if @user.admin?

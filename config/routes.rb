@@ -25,6 +25,8 @@ Rails.application.routes.draw do
           put :checkout, on: :member
           put :complete, on: :member
           get :versions, on: :member
+          put :apply_coupon, on: :member
+          put :remove_coupon, on: :member
           resources :line_items
         end
         resources :inventories
