@@ -1,5 +1,5 @@
 class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
-  before_action :set_order, only: [:show, :update, :destroy, :pack, :ship, :complete, :checkout, :versions, :apply_coupon, :remove_coupon]
+  before_action :set_order, only: [:show, :update, :destroy, :pack, :ship, :complete, :void, :checkout, :versions, :apply_coupon, :remove_coupon]
   before_action :set_orders, only: [:index]
   
   def index
@@ -20,7 +20,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     if @order.save
       render json: @order, adapter: :json, include: included_associations
     else
-      ErrorResponse.new(@order)
+      render json: ErrorResponse.new(@order), status: :unprocessable_entity
     end
   end
 
@@ -34,7 +34,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     if @order.update(allowed_params)
       render json: @order, adapter: :json, include: included_associations
     else
-      ErrorResponse.new(@order)
+      render json: ErrorResponse.new(@order), status: :unprocessable_entity
     end
   end
 
@@ -46,7 +46,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     if @order.pos_checkout!
       render json: @order, adapter: :json, include: included_associations
     else
-      ErrorResponse.new(@order)
+      render json: ErrorResponse.new(@order), status: :unprocessable_entity
     end
   end
 
@@ -68,7 +68,15 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
       @order.reload
       render json: @order, adapter: :json, include: included_associations
     else
-      ErrorResponse.new(@order)
+      render json: ErrorResponse.new(@order), status: :unprocessable_entity
+    end
+  end
+
+  def void
+    if @order.void!
+      render json: @order, adapter: :json, include: included_associations
+    else
+      render json: ErrorResponse.new(@order), status: :unprocessable_entity
     end
   end
 
@@ -76,7 +84,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     if @order.pack!
       render json: @order, adapter: :json, include: included_associations
     else
-      ErrorResponse.new(@order)
+      render json: ErrorResponse.new(@order), status: :unprocessable_entity
     end
   end
 
@@ -85,7 +93,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     if @order.ship!
       render json: @order, adapter: :json, include: included_associations
     else
-      ErrorResponse.new(@order)
+      render json: ErrorResponse.new(@order), status: :unprocessable_entity
     end
   end
 
@@ -93,7 +101,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     if @order.destroy
       head :no_content
     else
-      ErrorResponse.new(@order)
+      render json: ErrorResponse.new(@order), status: :unprocessable_entity
     end
   end
 

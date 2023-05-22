@@ -3,7 +3,8 @@ class Api::V1::User::OrderSerializer < ActiveModel::Serializer
              :subtotal, :delivery_fee, :discount, :is_flagged, :flagged_reason, :store_id,
              :unit_number, :street_address1, :street_address2, :postcode, :city, :state, :latitude, :longitude, 
              :courier_name, :tracking_number, :reward_coin, :pending_payment_at, :confirmed_at, :packed_at, 
-             :shipped_at, :completed_at, :cancelled_at, :failed_at, :created_by_id, :redeemed_coin, :redeemed_coin_value
+             :shipped_at, :completed_at, :cancelled_at, :failed_at, :created_by_id, :redeemed_coin, :redeemed_coin_value,
+             :voided_at, :refunded_at
 
   attributes :created_at, :updated_at
   has_one :customer

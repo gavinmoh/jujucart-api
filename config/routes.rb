@@ -24,6 +24,7 @@ Rails.application.routes.draw do
           put :ship, on: :member
           put :checkout, on: :member
           put :complete, on: :member
+          put :void, on: :member
           get :versions, on: :member
           put :apply_coupon, on: :member
           put :remove_coupon, on: :member

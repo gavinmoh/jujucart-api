@@ -217,6 +217,34 @@ RSpec.describe 'api/v1/user/orders', type: :request do
     end 
   end
 
+  path '/api/v1/user/orders/{id}/void' do
+    parameter name: 'id', in: :path, type: :string, description: 'id'
+
+    put('void orders') do
+      tags 'User Orders'
+      produces 'application/json'
+      security [ { bearerAuth: nil } ]
+
+      response(200, 'successful') do
+        let(:user) { create(:user) }
+        let(:id) { create(:order, order_type: 'pos', store_id: store.id, status: 'pending_payment', customer_id: nil).id }
+
+        before do
+          create(:assigned_store, user_id: user.id, store_id: store.id)
+          payment = create(:payment, order_id: id)
+          payment.mark_as_success!
+          payment.order.complete!
+        end
+
+        run_test! do |response|
+          response_body = JSON.parse(response.body)
+          expect(response_body.dig('order', 'status')).to eq('voided')
+          expect(response_body.dig('order', 'voided_at')).to be_present
+        end
+      end
+    end 
+  end
+
   path '/api/v1/user/orders/{id}/pack' do
     parameter name: 'id', in: :path, type: :string, description: 'id'
 

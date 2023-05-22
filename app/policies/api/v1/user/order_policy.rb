@@ -68,6 +68,10 @@ class Api::V1::User::OrderPolicy < ApplicationPolicy
     end
   end
 
+  def void?
+    @user.admin?
+  end
+
   def versions?
     @user.admin?
   end

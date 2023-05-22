@@ -24,7 +24,7 @@ class Api::V1::User::LineItemsController < Api::V1::User::ApplicationController
     if @line_item.save
       render json: @line_item, adapter: :json
     else
-      ErrorResponse.new(@line_item)
+      render json: ErrorResponse.new(@line_item), status: :unprocessable_entity
     end
   end
 
@@ -32,7 +32,7 @@ class Api::V1::User::LineItemsController < Api::V1::User::ApplicationController
     if @line_item.update(line_item_params)
       render json: @line_item, adapter: :json
     else
-      ErrorResponse.new(@line_item)
+      render json: ErrorResponse.new(@line_item), status: :unprocessable_entity
     end
   end
 
@@ -40,7 +40,7 @@ class Api::V1::User::LineItemsController < Api::V1::User::ApplicationController
     if @line_item.destroy
       head :no_content
     else
-      ErrorResponse.new(@line_item)
+      render json: ErrorResponse.new(@line_item), status: :unprocessable_entity
     end
   end
 

@@ -37,7 +37,8 @@ class Order < ApplicationRecord
   
   aasm column: 'status', whiny_transitions: false, timestamps: true do
     state :pending, initial: true
-    state :confirmed, :pending_payment, :packed, :shipped, :completed, :cancelled, :failed
+    state :confirmed, :pending_payment, :packed, :shipped, 
+          :completed, :cancelled, :failed, :voided, :refunded
 
     event :checkout do
       transitions from: :pending, to: :pending_payment, 
@@ -81,6 +82,17 @@ class Order < ApplicationRecord
                   after: [:create_reward_transaction]
       transitions from: [:packed, :shipped], to: :completed,
                   after: [:create_reward_transaction]
+    end
+
+    event :void do
+      transitions from: :completed, to: :voided,
+                  guard: [:is_pos_order?],
+                  after: [:create_refund_coin_wallet_transaction, :create_return_inventory_transactions, :destroy_order_reward]
+    end
+
+    event :refund do
+      transitions from: :completed, to: :refunded, guard: [:is_pos_order?], 
+                  after: [:create_refund_coin_wallet_transaction, :create_return_inventory_transactions, :destroy_order_reward]
     end
   end
 
@@ -220,6 +232,26 @@ class Order < ApplicationRecord
         transaction_type: 'redeem'
       )
       transaction.update(amount: -(self.redeemed_coin))
+    end
+
+    def create_refund_coin_wallet_transaction
+      return unless self.redeemed_coin_value > 0
+      return unless self.customer.present?
+      transaction = self.customer.wallet.wallet_transactions.find_or_create_by(
+        order_id: self.id,
+        transaction_type: 'refund'
+      )
+      transaction.update(amount: self.redeemed_coin)
+    end
+
+    def destroy_order_reward
+      return unless self.reward_coin > 0
+      return unless self.customer.present?
+      transaction = self.customer.wallet.wallet_transactions.find_by(
+        order_id: self.id,
+        transaction_type: 'reward'
+      )
+      transaction.destroy if transaction.present?
     end
 
 end
