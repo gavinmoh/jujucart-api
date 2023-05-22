@@ -4,11 +4,11 @@ class Api::V1::User::CouponsController < Api::V1::User::ApplicationController
   
   def index
     @pagy, @coupons = pagy(@coupons)
-    render json: @coupons, adapter: :json
+    render json: @coupons, adapter: :json, include_total_redemptions: true
   end
 
   def show
-    render json: @coupon, adapter: :json
+    render json: @coupon, adapter: :json, include_total_redemptions: true
   end
 
   def create
@@ -16,7 +16,7 @@ class Api::V1::User::CouponsController < Api::V1::User::ApplicationController
     pundit_authorize(@coupon)
 
     if @coupon.save
-      render json: @coupon, adapter: :json
+      render json: @coupon, adapter: :json, include_total_redemptions: true
     else
       render json: ErrorResponse.new(@coupon), status: :unprocessable_entity
     end
@@ -24,7 +24,7 @@ class Api::V1::User::CouponsController < Api::V1::User::ApplicationController
 
   def update
     if @coupon.update(coupon_params)
-      render json: @coupon, adapter: :json
+      render json: @coupon, adapter: :json, include_total_redemptions: true
     else
       render json: ErrorResponse.new(@coupon), status: :unprocessable_entity
     end
@@ -46,7 +46,7 @@ class Api::V1::User::CouponsController < Api::V1::User::ApplicationController
 
     def set_coupons
       pundit_authorize(Coupon)      
-      @coupons = pundit_scope(Coupon.all)
+      @coupons = pundit_scope(Coupon.with_total_redemptions.all)
       if params[:scope].present?
         case params[:scope]
         when 'active'

@@ -33,6 +33,17 @@ class Coupon < ApplicationRecord
   scope :active, -> { where('start_at <= ?', Time.zone.now).where('end_at >= ?', Time.zone.now) }
   scope :scheduled, -> { where('start_at > ?', Time.zone.now) }
   scope :expired, -> { where('end_at < ?', Time.zone.now) }
+  scope :with_total_redemptions, -> { 
+    select('coupons.*, COUNT(order_coupons.id) AS total_redemptions')
+      .left_joins({order_coupons: :order})
+      .where.not(orders: { status: 'pending'})
+      .where(order_coupons: { is_valid: true })
+      .group('coupons.id') 
+  }
+
+  def total_redemptions
+    self.order_coupons.joins(:order).where.not(orders: { status: 'pending'}).where(is_valid: true).count
+  end
 
   def active?
     self.start_at <= Time.zone.now && self.end_at >= Time.zone.now
@@ -43,7 +54,7 @@ class Coupon < ApplicationRecord
   end
 
   def limit_reached?
-    self.order_coupons.joins(:order).where.not(orders: { status: 'pending'}).where(is_valid: true).count >= self.redemption_limit
+    total_redemptions >= self.redemption_limit
   end
 
   def maximum_capped?
