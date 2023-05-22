@@ -199,7 +199,7 @@ class Order < ApplicationRecord
     end
 
     def set_reward_amount
-      self.reward_coin = (self.subtotal_price_cents/100 * Setting.order_reward_amount) if Setting.order_reward_amount > 0
+      self.reward_coin = (self.subtotal_cents/100 * Setting.order_reward_amount) if Setting.order_reward_amount > 0
     end
 
     def create_reward_transaction
