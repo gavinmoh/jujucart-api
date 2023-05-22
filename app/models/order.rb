@@ -31,7 +31,7 @@ class Order < ApplicationRecord
   validates :order_type, presence: true
 
   before_validation :calculate_delivery_fee, if: -> { self.pending? }
-  before_validation :set_redeemed_coin_value, if: -> { self.pending? }
+  before_validation :set_redeemed_coin_value, if: -> { self.pending? && self.customer.present? }
   before_validation :set_total, if: -> { self.pending? }
   before_validation :set_reward_amount, if: -> { self.pending? }
   
