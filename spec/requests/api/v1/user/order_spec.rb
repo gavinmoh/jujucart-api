@@ -189,34 +189,32 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       }
 
       response(200, 'successful') do
+        let(:user) { create(:user, role: 'cashier') }
+        let(:id) { create(:order, order_type: 'pos', store_id: store.id, status: 'pending_payment', customer_id: nil).id }
         let(:data) { { order: { transaction_reference: '12345' } } }
 
-        context 'when order is pending_payment' do
-          let(:user) { create(:user, role: 'cashier') }
-          let(:id) { create(:order, order_type: 'pos', store_id: store.id, status: 'pending_payment', customer_id: nil).id }
-
-          before do
-            create(:assigned_store, user_id: user.id, store_id: store.id)
-          end
-
-          run_test! do |response|
-            response_body = JSON.parse(response.body)
-            expect(response_body.dig('order', 'status')).to eq('completed')
-          end
+        before do
+          create(:assigned_store, user_id: user.id, store_id: store.id)
         end
 
-        context 'when order is packed' do
-          let(:user) { create(:user, role: 'admin')}
-          let(:id) { create(:order, order_type: 'pickup', status: 'packed').id }
-          
-          run_test! do |response|
-            response_body = JSON.parse(response.body)
-            expect(response_body.dig('order', 'status')).to eq('completed')
-          end
+        run_test! do |response|
+          response_body = JSON.parse(response.body)
+          expect(response_body.dig('order', 'status')).to eq('completed')
         end
-
       end
-    end    
+
+      context 'when order is packed' do
+        let(:user) { create(:user, role: 'admin')}
+        let(:id) { create(:order, order_type: 'pickup', status: 'packed').id }
+
+        it 'should complete order' do
+          put complete_api_v1_user_order_url(id: id), headers: { Authorization: bearer_token_for(user) }
+          expect(response).to have_http_status(:ok)
+          parsed_response = JSON.parse(response.body)
+          expect(parsed_response.dig('order', 'status')).to eq('completed')
+        end
+      end
+    end 
   end
 
   path '/api/v1/user/orders/{id}/pack' do

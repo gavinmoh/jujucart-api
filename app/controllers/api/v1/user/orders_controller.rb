@@ -4,7 +4,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
   
   def index
     @pagy, @orders = pagy(@orders.order(created_at: :desc))
-    render json: @orders, adapter: :json, include: included_associations
+    render json: @orders, adapter: :json, include: index_included_associations
   end
 
   def show
@@ -64,8 +64,8 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
       @order.errors.add(:base, exception.message)
     end
 
-
     if @order.completed?
+      @order.reload
       render json: @order, adapter: :json, include: included_associations
     else
       ErrorResponse.new(@order)
@@ -136,7 +136,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
 
     def set_orders
       pundit_authorize(Order)      
-      @orders = pundit_scope(Order.where.not(status: 'pending')).includes(:customer, :created_by, :store, :order_coupon, {line_items: :product})
+      @orders = pundit_scope(Order.where.not(status: 'pending')).includes(:customer, :success_payment, :created_by, :store, :order_coupon, {line_items: :product})
       @orders = status_scopable(@orders)
       @orders = keyword_queryable(@orders)
       @orders = @orders.where(store_id: params[:store_id]) if params[:store_id].present?
@@ -147,8 +147,12 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
       @orders = attribute_sortable(@orders)
     end
 
+    def index_included_associations
+      ['customer', 'created_by', 'store', 'line_items.product', 'order_coupon', 'success_payment']
+    end
+
     def included_associations
-      ['customer', 'created_by', 'store', 'line_items.product', 'order_coupon']
+      ['customer', 'created_by', 'store', 'line_items.product', 'order_coupon', 'success_payment', 'payments']
     end
 
     def pundit_scope(scope)
