@@ -11,6 +11,8 @@ class Customer < Account
   after_commit :create_wallet, on: :create
 
   before_validation :strip_phone_number, :append_country_code_to_phone_number, :capitalize_name
+  
+  scope :query, -> (keyword) { where('name ILIKE :keyword OR phone_number ILIKE :keyword OR email ILIKE :keyword', {keyword: "%#{keyword}%"}) }
 
   protected
     def email_required?
