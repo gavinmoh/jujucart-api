@@ -18,6 +18,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       parameter name: :items,          in: :query, type: :integer, required: false, description: 'Number of items per page'
       parameter name: :query,          in: :query, type: :string,  required: false, description: "Search by order_number"
       parameter name: :status,         in: :query, type: :string,  required: false, description: "Filter by status, available status: #{Order.aasm.states.map(&:name).map(&:to_s).join(', ')}"
+      parameter name: :customer_id,    in: :query, type: :string,  required: false, description: 'Filter by customer_id'
       parameter name: :order_type,     in: :query, type: :string, required: false, description: "Filter by order_type, available order_type: #{Order.order_types.keys.join(', ')}"
       parameter name: :scope,          in: :query, type: :string,  required: false, description: "Filter by scope, available scope: ['delivery', 'pickup']"
       parameter name: :flagged,        in: :query, type: :boolean,  required: false, description: "Filter flagged order"

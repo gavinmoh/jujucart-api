@@ -123,15 +123,14 @@ RSpec.describe 'api/v1/user/users', type: :request do
       end
     end
 
-    # delete('delete users') do
-    #   tags 'User Users'
-    #   security [ { bearerAuth: nil } ]
+    delete('delete users') do
+      tags 'User Users'
+      security [ { bearerAuth: nil } ]
 
-    #   response(204, 'successful') do
-    #     run_test!
-    #   end
-    # end
-
+      response(204, 'successful') do
+        run_test!
+      end
+    end
     
   end
 end

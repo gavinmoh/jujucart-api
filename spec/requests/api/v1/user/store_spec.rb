@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/stores', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:store).id }
+  let(:id) { create(:assigned_store).store_id }
 
   path '/api/v1/user/stores' do
     get('list stores') do
@@ -19,7 +19,9 @@ RSpec.describe 'api/v1/user/stores', type: :request do
 
       response(200, 'successful') do
         before do
-          create_list(:store, 2)
+          3.times do
+            create(:assigned_store, user: user)
+          end
         end
 
         run_test!
@@ -42,7 +44,16 @@ RSpec.describe 'api/v1/user/stores', type: :request do
               name: { type: :string },
               description: { type: :string },
               logo: { type: :string },
-              validate_inventory: { type: :boolean }
+              validate_inventory: { type: :boolean },
+              assigned_stores_attributes: {
+                type: :array,
+                items: {
+                  type: :object, 
+                  properties: {
+                    user_id: { type: :string }
+                  }
+                }
+              }
             }
           }
         }
@@ -86,7 +97,18 @@ RSpec.describe 'api/v1/user/stores', type: :request do
               description: { type: :string },
               logo: { type: :string },
               remove_logo: { type: :boolean },
-              validate_inventory: { type: :boolean }
+              validate_inventory: { type: :boolean },
+              assigned_stores_attributes: {
+                type: :array,
+                items: {
+                  type: :object, 
+                  properties: {
+                    id: { type: :string },
+                    _destroy: { type: :boolean },
+                    user_id: { type: :string }
+                  }
+                }
+              }
             }
           }
         }

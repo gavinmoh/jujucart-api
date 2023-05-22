@@ -46,7 +46,7 @@ class Api::V1::User::StoresController < Api::V1::User::ApplicationController
 
     def set_stores
       pundit_authorize(Store)      
-      @stores = pundit_scope(Store.all)
+      @stores = pundit_scope(Store.includes(:users))
       @stores = attribute_sortable(@stores)
     end
 
@@ -59,6 +59,9 @@ class Api::V1::User::StoresController < Api::V1::User::ApplicationController
     end
 
     def store_params
-      params.require(:store).permit(:name, :description, :logo, :remove_logo, :validate_inventory)
+      params.require(:store).permit(
+        :name, :description, :logo, :remove_logo, :validate_inventory,
+        assigned_stores_attributes: [:id, :admin_id, :_destroy]
+      )
     end
 end

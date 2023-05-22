@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sales statement PDF</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+      .page-break { display:block; clear:both; page-break-after:always; }
+    </style>
+  </head>
+  <body style="margin:0;font-family:Arial;background:#E5E5E5;font-family: 'Poppins', sans-serif;">
+    <div class="page-break" style="width:100%;max-width:1200px;margin:0 auto;">
+      <div style="background:#00675B;color:#B9B8B8;padding:24px 36px 50px 36px;">
+        <img src="data:image/png;base64,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" alt="Blank" width="100px" style="margin-left: -7px; margin-bottom: 15px;" />
+        <table style="width: 100%;">
+          <tr>
+            <td style="width: 50%">
+              <div style="color:#fff;font-weight: 600;padding-bottom:4px;">CGB Venture SDN BHD</div>
+              <div style="padding-bottom: 4px;"><%= Setting.statement_address %></div>
+            </td>
+            <td style="width: 50%; text-align: right;">
+              <div style="color:#fff;padding-bottom:4px;font-weight: 600;"><%= sales_statement.statement_number %></div>
+              <div style="padding-bottom:4px;">Issue at <%= sales_statement.created_at.strftime("%d %B %Y") %></div>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div style="padding:24px;">
+        <div style="background:#FFFEFE;border-radius:12px;margin-bottom:16px;">
+          <h3 style="padding:24px 26px;border-bottom: 1px solid #E5E5E5;margin:0;"> Summary of <%= sales_statement.created_at.strftime("%B") %> sales report </h3>
+          <table style="padding:12px 26px;color:#8A8988; width: 100%;">
+            <tr style="height: 30px">
+              <td style="width: 50%">Total sales</td>
+              <td style="width: 50%; text-align: right;"><%= humanized_money_with_symbol sales_statement.total_sales %></td>
+            </tr>
+            <tr style="height: 30px">
+              <td style="width: 50%">Total delivery fees</td>
+              <td style="width: 50%; text-align: right;"><%= humanized_money_with_symbol sales_statement.total_delivery_fee %></td>
+            </tr>
+            <tr style="height: 30px">
+              <td style="width: 50%">Total coupons redeemed value</td>
+              <td style="width: 50%; text-align: right;"><%= humanized_money_with_symbol sales_statement.total_discount %></td>
+            </tr>
+            <tr style="height: 30px">
+              <td style="width: 50%">Total points redeemed value</td>
+              <td style="width: 50%; text-align: right;"><%= humanized_money_with_symbol sales_statement.total_redeemed_coin %></td>
+            </tr>
+          </table>
+          <table style="padding:8px 26px;border-top: 1px solid #E5E5E5;color:#8A8988; width: 100%;">
+            <tr style="height: 50px">
+              <td style="width: 50%">Total Gross Profit</td>
+              <td style="width: 50%; text-align: right;color:#065F46;font-size: 22px;font-weight: bold;"><%= humanized_money_with_symbol sales_statement.total_gross_profit %></td>
+            </tr>
+          </table>
+        </div>
+        <div style="background:#FFFEFE;border-radius:12px;margin-bottom:16px;">
+          <h3 style="padding:24px 26px;margin:0;"> Settlement Breakdown </h3>
+          <table style="color:#8A8988; width: 100%;">
+            <tr style="height: 30px">
+              <td style="width: 18%; padding:12px 26px; border-top: 1px solid #E5E5E5; border-bottom: 1px solid #E5E5E5;">Transact at</td>
+              <td style="width: 44%; padding:12px 26px; border-top: 1px solid #E5E5E5; border-bottom: 1px solid #E5E5E5;">Reference number</td>
+              <td style="width: 18%; text-align: center; padding:12px 26px; border-top: 1px solid #E5E5E5; border-bottom: 1px solid #E5E5E5;">Order Type</td>
+              <td style="width: 20%; text-align: right; padding:12px 26px; border-top: 1px solid #E5E5E5; border-bottom: 1px solid #E5E5E5;">Amount (RM)</td>
+            </tr>
+            <!-- loop orders -->
+            <% orders.each do |order| %>
+            <tr style="height: 30px">
+              <td style="width: 18%; padding:6px 26px;"><%= order.success_payment&.created_at.strftime("%d %b %Y") %></td>
+              <td style="width: 44%; padding:6px 26px;"><%= order.nanoid %></td>
+              <td style="width: 18%; padding:6px 26px; text-align: center;"><%= order.order_type.upcase %></td>
+              <td style="width: 20%; padding:6px 26px; text-align: right;"><%= humanized_money order.total %></td>
+            </tr>
+            <% end %>
+          </table>
+        </div>
+        <table style="padding:5px 0px;color:#8A8988; font-size: 14px; width: 100%;">
+          <tr style="height: 50px">
+            <td style="width: 50%"><%= sales_statement.statement_number %></td>
+            <td style="width: 50%; text-align: right;">Issue at <%= sales_statement.created_at.strftime("%d %B %Y") %></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div style="width:100%;max-width:1200px;margin:0 auto;">
+      <% orders.each do |order| %>
+        <div class="page-break" style="background: #FEFEFE;">
+          <div style="background:#00675B;color:#B9B8B8;padding:24px 36px 50px 36px;">
+            <img src="data:image/png;base64,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" alt="Blank" width="100px" style="margin-left: -7px; margin-bottom: 15px;" />
+            <table style="width: 100%;">
+              <tr>
+                <td style="width: 50%">
+                  <div style="color:#fff;font-weight: 600;padding-bottom:4px;">CGB Venture SDN BHD</div>
+                  <div style="padding-bottom: 4px;"><%= Setting.statement_address %></div>
+                </td>
+                <td style="width: 50%; text-align: right;">
+                  <div style="color:#fff;padding-bottom:4px;font-weight: 600;"><%= order.nanoid %></div>
+                  <div style="padding-bottom:4px;">Issue at <%= order.success_payment&.created_at.strftime("%d %B %Y") %></div>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div style="background:#FFFEFE;border-radius:12px;margin-bottom:16px; padding: 12px 24px;">
+            <table style="color: #8A8988; width: 100%">
+              <tr style="height: 20px; color: hsl(0, 0%, 0%);">
+                <td colspan="2" style="width: 50%; border-bottom: 1px solid #8A8988;"><h3 style="padding:10px 26px;margin:0;"> Tax invoice </h3></td>
+                <td colspan="2" style="width: 50%; border-bottom: 1px solid #8A8988; text-align: right; padding-right: 26px;"></td>
+              </tr>
+              <tr>
+                  <td style="padding: 6px 26px;">Number</td>
+                  <td colspan="3"><%= order.nanoid %></td>
+              </tr>
+              <tr>
+                  <td style="padding: 6px 26px 12px 26px;">Order Type</td>
+                  <td colspan="3"><%= order.order_type.upcase %></td>
+              </tr>
+              <tr>
+                  <td colspan="4" style="border-bottom: 1px solid #8A8988"></td>
+              </tr>
+              <tr>
+                <td colspan="4" style="padding: 12px 26px 16px; width: 100%;">
+                  <table style="width: 100%; background: #F2F2F2;">
+                    <tr style="height: 30px">
+                      <td style="padding:12px 26px; width: 20%">Quantity</td>
+                      <td style="padding:12px 26px; width: 60%;">Item name</td>
+                      <td style="padding:12px 26px; width: 20%; text-align: right;">Price</td>
+                    </tr>
+                    <!-- loop orders item -->
+                    <% order.line_items.find_each do |item| %>
+                    <tr style="height: 30px">
+                      <td style="padding:6px 26px; width: 20%"><%= item.quantity %></td>
+                      <td style="padding:6px 26px; width: 60%;"><%= item.name %></td>
+                      <td style="padding:6px 26px; width: 20%; text-align: right;"><%= humanized_money item.unit_price %></td>
+                    </tr>
+                    <% end %>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="4" style="padding: 12px 26px 16px; width: 100%;">
+                  <table style="width: 100%; background: #F2F2F2;">
+                    <tr style="height: 30px">
+                      <td colspan="2" style="padding:12px 26px; width: 50%">Payment summary</td>
+                      <td colspan="2" style="padding:12px 26px; width: 50%; text-align: right;">Price</td>
+                    </tr>
+                    <tr style="height: 30px">
+                      <td colspan="2" style="padding:6px 26px; width: 20%"><%= order.line_items.count %> items</td>
+                      <td colspan="2" style="padding:6px 26px; width: 20%; text-align: right;"><%= humanized_money order.subtotal %></td>
+                    </tr>
+                    <% if order.delivery_fee.cents %>
+                    <tr style="height: 30px">
+                      <td colspan="2" style="padding:6px 26px; width: 20%">Delivery Fee</td>
+                      <td colspan="2" style="padding:6px 26px; width: 20%; text-align: right;"><%= humanized_money order.delivery_fee %></td>
+                    </tr>
+                    <% end %>
+                    <tr style="height: 30px">
+                      <td colspan="2" style="padding:6px 26px; width: 20%">Discount</td>
+                      <td colspan="2" style="padding:6px 26px; width: 20%; text-align: right;"><%= humanized_money order.discount %></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" style="width: 50%; padding:12px 26px;"><h3>Total</h3></td>
+                <td colspan="2" style="width: 50%; padding:12px 26px; text-align: right;"><h3><%= humanized_money order.total %></h3></td>
+              </tr>
+              <tr>
+                <td colspan="4" style="border-bottom: 1px solid #8A8988"></td>
+              </tr>
+              <tr>
+                  <td colspan="4" style="padding: 24px 26px 16px; width: 100%;">
+                    <table style="width: 100%; background: #F2F2F2;">
+                      <tr style="height: 30px">
+                        <td colspan="2" style="padding:12px 26px; width: 50%">Transaction details</td>
+                        <td colspan="2" style="padding:12px 26px; width: 50%; text-align: right;"></td>
+                      </tr>
+                      <% if order.success_payment.present? %>
+                      <tr style="height: 30px">
+                        <td colspan="2" style="padding:6px 26px; width: 20%">Transaction ID</td>
+                        <td colspan="2" style="padding:6px 26px; width: 20%; text-align: right;"><%= order.success_payment&.id %></td>
+                      </tr>
+                      <tr style="height: 30px">
+                        <td colspan="2" style="padding:6px 26px; width: 20%">Transaction Referrence</td>
+                        <td colspan="2" style="padding:6px 26px; width: 20%; text-align: right;"><%= order.success_payment&.transaction_reference %></td>
+                      </tr>
+                      <tr style="height: 30px">
+                        <td colspan="2" style="padding:6px 26px; width: 20%">Transaction At</td>
+                        <td colspan="2" style="padding:6px 26px; width: 20%; text-align: right;"><%= order.success_payment&.created_at.strftime("%d %b %Y") %></td>
+                      </tr>
+                      <% end  %>
+                    </table>
+                  </td>
+                </tr>
+            </table>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </body>
+</html>

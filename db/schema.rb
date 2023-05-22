@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_19_091117) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_22_043213) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -276,6 +276,26 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_19_091117) do
     t.datetime "start_at"
     t.datetime "end_at"
     t.boolean "active", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "sales_statements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "nanoid"
+    t.string "statement_number"
+    t.date "from_date"
+    t.date "to_date"
+    t.bigint "total_sales_cents", default: 0, null: false
+    t.string "total_sales_currency", default: "MYR", null: false
+    t.bigint "total_delivery_fee_cents", default: 0, null: false
+    t.string "total_delivery_fee_currency", default: "MYR", null: false
+    t.bigint "total_discount_cents", default: 0, null: false
+    t.string "total_discount_currency", default: "MYR", null: false
+    t.bigint "total_redeemed_coin_cents", default: 0, null: false
+    t.string "total_redeemed_coin_currency", default: "MYR", null: false
+    t.bigint "total_gross_profit_cents", default: 0, null: false
+    t.string "total_gross_profit_currency", default: "MYR", null: false
+    t.string "file"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

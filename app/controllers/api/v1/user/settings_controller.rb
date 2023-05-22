@@ -37,11 +37,11 @@ class Api::V1::User::SettingsController < Api::V1::User::ApplicationController
 
   private
     def setting_params
-      params.require(:setting).permit(:web_host, :coin_to_cash_rate, :order_reward_amount, :maximum_redeemed_coin_rate)
+      params.require(:setting).permit(:web_host, :coin_to_cash_rate, :order_reward_amount, :maximum_redeemed_coin_rate, :statement_address)
     end
 
     def setting_keys
-      [:web_host, :coin_to_cash_rate, :order_reward_amount, :maximum_redeemed_coin_rate]
+      [:web_host, :coin_to_cash_rate, :order_reward_amount, :maximum_redeemed_coin_rate, :statement_address]
     end
 
     def settings

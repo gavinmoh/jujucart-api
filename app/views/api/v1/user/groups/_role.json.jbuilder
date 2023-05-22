@@ -1,1 +1,0 @@
-json.extract! role, :id, :name, :featured_photo

@@ -30,13 +30,13 @@ class Api::V1::User::UsersController < Api::V1::User::ApplicationController
     end
   end
 
-  # def destroy
-  #   if @user.destroy
-  #     head :no_content
-  #   else
-  #     render json: ErrorResponse.new(@user), status: :unprocessable_entity
-  #   end
-  # end
+  def destroy
+    if @user.destroy
+      head :no_content
+    else
+      render json: ErrorResponse.new(@user), status: :unprocessable_entity
+    end
+  end
 
   private
     def set_user

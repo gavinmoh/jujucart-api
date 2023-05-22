@@ -49,6 +49,9 @@ Rails.application.routes.draw do
         resources :promotion_bundles do
           resources :promotion_bundle_items
         end
+        resources :sales_statements, only: [:index] do
+          get :pdf, on: :member
+        end
       end
     end
   end
