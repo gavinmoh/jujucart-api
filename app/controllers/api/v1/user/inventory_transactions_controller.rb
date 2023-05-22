@@ -38,6 +38,18 @@ class Api::V1::User::InventoryTransactionsController < Api::V1::User::Applicatio
     end
   end
 
+  def adjustment
+    @inventory = Inventory.find_or_create_by(adjustment_params.slice(:store_id, :product_id))
+    @inventory_transaction = @inventory.inventory_transactions.new(adjustment_params.slice(:quantity, :description))
+    pundit_authorize(@inventory_transaction)
+
+    if @inventory_transaction.save
+      render json: @inventory_transaction, adapter: :json
+    else
+      render json: ErrorResponse.new(@inventory_transaction), status: :unprocessable_entity
+    end
+  end
+
   private
     def set_inventory_transaction
       @inventory_transaction = pundit_scope(InventoryTransaction).find(params[:id])
@@ -61,5 +73,9 @@ class Api::V1::User::InventoryTransactionsController < Api::V1::User::Applicatio
 
     def inventory_transaction_params
       params.require(:inventory_transaction).permit(:inventory_id, :quantity, :description)
+    end
+
+    def adjustment_params
+      params.require(:inventory_transaction).permit(:store_id, :product_id, :quantity, :description)
     end
 end

@@ -108,4 +108,39 @@ RSpec.describe 'api/v1/user/inventory_transactions', type: :request do
 
     
   end
+
+  path '/api/v1/user/inventory_transactions/adjustment' do
+    put('adjust item quantity') do
+      tags 'User Inventory Transactions'
+      produces 'application/json'
+      consumes 'application/json'
+      security [ { bearerAuth: nil } ]
+
+      parameter name: :data, in: :body, schema: {
+        type: :object,
+        properties: {
+          inventory_transaction: {
+            type: :object,
+            properties: {
+              store_id: { type: :string },
+              product_id: { type: :string },
+              quantity: { type: :integer },
+              description: { type: :string }
+            }
+          }
+        }
+      }
+
+      response(200, 'successful', save_request_example: :data) do
+        let(:data) { { inventory_transaction: {
+          store_id: create(:store).id, 
+          product_id: create(:product).id, 
+          quantity: Faker::Number.within(range: 1..100),
+          description: Faker::Lorem.sentence
+        } } }
+
+        run_test!
+      end
+    end
+  end
 end

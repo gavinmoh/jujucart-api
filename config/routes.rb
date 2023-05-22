@@ -31,7 +31,9 @@ Rails.application.routes.draw do
           resources :line_items
         end
         resources :inventories
-        resources :inventory_transactions
+        resources :inventory_transactions do
+          put :adjustment, on: :collection
+        end
         resources :products
         resources :stores
         resources :categories
