@@ -79,12 +79,12 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
   end
 
   def import_template
-    csv = CSV.generate do |csv|
+    template = CSV.generate do |csv|
       csv << importable_attributes
       csv << ['Potato Chips', 'Onion Flavour', 'Snack', 'snacks foods party', '5.00', '4.50', true, true, true, false, '123456789', 'https://loremflickr.com/g/320/240/lays']
       csv << ['Maggie Noodles', 'Chicken Flavour', 'Noodles', 'noodles foods', '3.00', '0.00', true, true, true, false, '123456790', 'https://loremflickr.com/g/320/240/instantnoodles']
     end
-    send_data csv, filename: "import_product_templates.csv"
+    send_data template, filename: "import_product_templates.csv"
   end
 
   private
