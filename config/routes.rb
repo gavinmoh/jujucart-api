@@ -59,6 +59,14 @@ Rails.application.routes.draw do
           get :pdf, on: :member
         end
         resources :locations
+        resources :inventory_transfers do
+          member do
+            put :transfer
+            put :accept
+            put :cancel
+            put :revert
+          end
+        end
       end
     end
   end

@@ -8,6 +8,7 @@ class Product < BaseProduct
   
   has_many :product_variants, dependent: :destroy, foreign_key: :product_id
   has_many :line_items, dependent: :nullify
+  has_many :inventory_transfer_items, dependent: :nullify
 
   accepts_nested_attributes_for :product_variants, allow_destroy: true
 

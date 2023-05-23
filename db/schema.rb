@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_23_050910) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_23_062408) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -99,9 +99,50 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_23_050910) do
     t.string "unit_price_currency", default: "MYR", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "inventory_transfer_id"
     t.index ["inventory_id"], name: "index_inventory_transactions_on_inventory_id"
+    t.index ["inventory_transfer_id"], name: "index_inventory_transactions_on_inventory_transfer_id"
     t.index ["nanoid"], name: "index_inventory_transactions_on_nanoid", unique: true
     t.index ["order_id"], name: "index_inventory_transactions_on_order_id"
+  end
+
+  create_table "inventory_transfer_items", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "inventory_transfer_id", null: false
+    t.string "name"
+    t.uuid "product_id"
+    t.integer "quantity", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["inventory_transfer_id"], name: "index_inventory_transfer_items_on_inventory_transfer_id"
+    t.index ["product_id"], name: "index_inventory_transfer_items_on_product_id"
+  end
+
+  create_table "inventory_transfers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "transfer_from_location_id"
+    t.uuid "transfer_to_location_id"
+    t.string "nanoid"
+    t.string "remark"
+    t.string "acceptance_remark"
+    t.string "status"
+    t.datetime "transferred_at"
+    t.datetime "accepted_at"
+    t.datetime "cancelled_at"
+    t.datetime "reverted_at"
+    t.uuid "transferred_by_id"
+    t.uuid "accepted_by_id"
+    t.uuid "cancelled_by_id"
+    t.uuid "reverted_by_id"
+    t.uuid "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["accepted_by_id"], name: "index_inventory_transfers_on_accepted_by_id"
+    t.index ["cancelled_by_id"], name: "index_inventory_transfers_on_cancelled_by_id"
+    t.index ["created_by_id"], name: "index_inventory_transfers_on_created_by_id"
+    t.index ["nanoid"], name: "index_inventory_transfers_on_nanoid", unique: true
+    t.index ["reverted_by_id"], name: "index_inventory_transfers_on_reverted_by_id"
+    t.index ["transfer_from_location_id"], name: "index_inventory_transfers_on_transfer_from_location_id"
+    t.index ["transfer_to_location_id"], name: "index_inventory_transfers_on_transfer_to_location_id"
+    t.index ["transferred_by_id"], name: "index_inventory_transfers_on_transferred_by_id"
   end
 
   create_table "line_items", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -380,7 +421,17 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_23_050910) do
   add_foreign_key "inventories", "locations"
   add_foreign_key "inventories", "products"
   add_foreign_key "inventory_transactions", "inventories"
+  add_foreign_key "inventory_transactions", "inventory_transfers"
   add_foreign_key "inventory_transactions", "orders"
+  add_foreign_key "inventory_transfer_items", "inventory_transfers"
+  add_foreign_key "inventory_transfer_items", "products"
+  add_foreign_key "inventory_transfers", "accounts", column: "accepted_by_id"
+  add_foreign_key "inventory_transfers", "accounts", column: "cancelled_by_id"
+  add_foreign_key "inventory_transfers", "accounts", column: "created_by_id"
+  add_foreign_key "inventory_transfers", "accounts", column: "reverted_by_id"
+  add_foreign_key "inventory_transfers", "accounts", column: "transferred_by_id"
+  add_foreign_key "inventory_transfers", "locations", column: "transfer_from_location_id"
+  add_foreign_key "inventory_transfers", "locations", column: "transfer_to_location_id"
   add_foreign_key "line_items", "orders"
   add_foreign_key "line_items", "products"
   add_foreign_key "line_items", "promotion_bundles"
