@@ -54,7 +54,7 @@ class Api::V1::User::ReportsController < Api::V1::User::ApplicationController
       store_id: params[:store_id]
     )
 
-    render json: @products, adapter: :json, include: ['category']
+    render json: @products, adapter: :json, include: ['category'], each_serializer: Api::V1::User::BestSellerProductSerializer
   end
 
   def best_seller_categories
