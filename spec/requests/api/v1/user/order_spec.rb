@@ -21,7 +21,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       parameter name: :customer_id,    in: :query, type: :string,  required: false, description: 'Filter by customer_id'
       parameter name: :order_type,     in: :query, type: :string, required: false, description: "Filter by order_type, available order_type: #{Order.order_types.keys.join(', ')}"
       parameter name: :scope,          in: :query, type: :string,  required: false, description: "Filter by scope, available scope: ['delivery', 'pickup']"
-      parameter name: :flagged,        in: :query, type: :boolean,  required: false, description: "Filter flagged order"
+      parameter name: :is_flagged,     in: :query, type: :boolean,  required: false, description: "Filter flagged order"
       parameter name: :filter_date_by, in: :query, type: :string,  required: false, description: 'Filter by which date column, e.g. created_at, updated_at'
       parameter name: :from_date,      in: :query, type: :string,  required: false, description: 'Filter by date column specified by the params filter_date_by'
       parameter name: :to_date,        in: :query, type: :string,  required: false, description: 'Filter by date column specified by the params filter_date_by'

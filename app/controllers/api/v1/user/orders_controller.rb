@@ -149,7 +149,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
       @orders = keyword_queryable(@orders)
       @orders = @orders.where(store_id: params[:store_id]) if params[:store_id].present?
       @orders = @orders.where(customer_id: params[:customer_id]) if params[:customer_id].present?
-      @orders = @orders.where(flagged: ActiveModel::Type::Boolean.new.cast(params[:flagged])) if params[:flagged].present?
+      @orders = @orders.where(is_flagged: ActiveModel::Type::Boolean.new.cast(params[:is_flagged])) if params[:is_flagged].present?
       @orders = @orders.where(order_type: params[:order_type]) if params[:order_type].present?
       @orders = attribute_date_scopable(@orders)
       @orders = attribute_sortable(@orders)
@@ -181,7 +181,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
 
     def update_params
       params.require(:order).permit(
-        :is_flagged, :flagged_reason, :unit_number, :street_address1, :street_address2, 
+        :is_is_flagged, :is_flagged_reason, :unit_number, :street_address1, :street_address2, 
         :postcode, :city, :state, :latitude, :longitude, :courier_name, :tracking_number
       )
     end
