@@ -39,11 +39,11 @@ Rails.application.routes.draw do
         resources :categories
         resource  :settings, only: [:show, :update]
         resources :reports, only: [] do
-          get :revenue,          on: :collection
-          get :total_paid_order, on: :collection
-          get :total_checkout,   on: :collection
-          get :total_abandoned,  on: :collection
-          get :total_order,      on: :collection
+          collection do
+            get :overview
+            get :best_seller_products
+            get :best_seller_categories
+          end
         end
         resources :coupons
         resources :wallets, only: [:index, :show] do

@@ -38,6 +38,31 @@ class Product < BaseProduct
       .joins(product_quantity_sql.squish)
       .joins(product_variant_quantity_sql.squish)
   end
+  scope :bestseller, -> (from_date: Date.current.beginning_of_month, to_date: Date.current.end_of_month, limit: 10, metric: 'sold_quantity', store_id: nil) {
+    products =
+      joins(line_items: {order: :store})
+        .where(orders: { completed_at: from_date.beginning_of_day..to_date.end_of_day })
+        .group('products.id, categories.id, stores.id')
+        .select(
+          <<~SQL
+          products.*,
+          SUM(line_items.quantity) AS sold_quantity,
+          SUM(line_items.quantity * line_items.unit_price_cents) AS sales_amount_cents
+          SQL
+        )
+
+    products = products.limit(limit) if limit
+
+    if metric == 'sold_quantity'
+      products = products.order(LineItem.arel_table[:quantity].sum.desc)
+    else
+      products = products.order((LineItem.arel_table[:quantity] * LineItem.arel_table[:unit_price_cents]).sum.desc)
+    end
+
+    products = products.where(orders: { store_id: store_id }) if store_id
+
+    products
+  }
 
   validates :name, presence: true
 
