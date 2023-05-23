@@ -122,7 +122,7 @@ class Order < ApplicationRecord
   private
     def create_inventory_transactions
       self.line_items.each do |line_item|
-        inventory = line_item.product.inventories.find_or_create_by(store_id: self.store_id)
+        inventory = line_item.product.inventories.find_or_create_by(location_id: self.store.location.id)
         inventory.inventory_transactions.create(
           order_id: self.id,
           quantity: -(line_item.quantity),
@@ -134,7 +134,7 @@ class Order < ApplicationRecord
     def create_return_inventory_transactions
       self.line_items.each do |line_item|
         next if line_item.product_deleted?
-        inventory = line_item.product.inventories.find_or_create_by(store_id: self.store_id)
+        inventory = line_item.product.inventories.find_or_create_by(location_id: self.store.location.id)
         inventory.inventory_transactions.create(
           order_id: self.id,
           quantity: (line_item.quantity),

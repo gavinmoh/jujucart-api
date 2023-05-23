@@ -58,6 +58,7 @@ Rails.application.routes.draw do
         resources :sales_statements, only: [:index] do
           get :pdf, on: :member
         end
+        resources :locations
       end
     end
   end

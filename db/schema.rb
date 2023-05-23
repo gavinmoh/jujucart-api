@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_22_062207) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_23_050910) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -76,15 +76,15 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_22_062207) do
   end
 
   create_table "inventories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "store_id", null: false
     t.uuid "product_id", null: false
     t.integer "quantity", default: 0, null: false
     t.string "nanoid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "location_id", null: false
+    t.index ["location_id"], name: "index_inventories_on_location_id"
     t.index ["nanoid"], name: "index_inventories_on_nanoid", unique: true
     t.index ["product_id"], name: "index_inventories_on_product_id"
-    t.index ["store_id"], name: "index_inventories_on_store_id"
   end
 
   create_table "inventory_transactions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -123,6 +123,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_22_062207) do
     t.index ["order_id"], name: "index_line_items_on_order_id"
     t.index ["product_id"], name: "index_line_items_on_product_id"
     t.index ["promotion_bundle_id"], name: "index_line_items_on_promotion_bundle_id"
+  end
+
+  create_table "locations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name"
+    t.uuid "store_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["store_id"], name: "index_locations_on_store_id"
   end
 
   create_table "notification_tokens", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -369,13 +377,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_22_062207) do
 
   add_foreign_key "assigned_stores", "accounts", column: "user_id"
   add_foreign_key "assigned_stores", "stores"
+  add_foreign_key "inventories", "locations"
   add_foreign_key "inventories", "products"
-  add_foreign_key "inventories", "stores"
   add_foreign_key "inventory_transactions", "inventories"
   add_foreign_key "inventory_transactions", "orders"
   add_foreign_key "line_items", "orders"
   add_foreign_key "line_items", "products"
   add_foreign_key "line_items", "promotion_bundles"
+  add_foreign_key "locations", "stores"
   add_foreign_key "notification_tokens", "accounts", column: "recipient_id"
   add_foreign_key "notifications", "accounts", column: "recipient_id"
   add_foreign_key "order_coupons", "coupons"

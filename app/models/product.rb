@@ -16,7 +16,10 @@ class Product < BaseProduct
   scope :with_store_quantity, -> (store_id) do
     product_quantity_sql = <<-SQL
       LEFT OUTER JOIN (
-        SELECT product_id, quantity AS product_quantity FROM inventories WHERE inventories.store_id = \'#{store_id}\'
+        SELECT product_id, quantity AS product_quantity 
+        FROM inventories
+        LEFT JOIN locations on inventories.location_id = locations.id
+        WHERE locations.store_id = \'#{store_id}\'
       ) AS product_inventories ON product_inventories.product_id = products.id
     SQL
     product_variant_quantity_sql = <<-SQL
@@ -26,10 +29,11 @@ class Product < BaseProduct
           products.product_id
         FROM
           inventories
+          LEFT JOIN locations on inventories.location_id = locations.id
           LEFT OUTER JOIN products ON inventories.product_id = products.id
         WHERE
           products.type = 'ProductVariant'
-          AND inventories.store_id = \'#{store_id}\'
+          AND locations.store_id = \'#{store_id}\'
         GROUP BY
           products.product_id
       ) AS product_variant_inventories ON products.id = product_variant_inventories.product_id

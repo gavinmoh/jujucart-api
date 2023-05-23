@@ -21,14 +21,15 @@ RSpec.describe 'api/v1/user/products', type: :request do
       parameter name: :sort_order, in: :query, type: :string, required: false, description: "Default to descending, available sort_order: 'asc', 'desc'"
       
       response(200, 'successful') do
-        let(:store_id) { create(:store).id }
+        let(:store) { create(:store) }
+        let(:store_id) { store.id }
         before do
           3.times do
             product = create(:product)
             variant = create(:product_variant, product_id: product.id)
-            product_inventory = create(:inventory, product_id: product.id, store_id: store_id)
+            product_inventory = create(:inventory, product_id: product.id, location_id: store.location.id)
             create(:inventory_transaction, inventory_id: product_inventory.id)
-            variant_inventory = create(:inventory, product_id: variant.id, store_id: store_id)
+            variant_inventory = create(:inventory, product_id: variant.id, location_id: store.location.id)
             create(:inventory_transaction, inventory_id: variant_inventory.id)
           end
         end
@@ -124,18 +125,19 @@ RSpec.describe 'api/v1/user/products', type: :request do
       produces 'application/json'
       security [ { bearerAuth: nil } ]
 
-      let(:store_id) { create(:store).id }
+      let(:store) { create(:store) }
+      let(:store_id) { store.id }
 
       response(200, 'successful') do
         before do
           variant1 = create(:product_variant, product_id: id, product_attributes: [{name: 'Color', value: 'Red'}])
-          inventory1 = Inventory.find_or_create_by(product_id: variant1.id, store_id: store_id)
+          inventory1 = Inventory.find_or_create_by(product_id: variant1.id, location_id: store.location.id)
           create(:inventory_transaction, inventory_id: inventory1.id)
           variant2 = create(:product_variant, product_id: id, product_attributes: [{name: 'Color', value: 'Blue'}])
-          inventory2 = Inventory.find_or_create_by(product_id: variant2.id, store_id: store_id)
+          inventory2 = Inventory.find_or_create_by(product_id: variant2.id, location_id: store.location.id)
           create(:inventory_transaction, inventory_id: inventory2.id)
           variant3 = create(:product_variant, product_id: id, product_attributes: [{name: 'Color', value: 'Green'}])
-          inventory3 = Inventory.find_or_create_by(product_id: variant3.id, store_id: store_id)
+          inventory3 = Inventory.find_or_create_by(product_id: variant3.id, location_id: store.location.id)
           create(:inventory_transaction, inventory_id: inventory3.id)
         end
         run_test!

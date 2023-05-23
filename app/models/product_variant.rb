@@ -14,8 +14,9 @@ class ProductVariant < BaseProduct
           quantity AS variant_quantity
         FROM
           inventories
+          LEFT JOIN locations on inventories.location_id = locations.id
         WHERE
-          inventories.store_id = \'#{store_id}\'
+          locations.store_id = \'#{store_id}\'
       ) AS product_variant_inventories ON products.id = product_variant_inventories.product_id
     SQL
     select('products.*, coalesce(product_variant_inventories.variant_quantity, 0) AS product_quantity')

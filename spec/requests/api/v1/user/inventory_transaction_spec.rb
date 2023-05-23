@@ -133,7 +133,7 @@ RSpec.describe 'api/v1/user/inventory_transactions', type: :request do
 
       response(200, 'successful', save_request_example: :data) do
         let(:data) { { inventory_transaction: {
-          store_id: create(:store).id, 
+          location_id: create(:store).location.id, 
           product_id: create(:product).id, 
           quantity: Faker::Number.within(range: 1..100),
           description: Faker::Lorem.sentence

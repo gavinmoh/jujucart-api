@@ -39,7 +39,7 @@ class Api::V1::User::InventoryTransactionsController < Api::V1::User::Applicatio
   end
 
   def adjustment
-    @inventory = Inventory.find_or_create_by(adjustment_params.slice(:store_id, :product_id))
+    @inventory = Inventory.find_or_create_by(adjustment_params.slice(:location_id, :product_id))
     @inventory_transaction = @inventory.inventory_transactions.new(adjustment_params.slice(:quantity, :description))
     pundit_authorize(@inventory_transaction)
 
@@ -76,6 +76,6 @@ class Api::V1::User::InventoryTransactionsController < Api::V1::User::Applicatio
     end
 
     def adjustment_params
-      params.require(:inventory_transaction).permit(:store_id, :product_id, :quantity, :description)
+      params.require(:inventory_transaction).permit(:location_id, :product_id, :quantity, :description)
     end
 end
