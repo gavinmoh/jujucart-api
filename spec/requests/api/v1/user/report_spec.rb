@@ -6,7 +6,7 @@ RSpec.describe 'api/v1/user/reports', type: :request do
 
   path '/api/v1/user/reports/overview' do
     get('overview report') do
-      tags 'User Report'
+      tags 'User Reports'
       security [ { bearerAuth: nil } ]
       produces 'application/json'
 
@@ -106,7 +106,7 @@ RSpec.describe 'api/v1/user/reports', type: :request do
 
   path '/api/v1/user/reports/best_seller_categories' do
     get('list best seller categories') do
-      tags 'User Categories'
+      tags 'User Reports'
       security [ { bearerAuth: nil } ]
       produces 'application/json'
 
