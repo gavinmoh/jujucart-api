@@ -13,6 +13,7 @@ require "action_mailer/railtie"
 require "action_view/railtie"
 require "action_cable/engine"
 # require "rails/test_unit/railtie"
+require 'csv'
 
 # requiring middlewares
 require_relative '../lib/token_authenticatable'

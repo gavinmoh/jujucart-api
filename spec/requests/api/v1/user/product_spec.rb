@@ -231,4 +231,53 @@ RSpec.describe 'api/v1/user/products', type: :request do
 
     
   end
+
+  path '/api/v1/user/products/import' do
+    post('import products from csv') do
+      tags 'User Products'
+      produces 'application/json'
+      consumes 'application/json'
+      security [ { bearerAuth: nil } ]
+
+      parameter name: :data, in: :body, schema: {
+        type: :object,
+        properties: {
+          product: {
+            type: :object,
+            properties: {
+              file: { type: :string }
+            }
+          }
+        }
+      }
+
+      response(200, 'successful') do
+        let(:data) { { product: { file: "data:application/csv;base64,(#{Base64.encode64(File.open(File.join(Rails.root.join("spec/fixtures/products.csv"))).read)})" } } }
+
+        run_test!
+      end
+    end
+
+  end
+
+  path '/api/v1/user/products/import_template' do
+    get('download import template') do
+      tags 'User Products'
+      produces 'text/csv'
+      security [ { bearerAuth: nil } ]
+
+      response(200, 'successful') do
+        after do |example|
+          example.metadata[:response][:content] = {
+            'text/csv' =>{
+              example: response.body
+            } 
+          }
+        end
+
+        run_test!
+      end
+    end
+
+  end
 end

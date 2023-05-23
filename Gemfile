@@ -116,7 +116,7 @@ gem "carrierwave-base64", "~> 2.8"
 gem "file_validators", "~> 2.3"
 
 # only needed for csv processing
-# gem "smarter_csv", "~> 1.2"
+gem "smarter_csv"
 
 # state machine
 gem "aasm", "~> 5.1"

@@ -34,7 +34,10 @@ Rails.application.routes.draw do
         resources :inventory_transactions do
           put :adjustment, on: :collection
         end
-        resources :products
+        resources :products do
+          post :import, on: :collection
+          get :import_template, on: :collection
+        end
         resources :stores
         resources :categories
         resource  :settings, only: [:show, :update]

@@ -1,11 +1,12 @@
-﻿name,description,active,is_voucher,earliest_expiry_date,latest_expiry_date,is_featured,tags,category,price,discounted_price
-Prego Tomato Basil Garlic (665g),"<p>hello Prego looks nice, just kidding la</p>\n",TRUE,FALSE,27/10/2021,14/11/2021,TRUE,food family,Snacks,10.5,1.5
-Super Essenso MicroGround Black Coffee Mandheling Blend 20 x 2grams,<p>Cool Cool coffe fragance</p>\n,TRUE,FALSE,17/11/2021,null,TRUE,,Powdered Drinks,11,6
-MyKuali Penang White Curry Noodle 4 x 110grams,<p>Your preferred Penang white curry mee!</p>\n,TRUE,FALSE,30/08/2021,29/11/2021,FALSE,,Instant Noodles,9,5
-Nescafe Classic Instant Coffee (200g) ,<p>100 cups of Nescafe Coffee</p>\n,TRUE,FALSE,06/10/2021,null,FALSE,,Powdered Drinks,25,14
-Wonda Premium Coffee Mocha 240ml,<p>sdd ds Instant premium canned coffee at your finger tip</p>\n,FALSE,FALSE,30/08/2021,30/10/2021,FALSE,,Snacks,2,1
-Ibumie Mi Goreng Original 5 x 80grams,<p>Your preferred dry instant Noodles.</p>\n,FALSE,FALSE,30/08/2021,30/10/2021,FALSE,,Instant Noodles,4,1
-Kimball Spaghetti (400g),<p></p>\n,TRUE,FALSE,06/10/2021,03/11/2021,TRUE,,Instant Noodles,4,2
-Lay's Classic Potato Chips (42.5g) ,<p>Testing function version 2</p>\n,TRUE,FALSE,02/10/2021,30/12/2021,FALSE,,Snacks,12,5
-Nestle MILO ProtoMalt Softpack (3.2kg),<p><strong>Malaysian famous family drinks x asassasa</strong></p>\n,TRUE,FALSE,30/10/2021,29/11/2021,TRUE,family,Powdered Drinks,46.12,23.12
-WingsFood Mi Sedap Original 5 x 91grams,<p>Meee Sedapnya</p>\n,FALSE,FALSE,30/08/2021,30/10/2021,FALSE,,Instant Noodles,5,280
+﻿name,description,sku,active,is_featured,is_hidden,tags,category,price,discount_price
+Prego Tomato Basil Garlic (665g),"<p>hello Prego looks nice, just kidding la</p>\n",1234567891,TRUE,TRUE,FALSE,food family,Snacks,10.5,1.5
+Super Essenso MicroGround Black Coffee Mandheling Blend 20 x 2grams,<p>Cool Cool coffe fragance</p>\n,1234567892,TRUE,TRUE,FALSE,,Powdered Drinks,11,6
+MyKuali Penang White Curry Noodle 4 x 110grams,<p>Your preferred Penang white curry mee!</p>\n,1234567893,TRUE,FALSE,FALSE,,Instant Noodles,9,5
+Nescafe Classic Instant Coffee (200g) ,<p>100 cups of Nescafe Coffee</p>\n,1234567894,TRUE,FALSE,FALSE,,Powdered Drinks,25,14
+Wonda Premium Coffee Mocha 240ml,<p>sdd ds Instant premium canned coffee at your finger tip</p>\n,1234567895,FALSE,FALSE,FALSE,,Snacks,2,1
+Ibumie Mi Goreng Original 5 x 80grams,<p>Your preferred dry instant Noodles.</p>\n,1234567896,FALSE,FALSE,FALSE,,Instant Noodles,4,1
+Kimball Spaghetti (400g),<p></p>\n,1234567897,TRUE,TRUE,FALSE,,Instant Noodles,4,2
+Lay's Classic Potato Chips (42.5g) ,<p>Testing function version 2</p>\n,1234567898,TRUE,FALSE,FALSE,,Snacks,12,5
+Nestle MILO ProtoMalt Softpack (3.2kg),<p><strong>Malaysian famous family drinks x asassasa</strong></p>\n,1234567899,TRUE,TRUE,FALSE,family,Powdered Drinks,46.12,23.12
+WingsFood Mi Sedap Original 5 x 91grams,<p>Meee Sedapnya</p>\n,1234567900,FALSE,FALSE,FALSE,,Instant Noodles,5,280
+Plastic Bag,,1234567901,TRUE,FALSE,TRUE,,,0.2,0

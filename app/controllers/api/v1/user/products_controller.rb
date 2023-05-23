@@ -43,6 +43,50 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
     end
   end
 
+  def import
+    pundit_authorize(Product)
+    raise ActionController::ParameterMissing unless import_params[:file].is_a?(String)
+    decoded = Base64.decode64(import_params[:file].split(',').second).force_encoding('utf-8').sub("\xEF\xBB\xBF", '')
+    file = StringIO.new(decoded)
+
+    products_attributes = SmarterCSV.process(file).map { |x| x.slice(*importable_attributes) }
+    category_names = products_attributes.map { |x| x[:category] }.uniq
+    categories = Category.where(name: category_names).as_json.map { |x| ActiveSupport::HashWithIndifferentAccess.new(x) }
+
+    ActiveRecord::Base.transaction do
+      products_attributes = products_attributes.map do |x|
+        if categories.any?
+          category_id = categories.find { |category| category[:name] == x[:category] }.dig(:id)
+        else
+          category_id = nil
+        end
+        if category_id.present?
+          x[:category_id] = category_id
+        else
+          category = Category.find_or_create_by(name: x[:category])
+          x[:category_id] = category.id
+        end
+        x[:tags] = x[:tags].split if x[:tags].present?
+        x.except(:category)
+      end
+      @products_array = Product.create!(products_attributes)
+    end
+
+    @products = pundit_scope(Product).where(id: @products_array.map(&:id))
+    render json: @products, adapter: :json
+  rescue => exception
+    render json: { error: exception }, status: :unprocessable_entity
+  end
+
+  def import_template
+    csv = CSV.generate do |csv|
+      csv << importable_attributes
+      csv << ['Potato Chips', 'Onion Flavour', 'Snack', 'snacks foods party', '5.00', '4.50', true, true, true, false, '123456789', 'https://loremflickr.com/g/320/240/lays']
+      csv << ['Maggie Noodles', 'Chicken Flavour', 'Noodles', 'noodles foods', '3.00', '0.00', true, true, true, false, '123456790', 'https://loremflickr.com/g/320/240/instantnoodles']
+    end
+    send_data csv, filename: "import_product_templates.csv"
+  end
+
   private
     def set_product
       if params[:store_id].present?
@@ -82,5 +126,13 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
           product_attributes: [:name, :value]
         ] 
       )
+    end
+
+    def import_params
+      params.require(:product).permit(:file)
+    end
+
+    def importable_attributes
+      %i[name description category tags price discount_price is_featured has_no_variant is_cartable is_hidden sku remote_featured_photo_url]
     end
 end
