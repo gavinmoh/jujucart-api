@@ -57,6 +57,7 @@ RSpec.describe Category, type: :model do
 
       it 'should return categories with sold quantity and sales amount cents' do
         categories = Category.with_sold_quantity_and_sales_amount_cents
+                             .order('sold_quantity DESC')
         expect(categories.first['sold_quantity']).to be_present
         expect(categories.first['sales_amount_cents']).to be_present
       end

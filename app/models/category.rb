@@ -17,6 +17,7 @@ class Category < ApplicationRecord
     left_joins(products: [line_items: { product: :product }])
       .select(select_query.squish)
       .group('categories.id', 'group_id')
+      .having('SUM(line_items.quantity) IS NOT NULL')
   }
 
   after_commit :update_slug, if: -> { self.name.present? and (saved_change_to_attribute?(:name) or (not self.slug.present?)) }

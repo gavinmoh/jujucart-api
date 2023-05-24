@@ -28,7 +28,7 @@ RSpec.describe Location, type: :model do
     end
 
     context 'non_store' do
-      let!(:location) { create(:location) }
+      let!(:location) { create(:location, store: nil) }
       let!(:store) { create(:store) }
 
       it 'should return locations without store' do
