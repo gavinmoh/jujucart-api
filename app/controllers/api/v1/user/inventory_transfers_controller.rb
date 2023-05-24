@@ -4,7 +4,7 @@ class Api::V1::User::InventoryTransfersController < Api::V1::User::ApplicationCo
   
   def index
     @pagy, @inventory_transfers = pagy(@inventory_transfers)
-    render json: @inventory_transfers, adapter: :json, include: ['*', 'transfer_from_location.store', 'transfer_to_location.store']
+    render json: @inventory_transfers, adapter: :json, include: index_included_associations
   end
 
   def show
@@ -108,5 +108,10 @@ class Api::V1::User::InventoryTransfersController < Api::V1::User::ApplicationCo
 
     def accept_params
       params.require(:inventory_transfer).permit(:acceptance_remark)
+    end
+
+    def index_included_associations
+      [ 'created_by', 'transferred_by', 'accepted_by', 'cancelled_by', 'reverted_by',
+         'transfer_from_location.store', 'transfer_to_location.store']
     end
 end

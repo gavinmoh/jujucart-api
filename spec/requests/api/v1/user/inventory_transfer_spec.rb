@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/inventory_transfers', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:inventory_transfer).id }
+  let(:id) { create(:inventory_transfer, :with_inventory_transfer_items).id }
 
   path '/api/v1/user/inventory_transfers' do
     get('list inventory transfers') do

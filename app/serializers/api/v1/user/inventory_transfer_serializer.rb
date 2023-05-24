@@ -12,4 +12,5 @@ class Api::V1::User::InventoryTransferSerializer < ActiveModel::Serializer
   has_one :cancelled_by, serializer: Api::V1::User::UserInfoSerializer
   has_one :reverted_by, serializer: Api::V1::User::UserInfoSerializer
   has_one :created_by, serializer: Api::V1::User::UserInfoSerializer
+  has_many :inventory_transfer_items
 end
