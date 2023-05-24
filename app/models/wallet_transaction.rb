@@ -10,6 +10,7 @@ class WalletTransaction < ApplicationRecord
 
   private
     def update_wallet_amount
+      return if self.wallet.destroyed?
       new_amount = self.wallet.wallet_transactions.sum(:amount)
       self.wallet.update(current_amount: new_amount)
     end
