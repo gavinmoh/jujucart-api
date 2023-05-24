@@ -7,12 +7,12 @@ class LineItem < ApplicationRecord
   monetize :total_price_cents
   monetize :discount_cents
 
-  validates :quantity, numericality: { greater_than_or_equal_to: 1 }
+  validates :quantity, numericality: { greater_than_or_equal_to: 1, only_integer: true }
 
   before_save :assign_unit_price, if: -> { self.order.pending? }
   before_save :set_total_price, if: -> { self.order.pending? }
   before_save :set_name, if: -> { self.order.pending? }
-  after_commit :update_order_price
+  after_commit :update_order_price, if: -> { self.order.pending? }
 
   scope :joins_with_pending_orders, -> { joins(:order).where(orders: { status: 'pending' }) }
   scope :joins_with_parent_product, -> (parent_product_id) { joins(product: :product).where(product: {product_id: parent_product_id}) }

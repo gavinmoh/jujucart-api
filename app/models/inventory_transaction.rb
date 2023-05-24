@@ -4,6 +4,8 @@ class InventoryTransaction < ApplicationRecord
 
   after_commit :update_inventory_quantity
 
+  validates :quantity, numericality: { other_than: 0, only_integer: true }, allow_nil: false
+
   private
     def update_inventory_quantity
       return if self.inventory.destroyed?
