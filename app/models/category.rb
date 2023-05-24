@@ -1,7 +1,7 @@
 class Category < ApplicationRecord
   has_many :products, dependent: :nullify
 
-  validates :name, presence: true 
+  validates :name, presence: true, uniqueness: { case_sensitive: false }
 
   mount_base64_uploader :photo, PhotoUploader
 
@@ -19,7 +19,7 @@ class Category < ApplicationRecord
       .group('categories.id', 'group_id')
   }
 
-  after_commit :update_slug, if: -> { (not self.slug.present?) and saved_change_to_attribute?(:name) }
+  after_commit :update_slug, if: -> { self.name.present? and (saved_change_to_attribute?(:name) or (not self.slug.present?)) }
 
   has_paper_trail
 
