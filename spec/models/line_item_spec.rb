@@ -93,7 +93,7 @@ RSpec.describe LineItem, type: :model do
           product = create(:product, price_cents: 100, discount_price_cents: 0)
           expect do
             create(:line_item, order: order, product: product, quantity: 2)
-          end.not_to (change { order.reload.total_cents })
+          end.not_to(change { order.reload.total_cents })
         end
       end
     end

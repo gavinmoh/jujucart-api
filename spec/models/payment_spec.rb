@@ -21,14 +21,14 @@ RSpec.describe Payment, type: :model do
           order = create(:order, status: 'pending_payment')
           expect do
             create(:payment, order: order, status: 'success')
-          end.to (change { order.reload.status }.from('pending_payment').to('confirmed'))
+          end.to(change { order.reload.status }.from('pending_payment').to('confirmed'))
         end
 
         it 'should not confirm order if payment is not success' do
           order = create(:order, status: 'pending_payment')
           expect do
             create(:payment, order: order, status: 'failed')
-          end.not_to (change { order.reload.status })
+          end.not_to(change { order.reload.status })
         end
 
         it 'should confirm order if payment is mark as success' do
@@ -36,7 +36,7 @@ RSpec.describe Payment, type: :model do
           payment = create(:payment, order: order, status: 'pending')
           expect do
             payment.mark_as_success!
-          end.to (change { order.reload.status }.from('pending_payment').to('confirmed'))
+          end.to(change { order.reload.status }.from('pending_payment').to('confirmed'))
         end
       end
     end
