@@ -11,13 +11,14 @@ class Payment < ApplicationRecord
 
   validates :transaction_reference, presence: true, if: -> { self.cash? }
 
+  after_commit :confirm_order, if: -> { saved_change_to_status? and self.success? }, on: [:create, :update]
+
   aasm column: :status do
     state :pending, initial: true
     state :success, :failed, :cancelled, :unknown
 
     event :mark_as_success do
-      transitions from: [:pending, :unknown], to: :success, 
-                  after: :update_order_status
+      transitions from: [:pending, :unknown], to: :success
     end
 
     event :mark_as_failed do
@@ -34,7 +35,7 @@ class Payment < ApplicationRecord
   end
 
   private
-    def update_order_status
+    def confirm_order
       self.order.confirm!
     end
 end
