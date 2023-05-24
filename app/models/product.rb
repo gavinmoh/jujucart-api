@@ -1,16 +1,16 @@
 class Product < BaseProduct
-  include ActiveModel::Dirty  
-  belongs_to :category, optional: true
-  belongs_to :product, optional: true
+  include ActiveModel::Dirty
+
+  has_many :product_variants, dependent: :destroy, foreign_key: :product_id
 
   monetize :price_cents
   monetize :discount_price_cents
   
-  has_many :product_variants, dependent: :destroy, foreign_key: :product_id
-  has_many :line_items, dependent: :nullify
-  has_many :inventory_transfer_items, dependent: :nullify
-
   accepts_nested_attributes_for :product_variants, allow_destroy: true
+
+  validates :name, presence: true
+
+  after_commit :update_slug, if: -> { (not self.slug.present?) and saved_change_to_attribute?(:name) }
 
   scope :active, -> { where(active: true) }
   scope :query, -> (keyword) { where('products.name ILIKE ?', "%#{keyword}%") }
@@ -43,36 +43,6 @@ class Product < BaseProduct
       .joins(product_quantity_sql.squish)
       .joins(product_variant_quantity_sql.squish)
   end
-  scope :bestseller, -> (from_date: Date.current.beginning_of_month, to_date: Date.current.end_of_month, limit: 10, metric: 'sold_quantity', store_id: nil) {
-    products =
-      joins(line_items: {order: :store})
-        .where(orders: { completed_at: from_date.beginning_of_day..to_date.end_of_day })
-        .group('products.id, categories.id, stores.id')
-        .select(
-          <<~SQL
-          products.*,
-          SUM(line_items.quantity) AS sold_quantity,
-          SUM(line_items.quantity * line_items.unit_price_cents) AS sales_amount_cents
-          SQL
-        )
-
-    products = products.limit(limit) if limit
-
-    if metric == 'sold_quantity'
-      products = products.order(LineItem.arel_table[:quantity].sum.desc)
-    else
-      products = products.order((LineItem.arel_table[:quantity] * LineItem.arel_table[:unit_price_cents]).sum.desc)
-    end
-
-    products = products.where(orders: { store_id: store_id }) if store_id
-
-    products
-  }
-
-  validates :name, presence: true
-
-  after_commit :update_slug, if: -> { (not self.slug.present?) and saved_change_to_attribute?(:name) }
-  after_commit :update_line_items, if: -> { saved_change_to_attribute?(:name) }, on: :update
 
   private
     def update_slug
@@ -81,12 +51,6 @@ class Product < BaseProduct
     rescue ActiveRecord::RecordNotUnique
       new_slug = new_slug + '-' + self.nanoid
       retry
-    end
-
-    def update_line_items
-      LineItem.joins(:order).where(product_id: self.id, order: { status: 'pending' }).each do |line_item|
-        line_item.update(name: self.name)
-      end
     end
 
 end

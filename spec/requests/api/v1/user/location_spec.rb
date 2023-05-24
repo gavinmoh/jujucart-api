@@ -16,7 +16,7 @@ RSpec.describe 'api/v1/user/locations', type: :request do
       parameter name: :items, in: :query, type: :integer, required: false, description: 'Number of items per page'
       parameter name: :sort_by, in: :query, type: :string, required: false, description: 'Sort by attribute'
       parameter name: :sort_order, in: :query, type: :string, required: false, description: 'Sort order'
-      parameter name: :exclude_store, in: :query, type: :string, required: false, description: 'Exclude Store location'
+      parameter name: :exclude_store, in: :query, type: :boolean, required: false, description: 'Exclude Store location'
       parameter name: :query, in: :query, type: :string, required: false, description: 'Search by name or store_name'
 
       response(200, 'successful') do
