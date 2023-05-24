@@ -12,7 +12,7 @@ class Order < ApplicationRecord
   has_many :line_items, -> { order(name: :asc) }, dependent: :destroy
   has_many :products, through: :line_items
   has_many :payments, dependent: :nullify
-  has_many :inventory_transactions, dependent: :destroy
+  has_many :inventory_transactions, dependent: :nullify
 
   has_paper_trail
 
@@ -30,7 +30,7 @@ class Order < ApplicationRecord
   enum order_type: { pos: 'pos', delivery: 'delivery', pickup: 'pickup' }
   validates :order_type, presence: true
 
-  before_validation :calculate_delivery_fee, if: -> { self.pending? }
+  before_validation :calculate_delivery_fee, if: -> { self.pending? && self.delivery? }
   before_validation :set_redeemed_coin_value, if: -> { self.pending? }
   before_validation :set_total, if: -> { self.pending? }
   before_validation :set_reward_amount, if: -> { self.pending? }
@@ -42,7 +42,7 @@ class Order < ApplicationRecord
 
     event :checkout do
       transitions from: :pending, to: :pending_payment, 
-                  guard: [:customer_present?, :enough_stock?],
+                  guard: [:customer_present?, :enough_stock?, :has_line_items?, :is_not_pos_order?],
                   after: [:create_inventory_transactions, :create_redeemed_coin_transaction]
     end
 
@@ -53,19 +53,19 @@ class Order < ApplicationRecord
     end
 
     event :confirm do
-      transitions from: :pending_payment, to: :confirmed
+      transitions from: :pending_payment, to: :confirmed, guard: [:has_success_payment?]
     end
 
     event :cancel do
       transitions from: :confirmed, to: :cancelled, 
                   after: [:create_return_inventory_transactions, 
-                          :create_refund_redeemed_coin_transaction]
+                          :create_refund_coin_wallet_transaction]
     end
 
     event :fail do
       transitions from: :pending_payment, to: :failed,
                   after: [:create_return_inventory_transactions, 
-                          :create_refund_redeemed_coin_transaction]
+                          :create_refund_coin_wallet_transaction]
     end
 
     event :pack do
@@ -111,15 +111,35 @@ class Order < ApplicationRecord
     self.save!
   end
 
-  def set_total
-    self.total = self.subtotal + self.delivery_fee - self.discount - self.redeemed_coin_value
-  end
-
   def display_address
-    [self.street_address1, self.street_address2, self.postcode, self.city, self.state].reject(&:blank?).join(', ')
+    [self.unit_number, self.street_address1, self.street_address2, self.postcode, self.city, self.state].reject(&:blank?).join(', ')
   end
 
   private
+    def calculate_delivery_fee
+      self.delivery_fee_cents = 0
+    end
+
+    def set_redeemed_coin_value
+      unless self.customer.present? and (Setting.maximum_redeemed_coin_rate > 0) and (self.redeemed_coin > 0)
+        self.redeemed_coin = 0
+        self.redeemed_coin_value_cents = 0
+        return
+      end
+
+      maximum_coin = self.subtotal_cents * Setting.maximum_redeemed_coin_rate
+      self.redeemed_coin = [self.redeemed_coin, maximum_coin, self.customer.wallet.current_amount].min
+      self.redeemed_coin_value = Money.from_amount(self.redeemed_coin * Setting.coin_to_cash_rate, "MYR")
+    end
+
+    def set_total
+      self.total = self.subtotal + self.delivery_fee - self.discount - self.redeemed_coin_value
+    end
+
+    def set_reward_amount
+      self.reward_coin = (self.subtotal_cents/100 * Setting.order_reward_amount) if Setting.order_reward_amount > 0
+    end
+
     def create_inventory_transactions
       self.line_items.each do |line_item|
         inventory = line_item.product.inventories.find_or_create_by(location_id: self.store.location.id)
@@ -154,18 +174,43 @@ class Order < ApplicationRecord
 
     def enough_stock?
       return true unless self.store.validate_inventory?
-      order_line_items = LineItem.includes({product: :store}).where(order_id: self.id)
+      order_line_items = self.line_items
+      inventories = Inventory.joins(:location)
+                             .where(location: { store_id: self.store_id })
+                             .where(product_id: order_line_items.map(&:product_id))
       has_enough_stock = true
       order_line_items.find_each do |line_item|
         if line_item.product_id.nil?
-          errors.add(:product, "#{line_item.name} is currently not available")
+          errors.add(:line_items, "#{line_item.name} is currently not available")
           has_enough_stock = false
-        elsif line_item.quantity > line_item.product.current_quantity
-          errors.add(:product, "#{line_item.name} has insufficient stock")
+          next
+        end
+
+        inventory_quantity = inventories.find { |inventory| inventory.product_id == line_item.product_id }&.quantity || 0
+        if line_item.quantity > inventory_quantity
+          errors.add(:line_items, "#{line_item.name} has insufficient stock")
           has_enough_stock = false
         end
       end
       return has_enough_stock
+    end
+
+    def has_line_items?
+      unless self.line_items.any?
+        errors.add(:line_items, 'is required')
+        return false
+      else
+        return true
+      end
+    end
+
+    def is_not_pos_order?
+      if self.pos?
+        errors.add(:order_type, 'is POS')
+        return false
+      else
+        return true
+      end
     end
 
     def is_pos_order?
@@ -192,26 +237,6 @@ class Order < ApplicationRecord
 
     def coordinates_complete?
       self.latitude.present? and self.longitude.present? 
-    end
-
-    def calculate_delivery_fee
-      self.delivery_fee_cents = 0
-    end
-
-    def set_redeemed_coin_value
-      unless self.customer.present? and (Setting.maximum_redeemed_coin_rate > 0) and (self.redeemed_coin > 0)
-        self.redeemed_coin = 0
-        self.redeemed_coin_value_cents = 0
-        return
-      end
-
-      maximum_coin = self.subtotal_cents * Setting.maximum_redeemed_coin_rate / 100
-      self.redeemed_coin = [self.redeemed_coin, maximum_coin, self.customer.wallet.current_amount].max
-      self.redeemed_coin_value = Money.from_amount(self.redeemed_coin * Setting.coin_to_cash_rate, "MYR")
-    end
-
-    def set_reward_amount
-      self.reward_coin = (self.subtotal_cents/100 * Setting.order_reward_amount) if Setting.order_reward_amount > 0
     end
 
     def create_reward_transaction

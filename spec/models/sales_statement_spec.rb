@@ -22,7 +22,7 @@ RSpec.describe SalesStatement, type: :model do
           3.times do
             order = create(:order, :with_line_items, order_type: 'pos')
             create(:order_coupon, order: order, coupon: coupon)
-            order.checkout!
+            order.pos_checkout!
             create(:payment, status: 'success', order: order, created_at: Faker::Time.between(from: Time.current.last_month.beginning_of_month, to: Time.current.last_month.end_of_month))
             order.complete!
           end
