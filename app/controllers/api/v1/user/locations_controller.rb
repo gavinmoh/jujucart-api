@@ -47,7 +47,7 @@ class Api::V1::User::LocationsController < Api::V1::User::ApplicationController
     def set_locations
       pundit_authorize(Location)      
       @locations = pundit_scope(Location.includes(:store))
-      @locations = @location.non_store if params[:exclude_store].present? && ActiveModel::Type::Boolean.new.cast(params[:exclude_store])
+      @locations = @locations.non_store if params[:exclude_store].present? && ActiveModel::Type::Boolean.new.cast(params[:exclude_store])
       @locations = keyword_queryable(@locations)
       @locations = attribute_sortable(@locations)
     end
