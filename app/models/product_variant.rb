@@ -4,7 +4,7 @@ class ProductVariant < BaseProduct
   validate :product_attributes_must_exist
   validates_uniqueness_of :product_attributes, scope: :product_id
 
-  before_validation :format_product_attributes
+  before_validation :format_product_attributes, if: -> { self.product_attributes.any? }
 
   scope :with_store_quantity, -> (store_id) do
     product_variant_quantity_sql = <<-SQL
@@ -29,6 +29,8 @@ class ProductVariant < BaseProduct
     end
 
     def format_product_attributes
-      self.product_attributes = self.product_attributes.map { |product_attribute| product_attribute.transform_values!(&:strip) }
+      self.product_attributes = self.product_attributes.map do |product_attribute| 
+        product_attribute.is_a?(Hash) ? product_attribute.transform_values!(&:strip) : product_attribute.strip
+      end
     end
 end

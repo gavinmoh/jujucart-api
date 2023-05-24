@@ -45,38 +45,61 @@ class Api::V1::User::ReportsController < Api::V1::User::ApplicationController
     from_date = params[:from_date].present? ? (Date.parse(params[:from_date]) rescue Date.current.beginning_of_month) : Date.current.beginning_of_month
     to_date = params[:to_date].present? ? (Date.parse(params[:to_date]) rescue Date.current.end_of_month) : Date.current.end_of_month
     metric = params[:metric].present? ? params[:metric] : 'sold_quantity'
+    limit = params[:limit].present? ? params[:limit] : 10
 
-    @products = Product.all.eager_load(:category)
-    @products = @products.bestseller(
-      from_date: from_date, 
-      to_date: to_date,
-      metric: metric, 
-      store_id: params[:store_id]
-    )
+    @products = BaseProduct.includes(:category)
+                           .with_sold_quantity_and_sales_amount_cents
+                           .joins(line_items: :order)
+                           .where(orders: { completed_at: from_date.beginning_of_day..to_date.end_of_day })
+    @products = @products.where(line_items: { orders: { store_id: params[:store_id] } }) if params[:store_id].present?
+    if params[:category_id].present?
+      @products = @products.left_joins(:product)
+      @products = @products.where(category_id: params[:category_id])
+                           .or(@products.where(product: { category_id: params[:category_id] }))
+    end
 
-    render json: @products, adapter: :json, include: ['category'], each_serializer: Api::V1::User::BestSellerProductSerializer
+    case metric
+    when 'sold_quantity'
+      @products = @products.order('sold_quantity DESC')
+    when 'sales_amount'
+      @products = @products.order('sales_amount_cents DESC')
+    end
+
+    @products = @products.limit(limit)
+
+    render json: @products, adapter: :json, include: ['category'], each_serializer: Api::V1::User::BestSellerProductSerializer, root: 'products'
   end
 
   def best_seller_categories
     from_date = params[:from_date].present? ? (Date.parse(params[:from_date]) rescue Date.current.beginning_of_month) : Date.current.beginning_of_month
     to_date = params[:to_date].present? ? (Date.parse(params[:to_date]) rescue Date.current.end_of_month) : Date.current.end_of_month
     metric = params[:metric].present? ? params[:metric] : 'sold_quantity'
+    limit = params[:limit].present? ? params[:limit] : 10
 
-    @categories = Category.bestseller(
-                    from_date: from_date, 
-                    to_date: to_date,
-                    store_id: params[:store_id],
-                    metric: metric
-                  )
-    @products = Product.all.eager_load(:category)
-                           .bestseller(
-                              from_date: from_date,
-                              to_date: to_date,
-                              limit: nil,
-                              metric: metric,
-                              store_id: params[:store_id])
-                           .having("SUM(line_items.quantity) > 0")
+    @categories = Category.with_sold_quantity_and_sales_amount_cents
+                          .joins(products: { line_items: :order })
+                          .where(orders: { completed_at: from_date.beginning_of_day..to_date.end_of_day })
+    @categories = @categories.where(products: { line_items: { orders: { store_id: params[:store_id] } } }) if params[:store_id].present?
+    @categories = @categories.limit(limit)    
 
+    @products = BaseProduct.with_sold_quantity_and_sales_amount_cents
+                           .joins(line_items: :order)
+                           .where(orders: { completed_at: from_date.beginning_of_day..to_date.end_of_day })
+    @products = @products.left_joins(:product)
+    @products = @products.where(line_items: { orders: { store_id: params[:store_id] } }) if params[:store_id].present?
+
+    case metric
+    when 'sold_quantity'
+      @categories = @categories.order('sold_quantity DESC')
+      @products = @products.order('sold_quantity DESC')
+    when 'sales_amount'
+      @categories = @categories.order('sales_amount_cents DESC')
+      @products = @products.order('sales_amount_cents DESC')
+    end
+
+    @categories_ids = @categories.map(&:id)
+    @products = @products.where(category_id: @categories_ids)
+                         .or(@products.where(product: { category_id: @categories_ids }))
     render json: @categories, adapter: :json, products: @products, each_serializer: Api::V1::User::BestSellerCategorySerializer
   end
 

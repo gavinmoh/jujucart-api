@@ -90,6 +90,8 @@ RSpec.describe 'api/v1/user/reports', type: :request do
       parameter name: :to_date, in: :query, type: :string, required: false, description: "Best seller to date"
       parameter name: :store_id, in: :query, type: :string, required: false, description: "Filter products by store"
       parameter name: :metric, in: :query, type: :string, required: false, description: "Set ordering by metric", enum: ['sold_quantity', 'sales_amount']
+      parameter name: :category_id, in: :query, type: :string, required: false, description: "Filter products by category"
+      parameter name: :limit, in: :query, type: :string, required: false, description: "Limit number of products, default to 10"
 
       response(200, 'successful') do
         before do
@@ -114,6 +116,7 @@ RSpec.describe 'api/v1/user/reports', type: :request do
       parameter name: :to_date, in: :query, type: :string, required: false, description: "Best seller to date"
       parameter name: :store_id, in: :query, type: :string, required: false, description: "Filter orders by store ID"
       parameter name: :metric, in: :query, type: :string, required: false, description: "Set ordering based on metrics", enum: [ 'sold_quantity', 'sales_amount' ]
+      parameter name: :limit, in: :query, type: :string, required: false, description: "Limit number of categories, default to 10"
 
       response(200, 'successful') do
         before do
