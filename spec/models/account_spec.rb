@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Account, type: :model do
   describe 'associations' do
+    it { is_expected.to have_one(:latest_session) }
     it { is_expected.to have_many(:sessions).dependent(:destroy) }
     it { is_expected.to have_many(:notifications).dependent(:destroy).with_foreign_key(:recipient_id) }
     it { is_expected.to have_many(:notification_tokens).dependent(:destroy).with_foreign_key(:recipient_id) }
@@ -46,6 +47,24 @@ RSpec.describe Account, type: :model do
 
       it 'should return unread notification count' do
         expect(user.badge_count).to eq 1
+      end
+    end
+
+    describe 'last_sign_in_at' do
+      let(:account) { create(:user) }
+      let!(:session) { create(:session, account: account) }
+
+      it 'should return last sign in at' do
+        expect(account.last_sign_in_at).to eq session.created_at
+      end
+    end
+
+    describe 'last_sign_in_ip' do
+      let(:account) { create(:user) }
+      let!(:session) { create(:session, account: account) }
+
+      it 'should return last sign in ip' do
+        expect(account.last_sign_in_ip).to eq session.remote_ip
       end
     end
   end
