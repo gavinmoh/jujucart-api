@@ -28,7 +28,7 @@ class Order < ApplicationRecord
   reverse_geocoded_by :latitude, :longitude
 
   enum order_type: { pos: 'pos', delivery: 'delivery', pickup: 'pickup' }
-  validates :order_type, presence: true
+validates :order_type, presence: true
 
   before_validation :calculate_delivery_fee, if: -> { self.pending? && self.delivery? }
   before_validation :set_redeemed_coin_value, if: -> { self.pending? }

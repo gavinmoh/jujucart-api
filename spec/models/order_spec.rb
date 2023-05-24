@@ -233,6 +233,34 @@ RSpec.describe Order, type: :model do
         expect(order.display_address).to eq('')
       end
     end
+
+    context '#coordinates_changed?' do
+      let!(:order) { create(:order) }
+
+      it 'should return true if coordinates changed' do
+        order.assign_attributes(latitude: 1, longitude: 1)
+        expect(order.send(:coordinates_changed?)).to eq(true)
+      end
+
+      it 'should return false if coordinates not changed' do
+        order.assign_attributes(unit_number: '123')
+        expect(order.send(:coordinates_changed?)).to eq(false)
+      end 
+    end
+
+    context '#coordinates_complete?' do
+      let!(:order) { create(:order) }
+
+      it 'should return true if coordinates complete' do
+        order.update(latitude: 1, longitude: 1)
+        expect(order.send(:coordinates_complete?)).to eq(true)
+      end
+
+      it 'should return false if coordinates not complete' do
+        order.update(latitude: nil, longitude: 1)
+        expect(order.send(:coordinates_complete?)).to eq(false)
+      end
+    end
   end
 
   describe 'aasm' do
@@ -312,6 +340,12 @@ RSpec.describe Order, type: :model do
         end
 
         it 'should return false if not enough stock' do
+          expect(order.send(:enough_stock?)).to eq(false)
+        end
+
+        it 'should return false if line item product deleted' do
+          create(:inventory_transaction, quantity: 10, inventory: create(:inventory, product: product, location: store.location))
+          line_item.product.destroy
           expect(order.send(:enough_stock?)).to eq(false)
         end
       end

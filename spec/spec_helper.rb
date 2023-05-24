@@ -14,7 +14,9 @@
 #
 # See https://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 require 'simplecov'
-SimpleCov.start 'rails'
+SimpleCov.start 'rails' do
+  add_filter '/lib/' # exclude lib files
+end
 require 'bearer_token_helper'
 require "pundit/rspec"
 require 'aasm/rspec'
