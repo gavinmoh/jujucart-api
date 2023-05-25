@@ -1,4 +1,6 @@
 class Api::V1::User::InventoriesController < Api::V1::User::ApplicationController
+
+  skip_before_action :authenticate_user!
   before_action :set_inventory, only: [:show, :update, :destroy]
   before_action :set_inventories, only: [:index]
   
@@ -8,7 +10,7 @@ class Api::V1::User::InventoriesController < Api::V1::User::ApplicationControlle
   end
 
   def show
-    render json: @inventory, adapter: :json, include: ['inventory_transactions', 'location.store']
+    render json: @inventory, adapter: :json, include: ['location.store', 'product']
   end
 
   def create
@@ -16,7 +18,7 @@ class Api::V1::User::InventoriesController < Api::V1::User::ApplicationControlle
     pundit_authorize(@inventory)
 
     if @inventory.save
-      render json: @inventory, adapter: :json, include: ['inventory_transactions', 'location.store']
+      render json: @inventory, adapter: :json, include: ['location.store', 'product']
     else
       render json: ErrorResponse.new(@inventory), status: :unprocessable_entity
     end
@@ -24,7 +26,7 @@ class Api::V1::User::InventoriesController < Api::V1::User::ApplicationControlle
 
   def update
     if @inventory.update(inventory_params)
-      render json: @inventory, adapter: :json, include: ['inventory_transactions', 'location.store']
+      render json: @inventory, adapter: :json, include: ['location.store', 'product']
     else
       render json: ErrorResponse.new(@inventory), status: :unprocessable_entity
     end
@@ -47,9 +49,9 @@ class Api::V1::User::InventoriesController < Api::V1::User::ApplicationControlle
     def set_inventories
       pundit_authorize(Inventory)      
       @inventories = pundit_scope(Inventory.includes(:product, {location: :store}))
-      @inventories = @inventories.joins(location: :store).where(store: {id: params[:store_id]}) if params[:store_id]
-      @inventories = @inventories.where(product_id: params[:product_id]) if params[:product_id]
-      @Inventories = @inventories.where(location_id: params[:location_id]) if params[:location_id]
+      @inventories = @inventories.joins(:location).where(location: {store_id: params[:store_id]}) if params[:store_id].present?
+      @inventories = @inventories.where(product_id: params[:product_id]) if params[:product_id].present?
+      @inventories = @inventories.where(location_id: params[:location_id]) if params[:location_id].present?
       @inventories = attribute_sortable(@inventories)
     end
 

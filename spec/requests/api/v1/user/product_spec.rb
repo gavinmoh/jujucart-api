@@ -17,6 +17,7 @@ RSpec.describe 'api/v1/user/products', type: :request do
       parameter name: :category_id, in: :query, type: :string, required: false, description: 'Filter by category_id'
       parameter name: :store_id, in: :query, type: :string, required: false, description: 'Filter by store_id'
       parameter name: :query, in: :query, type: :string,  required: false, description: "Search by product name"
+      parameter name: :sku, in: :query, type: :string, required: false, description: "Search by product sku"
       parameter name: :sort_by, in: :query, type: :string, required: false, description: 'Sort by which column/attribute'
       parameter name: :sort_order, in: :query, type: :string, required: false, description: "Default to descending, available sort_order: 'asc', 'desc'"
       

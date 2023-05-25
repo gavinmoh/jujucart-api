@@ -102,7 +102,8 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
       pundit_authorize(Product)      
       @products = pundit_scope(Product.includes(:category, :product_variants))
       @products = keyword_queryable(@products)
-      @products = @products.where(category_id: params[:category_id]) if params[:category_id]
+      @products = @products.where(sku: params[:sku]) if params[:sku].present?
+      @products = @products.where(category_id: params[:category_id]) if params[:category_id].present?
       @products = attribute_sortable(@products)
     end
 

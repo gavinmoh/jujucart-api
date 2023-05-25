@@ -4,11 +4,11 @@ class Api::V1::User::InventoryTransactionsController < Api::V1::User::Applicatio
   
   def index
     @pagy, @inventory_transactions = pagy(@inventory_transactions)
-    render json: @inventory_transactions, adapter: :json
+    render json: @inventory_transactions, adapter: :json, include: ['inventory.location.store', 'inventory.product']
   end
 
   def show
-    render json: @inventory_transaction, adapter: :json
+    render json: @inventory_transaction, adapter: :json, include: ['inventory.location.store', 'inventory.product', 'order']
   end
 
   def create
@@ -16,7 +16,7 @@ class Api::V1::User::InventoryTransactionsController < Api::V1::User::Applicatio
     pundit_authorize(@inventory_transaction)
 
     if @inventory_transaction.save
-      render json: @inventory_transaction, adapter: :json
+      render json: @inventory_transaction, adapter: :json, include: ['inventory.location.store', 'inventory.product', 'order']
     else
       render json: ErrorResponse.new(@inventory_transaction), status: :unprocessable_entity
     end
@@ -24,7 +24,7 @@ class Api::V1::User::InventoryTransactionsController < Api::V1::User::Applicatio
 
   def update
     if @inventory_transaction.update(inventory_transaction_params)
-      render json: @inventory_transaction, adapter: :json
+      render json: @inventory_transaction, adapter: :json, include: ['inventory.location.store', 'inventory.product', 'order']
     else
       render json: ErrorResponse.new(@inventory_transaction), status: :unprocessable_entity
     end
@@ -44,7 +44,7 @@ class Api::V1::User::InventoryTransactionsController < Api::V1::User::Applicatio
     pundit_authorize(@inventory_transaction)
 
     if @inventory_transaction.save
-      render json: @inventory_transaction, adapter: :json
+      render json: @inventory_transaction, adapter: :json, include: ['inventory.location.store', 'inventory.product', 'order']
     else
       render json: ErrorResponse.new(@inventory_transaction), status: :unprocessable_entity
     end
@@ -58,9 +58,10 @@ class Api::V1::User::InventoryTransactionsController < Api::V1::User::Applicatio
 
     def set_inventory_transactions
       pundit_authorize(InventoryTransaction)      
-      @inventory_transactions = pundit_scope(InventoryTransaction.includes(:inventory, :order))
+      @inventory_transactions = pundit_scope(InventoryTransaction.includes({inventory: [:product, {location: :store}]}))
       @inventory_transactions = @inventory_transactions.where(inventory_id: params[:inventory_id]) if params[:inventory_id].present?
-      @inventory_transactions = attribute_sortable(@inventory_transactions, { created_at: :desc })
+      @inventory_transactions = @inventory_transactions.joins(:inventory).where(inventory: {location_id: params[:location_id]}) if params[:location_id].present?
+      @inventory_transactions = attribute_sortable(@inventory_transactions)
     end
 
     def pundit_scope(scope)

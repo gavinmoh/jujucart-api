@@ -17,6 +17,7 @@ RSpec.describe 'api/v1/user/inventory_transactions', type: :request do
       parameter name: :sort_by, in: :query, type: :string, required: false, description: 'Sort by attribute'
       parameter name: :sort_order, in: :query, type: :string, required: false, description: 'Sort order'
       parameter name: :inventory_id, in: :query, type: :string, required: false, description: 'Inventory ID'
+      parameter name: :location_id, in: :query, type: :string, required: false, description: 'Location ID'
 
       response(200, 'successful') do
         before do
