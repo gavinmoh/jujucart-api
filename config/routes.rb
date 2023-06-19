@@ -67,6 +67,7 @@ Rails.application.routes.draw do
             put :revert
           end
         end
+        resources :pos_terminals
       end
     end
   end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_24_065204) do
+ActiveRecord::Schema[7.0].define(version: 2023_06_19_123515) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -279,6 +279,15 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_24_065204) do
     t.index ["order_id"], name: "index_payments_on_order_id"
   end
 
+  create_table "pos_terminals", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "store_id", null: false
+    t.string "terminal_id"
+    t.string "label"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["store_id"], name: "index_pos_terminals_on_store_id"
+  end
+
   create_table "products", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -445,6 +454,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_24_065204) do
   add_foreign_key "orders", "accounts", column: "customer_id"
   add_foreign_key "orders", "stores"
   add_foreign_key "payments", "orders"
+  add_foreign_key "pos_terminals", "stores"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "products"
   add_foreign_key "promotion_bundle_items", "products"
