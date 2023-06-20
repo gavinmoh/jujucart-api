@@ -7,7 +7,7 @@ FactoryBot.define do
 
     trait :revenue_monster do
       payment_type { 'terminal' }
-      payment_method { 'card' }
+      payment_method { 'CARD' }
       terminal_id { create(:pos_terminal).terminal_id }
       revenue_monster {
         {

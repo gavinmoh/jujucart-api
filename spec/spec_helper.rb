@@ -24,6 +24,7 @@ require 'aasm/rspec'
 # remember to uncomment webmock gem in Gemfile
 # disable all external connections
 require 'webmock/rspec'
+require 'support/fake_revenue_monster'
 WebMock.disable_net_connect!(allow_localhost: true)
 
 RSpec.configure do |config|
@@ -39,6 +40,7 @@ RSpec.configure do |config|
       body: { "Status": "200" }.to_json,
       headers: { "Content-Type": "application/json" }
     )
+    stub_request(:any, /revenuemonster.my/).to_rack(FakeRevenueMonster)
   end
 
   # helper for generating jwt token

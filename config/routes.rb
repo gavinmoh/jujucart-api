@@ -71,7 +71,13 @@ Rails.application.routes.draw do
             put :revert
           end
         end
-        resources :pos_terminals
+        resources :pos_terminals do
+          member do
+            post :initiate_payment
+            put :cancel_payment
+            put :card_payment_refund
+          end
+        end
       end
     end
   end

@@ -28,7 +28,7 @@ class Order < ApplicationRecord
   reverse_geocoded_by :latitude, :longitude
 
   enum order_type: { pos: 'pos', delivery: 'delivery', pickup: 'pickup' }
-validates :order_type, presence: true
+  validates :order_type, presence: true
 
   before_validation :calculate_delivery_fee, if: -> { self.pending? && self.delivery? }
   before_validation :set_redeemed_coin_value, if: -> { self.pending? }
@@ -152,12 +152,12 @@ validates :order_type, presence: true
     end
 
     def create_return_inventory_transactions
-      self.line_items.each do |line_item|
+      self.line_items.includes(:product).each do |line_item|
         next if line_item.product_deleted?
         inventory = line_item.product.inventories.find_or_create_by(location_id: self.store.location.id)
         inventory.inventory_transactions.create(
           order_id: self.id,
-          quantity: (line_item.quantity),
+          quantity: line_item.quantity,
           description: "Order ##{self.nanoid} on stock return"
         )
       end
