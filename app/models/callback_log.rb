@@ -1,0 +1,2 @@
+class CallbackLog < ApplicationRecord
+end
