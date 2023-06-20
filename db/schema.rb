@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_19_123515) do
+ActiveRecord::Schema[7.0].define(version: 2023_06_20_033953) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -42,6 +42,15 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_19_123515) do
     t.datetime "updated_at", null: false
     t.index ["store_id"], name: "index_assigned_stores_on_store_id"
     t.index ["user_id"], name: "index_assigned_stores_on_user_id"
+  end
+
+  create_table "callback_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.jsonb "request_headers"
+    t.text "request_body"
+    t.string "callback_from"
+    t.datetime "processed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "categories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -275,6 +284,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_19_123515) do
     t.jsonb "data", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "transaction_reference"
     t.index ["nanoid"], name: "index_payments_on_nanoid", unique: true
     t.index ["order_id"], name: "index_payments_on_order_id"
   end

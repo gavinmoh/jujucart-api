@@ -39,6 +39,30 @@ RSpec.describe Payment, type: :model do
           end.to(change { order.reload.status }.from('pending_payment').to('confirmed'))
         end
       end
+
+      context '#refund_order' do
+        it 'should refund order if payment is refunded' do
+          order = create(:order, status: 'completed', order_type: 'pos')
+          expect do
+            create(:payment, order: order, status: 'refunded')
+          end.to(change { order.reload.status }.from('completed').to('refunded'))
+        end
+
+        it 'should not refund order if payment is not refunded' do
+          order = create(:order, status: 'completed', order_type: 'pos')
+          expect do
+            create(:payment, order: order, status: 'failed')
+          end.not_to(change { order.reload.status })
+        end
+
+        it 'should refund order if payment is mark as refunded' do
+          order = create(:order, status: 'completed', order_type: 'pos')
+          payment = create(:payment, order: order, status: 'success')
+          expect do
+            payment.refund!
+          end.to(change { order.reload.status }.from('completed').to('refunded'))
+        end
+      end
     end
   end
 
@@ -49,6 +73,7 @@ RSpec.describe Payment, type: :model do
       it { should transition_from(:pending).to(:failed).on_event(:mark_as_failed) }
       it { should transition_from(:pending).to(:cancelled).on_event(:mark_as_cancelled) }
       it { should transition_from(:pending).to(:unknown).on_event(:mark_as_unknown) }
+      it { should transition_from(:success).to(:refunded).on_event(:refund) }
 
       context 'from unknown state' do
         subject { build(:payment, status: 'unknown', order: create(:order, status: 'pending_payment')) }
