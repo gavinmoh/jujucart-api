@@ -18,7 +18,7 @@ RSpec.describe Payment, type: :model do
     context 'after_commit' do
       context '#confirm_order' do
         it 'should confirm order if payment is success' do
-          order = create(:order, status: 'pending_payment')
+          order = create(:order, status: 'pending_payment', order_type: 'delivery')
           expect do
             create(:payment, order: order, status: 'success')
           end.to(change { order.reload.status }.from('pending_payment').to('confirmed'))
