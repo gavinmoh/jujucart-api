@@ -9,7 +9,7 @@ class Payment < ApplicationRecord
   
   store_accessor :data, :revenue_monster, :payment_method, :terminal_id
 
-  validates :transaction_reference, presence: true, if: -> { self.cash? }
+  # validates :transaction_reference, presence: true, if: -> { self.cash? }
   validates :transaction_reference, uniqueness: true, allow_blank: true
 
   after_commit :confirm_order, if: -> { saved_change_to_status? and self.success? }, on: [:create, :update]

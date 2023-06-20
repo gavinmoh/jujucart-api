@@ -8,10 +8,10 @@ RSpec.describe Payment, type: :model do
   describe 'validations' do
     it { should validate_presence_of(:payment_type) }
     it { should define_enum_for(:payment_type).with_values({ cash: 'cash', terminal: 'terminal' }).backed_by_column_of_type(:string) }
-    context 'transaction_reference' do
-      subject { build(:payment, payment_type: 'cash') }
-      it { should validate_presence_of(:transaction_reference) }
-    end
+    # context 'transaction_reference' do
+    #   subject { build(:payment, payment_type: 'cash') }
+    #   it { should validate_presence_of(:transaction_reference) }
+    # end
   end
 
   describe 'callbacks' do
@@ -32,7 +32,7 @@ RSpec.describe Payment, type: :model do
         end
 
         it 'should confirm order if payment is mark as success' do
-          order = create(:order, status: 'pending_payment')
+          order = create(:order, status: 'pending_payment', order_type: 'delivery')
           payment = create(:payment, order: order, status: 'pending')
           expect do
             payment.mark_as_success!
