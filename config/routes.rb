@@ -5,6 +5,10 @@ Rails.application.routes.draw do
   
   namespace :api, :defaults => { format: :json } do
     namespace :v1 do
+      namespace :revenue_monster do
+        post :callback, to: 'application#callback'
+      end
+
       namespace :user do
         devise_scope :user do
           post 'sign_in' => 'sessions#create'
