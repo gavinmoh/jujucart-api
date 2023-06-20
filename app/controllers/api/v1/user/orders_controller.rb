@@ -53,8 +53,13 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
   def complete
     begin
       ActiveRecord::Base.transaction do
-        if params[:order].present? and @order.pos?
-          @payment = @order.payments.create(complete_params.merge(payment_type: 'cash'))
+        if @order.pos?
+          if params[:order].present?
+            payment_params = complete_params.merge(payment_type: 'cash')
+          else
+            payment_params = { payment_type: 'cash' }
+          end
+          @payment = @order.payments.create(payment_params)
           @payment.mark_as_success!
         end
         @order.complete!

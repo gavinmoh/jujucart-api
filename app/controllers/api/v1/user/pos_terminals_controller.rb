@@ -57,6 +57,7 @@ class Api::V1::User::PosTerminalsController < Api::V1::User::ApplicationControll
     case response['status']
     when 'SUCCESS'
       @payment.mark_as_success!
+      @order.complete! if @order.pos?
     when 'FAILED'
       @payment.mark_as_failed!
     else

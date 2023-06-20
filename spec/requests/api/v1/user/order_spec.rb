@@ -188,7 +188,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       consumes 'application/json'
       security [ { bearerAuth: nil } ]    
 
-      parameter name: :data, in: :body, schema: {
+      parameter name: :data, in: :body, required: false, schema: {
         type: :object,
         properties: {
           order: {
@@ -203,7 +203,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       response(200, 'successful') do
         let(:user) { create(:user, role: 'cashier') }
         let(:id) { create(:order, order_type: 'pos', store_id: store.id, status: 'pending_payment', customer_id: nil).id }
-        let(:data) { { order: { transaction_reference: '12345' } } }
+        # let(:data) { { order: { transaction_reference: '12345' } } }
 
         before do
           create(:assigned_store, user_id: user.id, store_id: store.id)

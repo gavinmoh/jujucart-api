@@ -42,11 +42,7 @@ class Payment < ApplicationRecord
 
   private
     def confirm_order
-      if self.order.pos?
-        self.order.complete!
-      else
-        self.order.confirm!
-      end
+      self.order.confirm!
     end
 
     def refund_order
