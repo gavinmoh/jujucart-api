@@ -14,6 +14,9 @@ RSpec.describe Order, type: :model do
     it { should have_many(:products).through(:line_items) }
     it { should have_many(:payments).dependent(:nullify) }
     it { should have_many(:inventory_transactions).dependent(:nullify) }
+    it { should have_many(:order_attachments).dependent(:destroy) }
+
+    it { should accept_nested_attributes_for(:order_attachments).allow_destroy(true) }
   end
 
   describe 'validations' do
