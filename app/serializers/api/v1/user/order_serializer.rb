@@ -14,4 +14,5 @@ class Api::V1::User::OrderSerializer < ActiveModel::Serializer
   has_many :line_items
   has_one :success_payment
   has_many :payments
+  has_many :order_attachments
 end

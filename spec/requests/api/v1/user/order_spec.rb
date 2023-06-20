@@ -106,7 +106,19 @@ RSpec.describe 'api/v1/user/orders', type: :request do
               courier_name: { type: :string },
               tracking_number: { type: :string },
               customer_id: { type: :string, description: 'POS order only' },
-              redeemed_coin: { type: :integer, description: 'POS order only' }
+              redeemed_coin: { type: :integer, description: 'POS order only' },
+              order_attachments_attributes: {
+                type: :array,
+                items: {
+                  type: :object,
+                  properties: {
+                    id: { type: :string },
+                    _destroy: { type: :boolean },
+                    name: { type: :string },
+                    file: { type: :string }
+                  }
+                }
+              }
             }
           }
         }
@@ -114,7 +126,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
 
       response(200, 'successful', save_request_example: :data) do
         let(:id) { create(:order, store_id: store.id, order_type: 'delivery', status: 'confirmed').id }
-        let(:data) { { order: attributes_for(:order).slice(:courier_name, :tracking_number) } }
+        let(:data) { { order: attributes_for(:order).slice(:courier_name, :tracking_number).merge(order_attachments_attributes: [attributes_for(:order_attachment).slice(:name, :file)]) } }
 
         run_test!
       end

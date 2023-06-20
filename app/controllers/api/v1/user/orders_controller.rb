@@ -160,7 +160,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     end
 
     def included_associations
-      ['customer', 'created_by', 'store', 'line_items.product', 'order_coupon', 'success_payment', 'payments']
+      ['customer', 'created_by', 'store', 'line_items.product', 'order_coupon', 'success_payment', 'payments', 'order_attachments']
     end
 
     def pundit_scope(scope)
@@ -182,12 +182,13 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     def update_params
       params.require(:order).permit(
         :is_is_flagged, :is_flagged_reason, :unit_number, :street_address1, :street_address2, 
-        :postcode, :city, :state, :latitude, :longitude, :courier_name, :tracking_number
+        :postcode, :city, :state, :latitude, :longitude, :courier_name, :tracking_number,
+        order_attachments_attributes: [:id, :name, :file, :_destroy]
       )
     end
 
     def pos_order_params
-      params.require(:order).permit(:customer_id, :redeemed_coin)
+      params.require(:order).permit(:customer_id, :redeemed_coin, order_attachments_attributes: [:id, :name, :file, :_destroy])
     end
 
     def checkout_params
