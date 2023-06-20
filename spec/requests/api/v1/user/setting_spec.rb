@@ -32,7 +32,8 @@ RSpec.describe 'api/v1/user/settings', type: :request do
               web_host: { type: :string },
               coin_to_cash_rate: { type: :float },
               order_reward_amount: { type: :integer },
-              maximum_redeemed_coin_rate: { type: :float }
+              maximum_redeemed_coin_rate: { type: :float },
+              invoice_size: { type: :string }
             }
           }
         }

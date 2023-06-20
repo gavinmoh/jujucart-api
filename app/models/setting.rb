@@ -10,4 +10,5 @@ class Setting < RailsSettings::Base
   field :order_reward_amount, default: 0, type: :integer # percentage
   field :maximum_redeemed_coin_rate, default: 0.5, type: :float
   field :statement_address, type: :string, default: '6623 & 6627, Jalan Mengkuang, Kampung Paya, 12200 Butterworth, Pulau Pinang.'
+  field :invoice_size, type: :string, default: 'A4'
 end
