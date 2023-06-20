@@ -124,7 +124,7 @@ RSpec.describe 'api/v1/user/pos_terminals', type: :request do
     parameter name: 'id', in: :path, type: :string, description: 'id'
 
     post('initiate pos terminal payment') do
-      tags 'User Pos Terminal'
+      tags 'User Pos Terminals'
       security [ { bearerAuth: nil } ]
       consumes 'application/json'
       produces 'application/json'
@@ -161,7 +161,7 @@ RSpec.describe 'api/v1/user/pos_terminals', type: :request do
     parameter name: 'id', in: :path, type: :string, description: 'id'
 
     put('cancel pos terminal payment') do
-      tags 'User Pos Terminal'
+      tags 'User Pos Terminals'
       security [ { bearerAuth: nil } ]
       produces 'application/json'
 
@@ -177,7 +177,7 @@ RSpec.describe 'api/v1/user/pos_terminals', type: :request do
     parameter name: 'id', in: :path, type: :string, description: 'id'
 
     put('refund pos terminal card payment') do
-      tags 'User Pos Terminal'
+      tags 'User Pos Terminals'
       security [ { bearerAuth: nil } ]
       consumes 'application/json'
       produces 'application/json'

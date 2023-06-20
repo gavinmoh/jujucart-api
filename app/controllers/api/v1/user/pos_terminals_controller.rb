@@ -62,7 +62,7 @@ class Api::V1::User::PosTerminalsController < Api::V1::User::ApplicationControll
     else
       @payment.mark_as_unknown!
     end
-    render json: { payment: @payment }, status: :ok
+    render json: @payment, adapter: :json
   rescue RevenueMonster::RequestError, RevenueMonster::RequestTimeoutError, RevenueMonster::TerminalNotReachableError => e
     render json: { error: e.message }, status: :unprocessable_entity
   end
@@ -93,7 +93,7 @@ class Api::V1::User::PosTerminalsController < Api::V1::User::ApplicationControll
     if response['code'] == 'SUCCESS'
       @payment.update(revenue_monster: response)
       @payment.refund! if @payment.may_refund?
-      render json: { payment: @payment }, status: :ok
+      render json: @payment, adapter: :json
     else
       render json: response, status: :unprocessable_entity
     end
