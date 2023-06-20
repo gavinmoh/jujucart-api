@@ -34,6 +34,7 @@ Rails.application.routes.draw do
           put :remove_coupon, on: :member
           resources :line_items
         end
+        resources :order_attachments
         resources :inventories
         resources :inventory_transactions do
           put :adjustment, on: :collection
