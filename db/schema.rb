@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_20_044926) do
+ActiveRecord::Schema[7.0].define(version: 2023_06_21_093716) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -445,6 +445,22 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_20_044926) do
     t.index ["customer_id"], name: "index_wallets_on_customer_id"
   end
 
+  create_table "workspaces", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name"
+    t.jsonb "settings", default: {}, null: false
+    t.string "logo"
+    t.string "subdomain"
+    t.uuid "owner_id"
+    t.uuid "created_by_id"
+    t.string "nanoid"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_workspaces_on_created_by_id"
+    t.index ["nanoid"], name: "index_workspaces_on_nanoid", unique: true
+    t.index ["owner_id"], name: "index_workspaces_on_owner_id"
+    t.index ["subdomain"], name: "index_workspaces_on_subdomain", unique: true
+  end
+
   add_foreign_key "assigned_stores", "accounts", column: "user_id"
   add_foreign_key "assigned_stores", "stores"
   add_foreign_key "inventories", "locations"
@@ -483,4 +499,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_20_044926) do
   add_foreign_key "wallet_transactions", "orders"
   add_foreign_key "wallet_transactions", "wallets"
   add_foreign_key "wallets", "accounts", column: "customer_id"
+  add_foreign_key "workspaces", "accounts", column: "created_by_id"
+  add_foreign_key "workspaces", "accounts", column: "owner_id"
 end
