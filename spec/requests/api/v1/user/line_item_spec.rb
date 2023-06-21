@@ -42,7 +42,9 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
             type: :object,
             properties: {
               product_id: { type: :string },
-              quantity: { type: :integer }
+              quantity: { type: :integer },
+              name: { type: :string },
+              unit_price: { type: :string }
             }
           }
         }
@@ -50,12 +52,40 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
 
       response(200, 'successful') do
         let(:data) { { line_item: attributes_for(:line_item) } }
-      
         
         run_test!
       end
-    end
 
+      context 'manual order' do
+        let(:order) { create(:order, order_type: 'manual', status: 'pending') }
+        let(:product) { create(:product, price_cents: 1000, discount_price_cents: 0) }
+
+        it 'should allow setting name and unit price' do
+          expect {
+            post api_v1_user_order_line_items_url(order_id: order.id), headers: { Authorization: bearer_token_for(user) }, params: { line_item: { product_id: product.id, quantity: 1, name: 'test', unit_price: 1 } }
+          }.to change { LineItem.count }.by(1)
+          expect(response).to have_http_status(:ok)
+          response_body = JSON.parse(response.body)
+          expect(response_body['line_item']['name']).to eq('test')
+          expect(response_body['line_item']['unit_price']['cents']).to eq(100)
+        end
+      end
+
+      context 'pos order' do
+        let(:order) { create(:order, order_type: 'pos', status: 'pending') }
+        let(:product) { create(:product, price_cents: 1000, discount_price_cents: 0) }
+
+        it 'should not allow setting name and unit price' do
+          expect {
+            post api_v1_user_order_line_items_url(order_id: order.id), headers: { Authorization: bearer_token_for(user) }, params: { line_item: { product_id: product.id, quantity: 1, name: 'test', unit_price: 100 } }
+          }.to change { LineItem.count }.by(1)
+          expect(response).to have_http_status(:ok)
+          response_body = JSON.parse(response.body)
+          expect(response_body['line_item']['name']).to eq(product.name)
+          expect(response_body['line_item']['unit_price']['cents']).to eq(product.price.cents)
+        end
+      end
+    end
   end
 
   path '/api/v1/user/orders/{order_id}/line_items/{id}' do
@@ -85,7 +115,9 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
             type: :object,
             properties: {
               product_id: { type: :string },
-              quantity: { type: :integer }
+              quantity: { type: :integer },
+              name: { type: :string },
+              unit_price: { type: :string }
             }
           }
         }
@@ -156,6 +188,34 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
           expect(order.valid_order_coupon).to be_nil
           expect(order.discount.cents).to eq(0)
           expect(order.order_coupon.discount.cents).to eq(0)
+        end
+      end
+
+      context 'manual order' do
+        let(:order) { create(:order, order_type: 'manual', status: 'pending') }
+        let(:product) { create(:product, price_cents: 100, discount_price_cents: 0) }
+        let(:id) { create(:line_item, product_id: product.id, order_id: order.id).id }
+
+        it 'should allow overriding unit price and name' do
+          put api_v1_user_order_line_item_url(order_id: order.id, id: id), headers: { Authorization: bearer_token_for(user) }, params: { line_item: { name: 'test', unit_price: 10 } }
+          expect(response).to have_http_status(:ok)
+          response_body = JSON.parse(response.body)
+          expect(response_body['line_item']['name']).to eq('test')
+          expect(response_body['line_item']['unit_price']['cents']).to eq(1000)
+        end
+      end
+
+      context 'pos order' do
+        let(:order) { create(:order, order_type: 'pos', status: 'pending') }
+        let(:product) { create(:product, price_cents: 100, discount_price_cents: 0) }
+        let(:id) { create(:line_item, product_id: product.id, order_id: order.id).id }
+
+        it 'should not allow overriding unit price and name' do
+          put api_v1_user_order_line_item_url(order_id: order.id, id: id), headers: { Authorization: bearer_token_for(user) }, params: { line_item: { name: 'test', unit_price: 10 } }
+          expect(response).to have_http_status(:ok)
+          response_body = JSON.parse(response.body)
+          expect(response_body['line_item']['name']).to eq(product.name)
+          expect(response_body['line_item']['unit_price']['cents']).to eq(product.price_cents)
         end
       end
     end

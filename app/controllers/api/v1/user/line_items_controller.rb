@@ -12,7 +12,12 @@ class Api::V1::User::LineItemsController < Api::V1::User::ApplicationController
   end
 
   def create
-    @line_item = @order.line_items.find_or_initialize_by(product_id: line_item_params[:product_id])
+    if @order.manual?
+      @line_item = @order.line_items.find_or_initialize_by(product_id: line_item_params[:product_id], name: line_item_params[:name])
+      @line_item.assign_attributes(line_item_params.except(:quantity))
+    else
+      @line_item = @order.line_items.find_or_initialize_by(product_id: line_item_params[:product_id])
+    end
     pundit_authorize(@line_item) if @line_item
 
     if @line_item.quantity != 0
@@ -64,6 +69,10 @@ class Api::V1::User::LineItemsController < Api::V1::User::ApplicationController
     end
 
     def line_item_params
-      params.require(:line_item).permit(:product_id, :quantity)
+      if @order.manual?
+        params.require(:line_item).permit(:product_id, :quantity, :name, :unit_price)
+      else
+        params.require(:line_item).permit(:product_id, :quantity)
+      end
     end
 end

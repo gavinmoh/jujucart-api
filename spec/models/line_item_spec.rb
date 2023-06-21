@@ -48,7 +48,7 @@ RSpec.describe LineItem, type: :model do
         end
       end
 
-      context '#set_name' do
+      context '#set_name_from_product' do
         it 'should set name' do
           product = create(:product)
           line_item = build(:line_item, product: product)
@@ -64,6 +64,56 @@ RSpec.describe LineItem, type: :model do
           line_item.save
           expect(line_item.name).to be_nil
         end
+      end
+    end
+
+    context '#before_create' do
+      context '#set_unit_price_from_product' do
+        let(:order) { create(:order, order_type: 'manual') }
+
+        it 'should set unit_price' do
+          product = create(:product)
+          line_item = build(:line_item, order: order, product: product)
+          line_item.save
+          expect(line_item.unit_price).to eq(product.discount_price)
+        end
+
+        it 'should not set unit_price if product is nil' do
+          line_item = build(:line_item, order: order, product: nil)
+          line_item.save
+          expect(line_item.unit_price_cents).to eq(0)
+        end
+
+        it 'should allow overriding unit_price' do
+          product = create(:product, price_cents: 1000, discount_price_cents: 0)
+          line_item = build(:line_item, order: order, product: product, unit_price_cents: 100)
+          line_item.save
+          expect(line_item.unit_price_cents).to eq(100)
+        end
+      end
+
+      context '#set_name_from_product' do
+        let(:order) { create(:order, order_type: 'manual') }
+
+        it 'should set name' do
+          product = create(:product)
+          line_item = build(:line_item, order: order, product: product)
+          line_item.save
+          expect(line_item.name).to eq(product.name)
+        end
+
+        it 'should not set name if product is nil' do
+          line_item = build(:line_item, order: order, product: nil)
+          line_item.save
+          expect(line_item.name).to be_nil
+        end
+
+        it 'should allow overriding name' do
+          product = create(:product)
+          line_item = build(:line_item, order: order, product: product, name: 'test')
+          line_item.save
+          expect(line_item.name).to eq('test')
+        end        
       end
     end
 

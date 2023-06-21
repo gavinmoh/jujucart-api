@@ -9,9 +9,16 @@ class LineItem < ApplicationRecord
 
   validates :quantity, numericality: { greater_than_or_equal_to: 1, only_integer: true }
 
-  before_save :assign_unit_price, if: -> { self.order.pending? }
+  # manual order to be able to add line items without product
+  before_create :set_unit_price_from_product, if: -> { self.order.manual? and self.product_id.present? and self.unit_price_cents == 0 }
+  before_create :set_name_from_product, if: -> { self.order.manual? and self.product_id.present? and self.name.blank? }
+  
+  # for non-manual orders
+  before_save :assign_unit_price, if: -> { self.order.pending? and not self.order.manual? }
+  before_save :set_name_from_product, if: -> { self.order.pending? and not self.order.manual? }
+
+  # common callbacks
   before_save :set_total_price, if: -> { self.order.pending? }
-  before_save :set_name, if: -> { self.order.pending? }
   after_commit :update_order_price, if: -> { self.order.pending? }
 
   scope :joins_with_pending_orders, -> { joins(:order).where(orders: { status: 'pending' }) }
@@ -24,14 +31,22 @@ class LineItem < ApplicationRecord
         self.unit_price_cents = 0
         return
       end
-      self.unit_price = (product.discount_price_cents > 0) ? product.discount_price : product.price
+      self.unit_price = product_unit_price
+    end
+
+    def set_unit_price_from_product
+      self.unit_price = product_unit_price
+    end
+
+    def product_unit_price
+      (product.discount_price_cents > 0) ? product.discount_price : product.price
     end
 
     def set_total_price
       self.total_price = self.unit_price * self.quantity
     end
 
-    def set_name
+    def set_name_from_product
       return if self.product_id.nil?
       case self.product.type
       when 'Product'

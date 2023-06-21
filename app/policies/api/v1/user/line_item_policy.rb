@@ -1,14 +1,18 @@
 class Api::V1::User::LineItemPolicy < ApplicationPolicy
   def create?
-    @record.order.pos? and @record.order.pending?    
+    return true if @record.order.manual?
+    return true if @record.order.pos? and @record.order.pending?
+    false
   end
 
   def update?
-    @record.order.pos? and @record.order.pending?    
+    return true if @record.order.manual?
+    return true if @record.order.pos? and @record.order.pending?
+    false
   end
 
   def destroy?
-    @record.order.pos? and @record.order.pending?    
+    (@record.order.pos? or @record.order.manual?) and @record.order.pending?
   end
 
   class Scope < Scope
