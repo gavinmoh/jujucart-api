@@ -11,7 +11,7 @@ FactoryBot.define do
     state { Faker::Address.state }
     latitude { Faker::Address.latitude }
     longitude { Faker::Address.longitude }
-    order_type { Order.order_types.keys.sample }
+    order_type { 'delivery' }
     courier_name { ['POS Laju', 'DHL', 'J&T Express'].sample }
     tracking_number { Faker::Number.number(digits: 10) }
 

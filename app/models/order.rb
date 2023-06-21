@@ -30,7 +30,7 @@ class Order < ApplicationRecord
 
   reverse_geocoded_by :latitude, :longitude
 
-  enum order_type: { pos: 'pos', delivery: 'delivery', pickup: 'pickup' }
+  enum order_type: { pos: 'pos', delivery: 'delivery', pickup: 'pickup', manual: 'manual' }
   validates :order_type, presence: true
 
   before_validation :calculate_delivery_fee, if: -> { self.pending? && self.delivery? }
@@ -56,6 +56,7 @@ class Order < ApplicationRecord
     end
 
     event :confirm do
+      transitions from: :pending, to: :confirmed, guard: [:is_manual_order?]
       transitions from: :pending_payment, to: :confirmed, guard: [:has_success_payment?]
     end
 
@@ -82,6 +83,9 @@ class Order < ApplicationRecord
     event :complete do
       transitions from: [:pending_payment, :confirmed], to: :completed,
                   guard: [:is_pos_order?, :has_success_payment?],
+                  after: [:create_reward_transaction]
+      transitions from: [:confirmed], to: :completed,
+                  guard: [:is_manual_order?],
                   after: [:create_reward_transaction]
       transitions from: [:packed, :shipped], to: :completed,
                   after: [:create_reward_transaction]
@@ -144,7 +148,8 @@ class Order < ApplicationRecord
     end
 
     def create_inventory_transactions
-      self.line_items.each do |line_item|
+      self.line_items.includes(:product).each do |line_item|
+        next if line_item.product_id.nil?
         inventory = line_item.product.inventories.find_or_create_by(location_id: self.store.location.id)
         inventory.inventory_transactions.create(
           order_id: self.id,
@@ -156,7 +161,7 @@ class Order < ApplicationRecord
 
     def create_return_inventory_transactions
       self.line_items.includes(:product).each do |line_item|
-        next if line_item.product_deleted?
+        next if line_item.product_id.nil?
         inventory = line_item.product.inventories.find_or_create_by(location_id: self.store.location.id)
         inventory.inventory_transactions.create(
           order_id: self.id,
@@ -219,6 +224,15 @@ class Order < ApplicationRecord
     def is_pos_order?
       unless self.pos?
         errors.add(:order_type, 'is not POS')
+        return false
+      else
+        return true
+      end
+    end
+
+    def is_manual_order?
+      unless self.manual?
+        errors.add(:order_type, 'is not manual')
         return false
       else
         return true

@@ -21,7 +21,7 @@ RSpec.describe Order, type: :model do
 
   describe 'validations' do
     it { should validate_presence_of(:order_type) }
-    it { should define_enum_for(:order_type).with_values(pos: 'pos', delivery: 'delivery', pickup: 'pickup').backed_by_column_of_type(:string) }
+    it { should define_enum_for(:order_type).with_values(pos: 'pos', delivery: 'delivery', pickup: 'pickup', manual: 'manual').backed_by_column_of_type(:string) }
   end
 
   describe 'callbacks' do
@@ -280,6 +280,18 @@ RSpec.describe Order, type: :model do
         it { should transition_from(:pending).to(:pending_payment).on_event(:pos_checkout) }
       end
 
+      context 'manual order' do
+        subject { create(:order, :with_line_items, order_type: 'manual') }
+        it { should transition_from(:pending).to(:confirmed).on_event(:confirm) }
+        
+        context 'confirmed order' do
+          subject { create(:order, :with_line_items, order_type: 'manual', status: 'confirmed') }
+          it { should transition_from(:confirmed).to(:packed).on_event(:pack) }
+          it { should transition_from(:confirmed).to(:cancelled).on_event(:cancel) }
+          it { should transition_from(:confirmed).to(:completed).on_event(:complete) }
+        end
+      end
+
       context 'from pending_payment' do
         subject { create(:order, :with_line_items, status: 'pending_payment') }
         let!(:payment) { create(:payment, order: subject, status: 'success') }
@@ -386,6 +398,18 @@ RSpec.describe Order, type: :model do
         it 'should return false if order_type is not pos' do
           order = create(:order, :with_line_items, order_type: 'delivery')
           expect(order.send(:is_pos_order?)).to eq(false)
+        end
+      end
+
+      context '#is_manual_order?' do
+        it 'should return true if order_type is manual' do
+          order = create(:order, :with_line_items, order_type: 'manual')
+          expect(order.send(:is_manual_order?)).to eq(true)
+        end
+
+        it 'should return false if order_type is not manual' do
+          order = create(:order, :with_line_items, order_type: 'delivery')
+          expect(order.send(:is_manual_order?)).to eq(false)
         end
       end
 
