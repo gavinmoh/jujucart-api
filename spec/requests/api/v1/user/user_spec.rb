@@ -14,6 +14,7 @@ RSpec.describe 'api/v1/user/users', type: :request do
 
       parameter name: :page, in: :query, type: :integer, required: false, description: 'Page number'
       parameter name: :items, in: :query, type: :integer, required: false, description: 'Number of items per page'
+      parameter name: :role, in: :query, type: :string, required: false, description: 'Filter by role'
 
       response(200, 'successful') do
         before do

@@ -47,6 +47,7 @@ class Api::V1::User::UsersController < Api::V1::User::ApplicationController
     def set_users
       pundit_authorize(User)      
       @users = pundit_scope(User.includes(:assigned_stores, :stores, :latest_session))
+      @users = @users.where(role: params[:role]) if params[:role].present?
     end
 
     def pundit_scope(scope)
