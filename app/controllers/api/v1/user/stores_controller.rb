@@ -8,7 +8,7 @@ class Api::V1::User::StoresController < Api::V1::User::ApplicationController
   end
 
   def show
-    render json: @store, adapter: :json
+    render json: @store, adapter: :json, include: ['*', 'assigned_stores.user']
   end
 
   def create
@@ -16,7 +16,7 @@ class Api::V1::User::StoresController < Api::V1::User::ApplicationController
     pundit_authorize(@store)
 
     if @store.save
-      render json: @store, adapter: :json
+      render json: @store, adapter: :json, include: ['*', 'assigned_stores.user']
     else
       render json: ErrorResponse.new(@store), status: :unprocessable_entity
     end
@@ -24,7 +24,7 @@ class Api::V1::User::StoresController < Api::V1::User::ApplicationController
 
   def update
     if @store.update(store_params)
-      render json: @store, adapter: :json
+      render json: @store, adapter: :json, include: ['*', 'assigned_stores.user']
     else
       render json: ErrorResponse.new(@store), status: :unprocessable_entity
     end
@@ -61,7 +61,8 @@ class Api::V1::User::StoresController < Api::V1::User::ApplicationController
     def store_params
       params.require(:store).permit(
         :name, :description, :logo, :remove_logo, :validate_inventory,
-        assigned_stores_attributes: [:id, :user_id, :_destroy]
+        assigned_stores_attributes: [:id, :user_id, :_destroy],
+        pos_terminals_attributes: [:id, :terminal_id, :label, :_destroy]
       )
     end
 end

@@ -57,6 +57,16 @@ RSpec.describe 'api/v1/user/stores', type: :request do
                     user_id: { type: :string }
                   }
                 }
+              },
+              pos_terminals_attributes: {
+                type: :array,
+                items: {
+                  type: :object,
+                  properties: {
+                    terminal_id: { type: :string },
+                    label: { type: :string }
+                  }
+                }
               }
             }
           }
@@ -110,6 +120,18 @@ RSpec.describe 'api/v1/user/stores', type: :request do
                     id: { type: :string },
                     _destroy: { type: :boolean },
                     user_id: { type: :string }
+                  }
+                }
+              },
+              pos_terminals_attributes: {
+                type: :array,
+                items: {
+                  type: :object,
+                  properties: {
+                    id: { type: :string },
+                    _destroy: { type: :boolean },
+                    terminal_id: { type: :string },
+                    label: { type: :string }
                   }
                 }
               }
