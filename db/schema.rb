@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_21_093716) do
+ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -411,6 +411,17 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_093716) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "user_workspaces", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "workspace_id", null: false
+    t.boolean "admin", default: false
+    t.string "role"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_user_workspaces_on_user_id"
+    t.index ["workspace_id"], name: "index_user_workspaces_on_workspace_id"
+  end
+
   create_table "versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "item_type", null: false
     t.string "item_subtype"
@@ -496,6 +507,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_093716) do
   add_foreign_key "promotion_bundle_items", "products"
   add_foreign_key "promotion_bundle_items", "promotion_bundles"
   add_foreign_key "sessions", "accounts"
+  add_foreign_key "user_workspaces", "accounts", column: "user_id"
+  add_foreign_key "user_workspaces", "workspaces"
   add_foreign_key "wallet_transactions", "orders"
   add_foreign_key "wallet_transactions", "wallets"
   add_foreign_key "wallets", "accounts", column: "customer_id"

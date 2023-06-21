@@ -5,6 +5,8 @@ RSpec.describe User, type: :model do
     it { should have_many(:assigned_stores) }
     it { should have_many(:stores).through(:assigned_stores) }
     it { should have_many(:created_orders).dependent(:restrict_with_error) }
+    it { should have_many(:user_workspaces).dependent(:destroy) }
+    it { should have_many(:workspaces).through(:user_workspaces) }
 
     it { should accept_nested_attributes_for(:assigned_stores).allow_destroy(true) }
   end

@@ -5,6 +5,8 @@ class User < Account
   has_many :assigned_stores, dependent: :destroy
   has_many :stores, through: :assigned_stores
   has_many :created_orders, foreign_key: 'created_by_id', class_name: 'Order', dependent: :restrict_with_error
+  has_many :user_workspaces, dependent: :destroy
+  has_many :workspaces, through: :user_workspaces
 
   accepts_nested_attributes_for :assigned_stores, allow_destroy: true
   
@@ -14,6 +16,10 @@ class User < Account
   validates :role, presence: true  
   
   scope :query, -> (keyword) { where('name ILIKE :keyword OR phone_number ILIKE :keyword OR email ILIKE :keyword', {keyword: "%#{keyword}%"}) }
+
+  def current_workspace
+    workspaces.first
+  end
 
   def reset_password_link(token)
     "#{Setting.web_host}/user/reset_password?token=#{token}"

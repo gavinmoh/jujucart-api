@@ -4,6 +4,8 @@ RSpec.describe Workspace, type: :model do
   describe 'associations' do
     it { should belong_to(:owner).optional.class_name('Account') }
     it { should belong_to(:created_by).optional.class_name('Account') }
+    it { should have_many(:user_workspaces).dependent(:destroy) }
+    it { should have_many(:users).through(:user_workspaces) }
   end
 
   describe 'validations' do

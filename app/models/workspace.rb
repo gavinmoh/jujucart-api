@@ -2,6 +2,9 @@ class Workspace < ApplicationRecord
   belongs_to :owner, optional: true, class_name: 'Account'
   belongs_to :created_by, optional: true, class_name: 'Account'
 
+  has_many :user_workspaces, dependent: :destroy
+  has_many :users, through: :user_workspaces
+
   mount_base64_uploader :logo, PhotoUploader
 
   store_accessor :settings, [:web_host, :coin_to_cash_rate, :order_reward_amount, :maximum_redeemed_coin_rate, :statement_address, :invoice_size]
