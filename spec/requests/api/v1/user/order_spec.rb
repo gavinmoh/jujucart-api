@@ -14,21 +14,22 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       security [ { bearerAuth: nil } ]
       produces 'application/json'
 
-      parameter name: :page,           in: :query, type: :integer, required: false, description: 'Page number'
-      parameter name: :items,          in: :query, type: :integer, required: false, description: 'Number of items per page'
-      parameter name: :query,          in: :query, type: :string,  required: false, description: "Search by order_number"
-      parameter name: :status,         in: :query, type: :string,  required: false, description: "Filter by status, available status: #{Order.aasm.states.map(&:name).map(&:to_s).join(', ')}"
-      parameter name: :customer_id,    in: :query, type: :string,  required: false, description: 'Filter by customer_id'
-      parameter name: :order_type,     in: :query, type: :string, required: false, description: "Filter by order_type, available order_type: #{Order.order_types.keys.join(', ')}"
-      parameter name: :scope,          in: :query, type: :string,  required: false, description: "Filter by scope, available scope: ['delivery', 'pickup']"
-      parameter name: :is_flagged,     in: :query, type: :boolean,  required: false, description: "Filter flagged order"
-      parameter name: :filter_date_by, in: :query, type: :string,  required: false, description: 'Filter by which date column, e.g. created_at, updated_at'
-      parameter name: :from_date,      in: :query, type: :string,  required: false, description: 'Filter by date column specified by the params filter_date_by'
-      parameter name: :to_date,        in: :query, type: :string,  required: false, description: 'Filter by date column specified by the params filter_date_by'
-      parameter name: :store_id,       in: :query, type: :string, required: false, description: 'Filter by store_id'
-      parameter name: :sort_by,        in: :query, type: :string, required: false, description: 'Sort by which column/attribute'
-      parameter name: :sort_order,     in: :query, type: :string, required: false, description: "Default to descending, available sort_order: 'asc', 'desc'"
-      
+      parameter name: :page,            in: :query, type: :integer, required: false, description: 'Page number'
+      parameter name: :items,           in: :query, type: :integer, required: false, description: 'Number of items per page'
+      parameter name: :query,           in: :query, type: :string,  required: false, description: "Search by order_number"
+      parameter name: :status,          in: :query, type: :string,  required: false, description: "Filter by status, available status: #{Order.aasm.states.map(&:name).map(&:to_s).join(', ')}"
+      parameter name: :customer_id,     in: :query, type: :string,  required: false, description: 'Filter by customer_id'
+      parameter name: :order_type,      in: :query, type: :string, required: false, description: "Filter by order_type, available order_type: #{Order.order_types.keys.join(', ')}"
+      parameter name: :scope,           in: :query, type: :string,  required: false, description: "Filter by scope, available scope: ['delivery', 'pickup']"
+      parameter name: :is_flagged,      in: :query, type: :boolean,  required: false, description: "Filter flagged order"
+      parameter name: :filter_date_by,  in: :query, type: :string,  required: false, description: 'Filter by which date column, e.g. created_at, updated_at'
+      parameter name: :from_date,       in: :query, type: :string,  required: false, description: 'Filter by date column specified by the params filter_date_by'
+      parameter name: :to_date,         in: :query, type: :string,  required: false, description: 'Filter by date column specified by the params filter_date_by'
+      parameter name: :store_id,        in: :query, type: :string, required: false, description: 'Filter by store_id'
+      parameter name: :sort_by,         in: :query, type: :string, required: false, description: 'Sort by which column/attribute'
+      parameter name: :sort_order,      in: :query, type: :string, required: false, description: "Default to descending, available sort_order: 'asc', 'desc'"
+      parameter name: :skip_pagination, in: :query, type: :boolean, required: false, description: 'Skip pagination'
+      parameter name: 'ids[]',          in: :query, type: :array,  required: false, description: 'Filter by ids'      
 
       response(200, 'successful') do
         

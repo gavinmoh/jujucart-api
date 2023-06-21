@@ -3,7 +3,9 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
   before_action :set_orders, only: [:index]
   
   def index
-    @pagy, @orders = pagy(@orders.order(created_at: :desc))
+    unless params[:skip_pagination].present? and ActiveModel::Type::Boolean.new.cast(params[:skip_pagination])
+      @pagy, @orders = pagy(@orders)
+    end
     render json: @orders, adapter: :json, include: index_included_associations
   end
 
@@ -156,6 +158,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
       @orders = @orders.where(customer_id: params[:customer_id]) if params[:customer_id].present?
       @orders = @orders.where(is_flagged: ActiveModel::Type::Boolean.new.cast(params[:is_flagged])) if params[:is_flagged].present?
       @orders = @orders.where(order_type: params[:order_type]) if params[:order_type].present?
+      @orders = @orders.where(id: params[:ids]) if params[:ids].present?
       @orders = attribute_date_scopable(@orders)
       @orders = attribute_sortable(@orders)
     end
