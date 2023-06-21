@@ -6,6 +6,10 @@ RSpec.describe 'api/v1/user/stores', type: :request do
   let(:Authorization) { bearer_token_for(user) }
   let(:id) { create(:assigned_store).store_id }
 
+  before do
+    create(:pos_terminal, store_id: id)
+  end
+
   path '/api/v1/user/stores' do
     get('list stores') do
       tags 'User Stores'

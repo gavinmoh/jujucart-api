@@ -3,4 +3,5 @@ class Api::V1::User::StoreSerializer < ActiveModel::Serializer
   attributes :created_at, :updated_at
 
   has_many :users, serializer: Api::V1::User::UserInfoSerializer
+  has_many :pos_terminals
 end

@@ -8,6 +8,7 @@ RSpec.describe Store, type: :model do
     it { should have_many(:products).through(:inventories) }
     it { should have_many(:assigned_stores).dependent(:destroy) }
     it { should have_many(:users).through(:assigned_stores) }
+    it { should have_many(:pos_terminals).dependent(:destroy) }
 
     it { should accept_nested_attributes_for(:assigned_stores).allow_destroy(true) }
   end

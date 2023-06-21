@@ -4,7 +4,7 @@ class Api::V1::User::StoresController < Api::V1::User::ApplicationController
   
   def index
     @pagy, @stores = pagy(@stores)
-    render json: @stores, adapter: :json
+    render json: @stores, adapter: :json, include: []
   end
 
   def show
@@ -61,7 +61,7 @@ class Api::V1::User::StoresController < Api::V1::User::ApplicationController
     def store_params
       params.require(:store).permit(
         :name, :description, :logo, :remove_logo, :validate_inventory,
-        assigned_stores_attributes: [:id, :admin_id, :_destroy]
+        assigned_stores_attributes: [:id, :user_id, :_destroy]
       )
     end
 end
