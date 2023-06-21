@@ -11,6 +11,7 @@ RSpec.describe Store, type: :model do
     it { should have_many(:pos_terminals).dependent(:destroy) }
 
     it { should accept_nested_attributes_for(:assigned_stores).allow_destroy(true) }
+    it { should accept_nested_attributes_for(:pos_terminals).allow_destroy(true) }
   end
 
   describe 'validations' do

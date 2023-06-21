@@ -10,6 +10,7 @@ class Store < ApplicationRecord
   after_commit :create_location, on: :create
 
   accepts_nested_attributes_for :assigned_stores, allow_destroy: true
+  accepts_nested_attributes_for :pos_terminals, allow_destroy: true
 
   validates :name, presence: true
 
