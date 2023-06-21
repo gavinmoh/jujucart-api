@@ -4,7 +4,11 @@ class Api::V1::User::ApplicationController < ApplicationController
 
   # define pundit user here if the default user object is not current_user
   def pundit_user
-    current_user
+    PunditContext.new(current_user, current_workspace)
+  end
+
+  def current_workspace
+    current_user.current_workspace
   end
 
   def user_for_paper_trail
