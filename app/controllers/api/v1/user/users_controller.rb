@@ -12,10 +12,11 @@ class Api::V1::User::UsersController < Api::V1::User::ApplicationController
   end
 
   def create
-    @user = pundit_scope(User).new(user_params)
+    @user = User.new(user_params)
     pundit_authorize(@user)
 
     if @user.save
+      UserWorkspace.find_or_create_by(user: @user, workspace: current_workspace)
       render json: @user, adapter: :json
     else
       render json: ErrorResponse.new(@user), status: :unprocessable_entity

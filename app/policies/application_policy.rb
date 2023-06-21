@@ -1,5 +1,5 @@
 class ApplicationPolicy
-  attr_reader :user, :record
+  attr_reader :user, :record, :workspace
 
   def initialize(context, record)
     if context.class == PunditContext
@@ -32,7 +32,7 @@ class ApplicationPolicy
   end
 
   class Scope
-    attr_reader :user, :scope
+    attr_reader :user, :scope, :workspace
 
     def initialize(context, scope)
       if context.class == PunditContext

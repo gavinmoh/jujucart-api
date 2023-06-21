@@ -16,5 +16,9 @@ FactoryBot.define do
     trait :cashier do
       role { 'cashier' }
     end
+
+    after(:create) do |user|
+      create(:user_workspace, user: user)
+    end
   end
 end
