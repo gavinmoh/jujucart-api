@@ -32,7 +32,7 @@ class Customer < Account
 
   private
     def create_wallet
-      Wallet.find_or_create_by(customer_id: self.id)
+      Wallet.find_or_create_by(customer_id: self.id, workspace_id: self.workspace_id)
     end
 
     def strip_phone_number

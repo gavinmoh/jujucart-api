@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :wallet do
-    customer_id { create(:customer).id }
+    workspace
+    customer_id { create(:customer, workspace: workspace).id }
   end
 end
