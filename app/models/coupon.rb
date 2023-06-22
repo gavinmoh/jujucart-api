@@ -1,8 +1,9 @@
 class Coupon < ApplicationRecord
+  belongs_to :workspace
   has_many :order_coupons, dependent: :nullify
   has_many :orders, through: :order_coupons
 
-  validates :code, presence: true, uniqueness: { case_sensitive: false }
+  validates :code, presence: true, uniqueness: { case_sensitive: false, scope: :workspace_id }
   validates :name, presence: true
   validates :redemption_limit, numericality: { greater_than_or_equal_to: 0 }, allow_nil: false
   validates :start_at, presence: true

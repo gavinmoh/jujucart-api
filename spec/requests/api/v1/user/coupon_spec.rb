@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/coupons', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:coupon).id }
+  let(:id) { create(:coupon, workspace: user.current_workspace).id }
 
   path '/api/v1/user/coupons' do
     get('list coupons') do
@@ -20,7 +20,7 @@ RSpec.describe 'api/v1/user/coupons', type: :request do
 
       response(200, 'successful') do
         before do
-          create_list(:coupon, 3)
+          create_list(:coupon, 3, workspace: user.current_workspace)
         end
 
         run_test!

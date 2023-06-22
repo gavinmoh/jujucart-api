@@ -12,7 +12,8 @@ class Api::V1::User::CouponsController < Api::V1::User::ApplicationController
   end
 
   def create
-    @coupon = pundit_scope(Coupon).new(coupon_params)
+    @coupon = Coupon.new(coupon_params)
+    @coupon.workspace = current_workspace
     pundit_authorize(@coupon)
 
     if @coupon.save
