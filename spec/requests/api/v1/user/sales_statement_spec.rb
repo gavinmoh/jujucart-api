@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/sales_statements', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:sales_statement).id }
+  let(:id) { create(:sales_statement, workspace: user.current_workspace).id }
 
   path '/api/v1/user/sales_statements' do
     get('list sales statements') do
@@ -22,7 +22,7 @@ RSpec.describe 'api/v1/user/sales_statements', type: :request do
         before do
           3.times do |n|
             month = (n + 1).months.ago
-            create(:sales_statement, from_date: month.beginning_of_month, to_date: month.end_of_month)
+            create(:sales_statement, from_date: month.beginning_of_month, to_date: month.end_of_month, workspace: user.current_workspace)
           end
         end
 
@@ -42,9 +42,9 @@ RSpec.describe 'api/v1/user/sales_statements', type: :request do
       security [ { bearerAuth: nil } ]
 
       before do
-        coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10)
+        coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, workspace: user.current_workspace)
         3.times do
-          order = create(:order, :with_line_items, order_type: 'pos')
+          order = create(:order, :with_line_items, order_type: 'pos', workspace: user.current_workspace)
           create(:order_coupon, order: order, coupon: coupon)
           order.checkout!
           create(:payment, status: 'success', order: order, created_at: Faker::Time.between(from: Time.current.last_month.beginning_of_month, to: Time.current.last_month.end_of_month))

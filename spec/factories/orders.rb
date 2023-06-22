@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :order do
     workspace
-    customer_id { create(:customer).id }
-    store_id { create(:store).id }
+    customer_id { create(:customer, workspace: workspace).id }
+    store_id { create(:store, workspace: workspace).id }
     unit_number { Faker::Address.building_number }
     subtotal { Faker::Number.within(range: 1..1000).to_s }
     street_address1 { Faker::Address.street_address }
@@ -18,7 +18,9 @@ FactoryBot.define do
 
     trait :with_line_items do
       after(:create) do |order|
-        create_list(:line_item, 3, order: order)
+        3.times do
+          create(:line_item, order: order, product: create(:product, workspace: order.workspace))
+        end
       end
     end
   end

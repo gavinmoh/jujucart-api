@@ -1,6 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe SalesStatement, type: :model do
+  describe 'associations' do
+    it { should belong_to(:workspace) }
+  end
+  
   describe 'validations' do
     it { should validate_presence_of(:from_date) }
     it { should validate_presence_of(:to_date) }

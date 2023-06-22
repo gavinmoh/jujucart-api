@@ -1,4 +1,6 @@
 class SalesStatement < ApplicationRecord
+  belongs_to :workspace
+
   validates :from_date, presence: true
   validates :to_date, presence: true
 
@@ -18,7 +20,7 @@ class SalesStatement < ApplicationRecord
     from_time = self.from_date.beginning_of_day
     to_time = self.to_date.end_of_day
 
-    Order.completed.joins(:success_payment).where(success_payment: { created_at: from_time..to_time }).order("success_payment.created_at DESC")
+    Order.completed.joins(:success_payment).where(workspace_id: self.workspace_id, success_payment: { created_at: from_time..to_time }).order("success_payment.created_at DESC")
   end
 
   private
