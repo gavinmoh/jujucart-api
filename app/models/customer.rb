@@ -1,12 +1,19 @@
 class Customer < Account
-  devise :validatable
-
+  
+  belongs_to :workspace
+  
   has_one :wallet, dependent: :nullify
   has_many :wallet_transactions, through: :wallet
-
+  
   validates :name, presence: true
-  validates :phone_number, uniqueness: true, presence: true
-  validates :email, uniqueness: true, allow_blank: true
+  validates :phone_number, uniqueness: { scope: :workspace_id }, presence: true
+  
+  # this block below is to replace devise :validatable
+  # which doesn't work for uninqueness validation with scope
+  validates :email, uniqueness: { scope: :workspace_id, case_sensitive: false }, allow_blank: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates_presence_of     :password, if: :password_required?
+  validates_confirmation_of :password, if: :password_required?
+  validates_length_of       :password, within: Devise.password_length, allow_blank: true
 
   after_commit :create_wallet, on: :create
 
@@ -25,7 +32,7 @@ class Customer < Account
 
   private
     def create_wallet
-      Wallet.find_or_create_by(customer_id: self.id)
+      Wallet.find_or_create_by(customer_id: self.id, workspace_id: self.workspace_id)
     end
 
     def strip_phone_number

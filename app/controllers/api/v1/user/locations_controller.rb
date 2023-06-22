@@ -12,7 +12,8 @@ class Api::V1::User::LocationsController < Api::V1::User::ApplicationController
   end
 
   def create
-    @location = pundit_scope(Location).new(location_params)
+    @location = Location.new(location_params)
+    @location.workspace = current_workspace
     pundit_authorize(@location)
 
     if @location.save

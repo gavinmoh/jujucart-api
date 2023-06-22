@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Payment, type: :model do
   describe 'associations' do
+    it { should belong_to(:workspace) }
     it { should belong_to(:order).optional }
   end
 
@@ -15,6 +16,24 @@ RSpec.describe Payment, type: :model do
   end
 
   describe 'callbacks' do
+    context 'before_validaton' do
+      describe '#set_workspace_id' do
+        it 'should set workspace_id from order' do
+          workspace = create(:workspace)
+          order = create(:order, workspace: workspace)
+          payment = build(:payment, order: order)
+          payment.valid?
+          expect(payment.workspace_id).to eq(workspace.id)
+        end
+
+        it 'should not set workspace_id if order is not present' do
+          payment = build(:payment, order: nil, workspace: nil)
+          payment.valid?
+          expect(payment.workspace_id).to be_nil
+        end
+      end
+    end
+
     context 'after_commit' do
       context '#confirm_order' do
         it 'should confirm order if payment is success' do

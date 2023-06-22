@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  namespace :api do
+    namespace :v1 do
+      namespace :admin do
+        resources :workspaces
+      end
+    end
+  end
   devise_for :admins, only: []
   devise_for :users,  only: []
   devise_for :customers, only: [] 
@@ -11,8 +18,9 @@ Rails.application.routes.draw do
 
       namespace :user do
         devise_scope :user do
-          post 'sign_in' => 'sessions#create'
+          post   'sign_in'  => 'sessions#create'
           delete 'sign_out' => 'sessions#destroy'
+          post   'sign_up'  => 'registrations#create'
           resource :passwords, only: [:create, :update]
         end
         
@@ -79,6 +87,7 @@ Rails.application.routes.draw do
             put :card_payment_refund
           end
         end
+        resource :workspace, only: [:show, :update], controller: :workspace
       end
     end
   end

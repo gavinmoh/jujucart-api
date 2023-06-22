@@ -3,11 +3,13 @@ class Api::V1::User::ReportsController < Api::V1::User::ApplicationController
     from_date = params[:from_date].present? ? (Date.parse(params[:from_date]).beginning_of_day rescue Date.today.beginning_of_day) : Date.today.beginning_of_month.beginning_of_day
     to_date = params[:to_date].present? ? (Date.parse(params[:to_date]).end_of_day rescue Date.today.end_of_day) : Date.today.end_of_month.end_of_day
 
-    orders = Order.where(status: 'completed', completed_at: from_date..to_date)
+    orders = policy_scope(Order.all, policy_scope_class: Api::V1::User::OrderPolicy::Scope)
+    orders = orders.where(status: 'completed', completed_at: from_date..to_date)
     orders = orders.where(store_id: params[:store_id]) if params[:store_id].present?
     orders = orders.where(created_by_id: params[:created_by_id]) if params[:created_by_id].present?
 
-    customers = Customer.where(created_at: from_date..to_date)
+    customers = policy_scope(Customer.all, policy_scope_class: Api::V1::User::CustomerPolicy::Scope)
+    customers = customers.where(created_at: from_date..to_date)
     total_sales = Money.new(orders.sum(:total_cents)).as_json
 
     total_sales_report = group_sales(orders: orders, from_date: from_date, to_date: to_date)
@@ -47,10 +49,11 @@ class Api::V1::User::ReportsController < Api::V1::User::ApplicationController
     metric = params[:metric].present? ? params[:metric] : 'sold_quantity'
     limit = params[:limit].present? ? params[:limit] : 10
 
-    @products = BaseProduct.includes(:category)
-                           .with_sold_quantity_and_sales_amount_cents
-                           .joins(line_items: :order)
-                           .where(orders: { completed_at: from_date.beginning_of_day..to_date.end_of_day })
+    @products = policy_scope(BaseProduct.all, policy_scope_class: Api::V1::User::ProductPolicy::Scope)
+    @products = @products.includes(:category)
+                         .with_sold_quantity_and_sales_amount_cents
+                         .joins(line_items: :order)
+                         .where(orders: { completed_at: from_date.beginning_of_day..to_date.end_of_day })
     @products = @products.where(line_items: { orders: { store_id: params[:store_id] } }) if params[:store_id].present?
     if params[:category_id].present?
       @products = @products.left_joins(:product)
@@ -76,15 +79,17 @@ class Api::V1::User::ReportsController < Api::V1::User::ApplicationController
     metric = params[:metric].present? ? params[:metric] : 'sold_quantity'
     limit = params[:limit].present? ? params[:limit] : 10
 
-    @categories = Category.with_sold_quantity_and_sales_amount_cents
-                          .joins(products: { line_items: :order })
-                          .where(orders: { completed_at: from_date.beginning_of_day..to_date.end_of_day })
+    @categories = policy_scope(Category.all, policy_scope_class: Api::V1::User::CategoryPolicy::Scope)
+    @categories = @categories.with_sold_quantity_and_sales_amount_cents
+                             .joins(products: { line_items: :order })
+                             .where(orders: { completed_at: from_date.beginning_of_day..to_date.end_of_day })
     @categories = @categories.where(products: { line_items: { orders: { store_id: params[:store_id] } } }) if params[:store_id].present?
     @categories = @categories.limit(limit)    
 
-    @products = BaseProduct.with_sold_quantity_and_sales_amount_cents
-                           .joins(line_items: :order)
-                           .where(orders: { completed_at: from_date.beginning_of_day..to_date.end_of_day })
+    @products = policy_scope(BaseProduct.all, policy_scope_class: Api::V1::User::ProductPolicy::Scope)
+    @products = @products.with_sold_quantity_and_sales_amount_cents
+                         .joins(line_items: :order)
+                         .where(orders: { completed_at: from_date.beginning_of_day..to_date.end_of_day })
     @products = @products.left_joins(:product)
     @products = @products.where(line_items: { orders: { store_id: params[:store_id] } }) if params[:store_id].present?
 

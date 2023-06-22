@@ -12,7 +12,8 @@ class Api::V1::User::InventoryTransfersController < Api::V1::User::ApplicationCo
   end
 
   def create
-    @inventory_transfer = pundit_scope(InventoryTransfer).new(inventory_transfer_params)
+    @inventory_transfer = InventoryTransfer.new(inventory_transfer_params)
+    @inventory_transfer.workspace = current_workspace
     @inventory_transfer.created_by = current_user
     pundit_authorize(@inventory_transfer)
 

@@ -2,13 +2,14 @@ require 'rails_helper'
 
 RSpec.describe Coupon, type: :model do
   describe 'associations' do
+    it { should belong_to(:workspace) }
     it { should have_many(:order_coupons).dependent(:nullify) }
     it { should have_many(:orders).through(:order_coupons) }
   end
 
   describe 'validations' do
     it { should validate_presence_of(:code) }
-    it { should validate_uniqueness_of(:code).case_insensitive }
+    it { should validate_uniqueness_of(:code).case_insensitive.scoped_to(:workspace_id) }
     it { should validate_presence_of(:name) }
     it { should validate_numericality_of(:redemption_limit).is_greater_than_or_equal_to(0) }
     it { should validate_presence_of(:start_at) }

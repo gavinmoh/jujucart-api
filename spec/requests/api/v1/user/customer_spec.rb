@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/customers', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:customer).id }
+  let(:id) { create(:customer, workspace: user.current_workspace).id }
 
   path '/api/v1/user/customers' do
     get('list customers') do
@@ -24,7 +24,7 @@ RSpec.describe 'api/v1/user/customers', type: :request do
 
       response(200, 'successful') do
         before do
-          create_list(:customer, 3)
+          create_list(:customer, 3, workspace: user.current_workspace)
         end
 
         run_test!

@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/inventory_transactions', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:inventory_transaction).id }
+  let(:id) { create(:inventory_transaction, inventory: create(:inventory, workspace: user.current_workspace)).id }
 
   path '/api/v1/user/inventory_transactions' do
     get('list inventory transactions') do
@@ -21,7 +21,9 @@ RSpec.describe 'api/v1/user/inventory_transactions', type: :request do
 
       response(200, 'successful') do
         before do
-          create_list(:inventory_transaction, 5)
+          5.times do
+            create(:inventory_transaction, inventory: create(:inventory, workspace: user.current_workspace))
+          end
         end
 
         run_test!

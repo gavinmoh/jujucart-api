@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/stores', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:assigned_store).store_id }
+  let(:id) { create(:assigned_store, store_id: create(:store, workspace: user.current_workspace).id).store_id }
 
   before do
     create(:pos_terminal, store_id: id)
@@ -24,7 +24,7 @@ RSpec.describe 'api/v1/user/stores', type: :request do
       response(200, 'successful') do
         before do
           3.times do
-            create(:assigned_store, user: user)
+            create(:assigned_store, user: user, store_id: create(:store, workspace: user.current_workspace).id)
           end
         end
 

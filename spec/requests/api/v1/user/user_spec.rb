@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/users', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:user).id }
+  let(:id) { create(:user_workspace, workspace: user.current_workspace).user_id }
 
   path '/api/v1/user/users' do
     get('list users') do
@@ -18,7 +18,7 @@ RSpec.describe 'api/v1/user/users', type: :request do
 
       response(200, 'successful') do
         before do
-          create_list(:user, 3)
+          create_list(:user_workspace, 3, workspace: user.current_workspace)
         end
 
         run_test!
@@ -63,6 +63,15 @@ RSpec.describe 'api/v1/user/users', type: :request do
         let(:data) { { user: attributes_for(:user) } }
 
         run_test!
+      end
+
+      context 'user workspace' do
+        let!(:user) { create(:user) }
+        it 'should create user workspace' do
+          expect {
+            post '/api/v1/user/users', params: { user: attributes_for(:user) }, headers: { Authorization: bearer_token_for(user) }
+          }.to change(UserWorkspace, :count).by(1)
+        end
       end
     end
 

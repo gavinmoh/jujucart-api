@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/categories', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:category).id }
+  let(:id) { create(:category, workspace: user.current_workspace).id }
 
   path '/api/v1/user/categories' do
     get('list categories') do
@@ -17,7 +17,7 @@ RSpec.describe 'api/v1/user/categories', type: :request do
 
       response(200, 'successful') do
         before do
-          create_list(:category, 10)
+          create_list(:category, 3, workspace: user.current_workspace)
         end
 
         run_test!

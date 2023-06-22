@@ -1,10 +1,12 @@
 class ProductVariant < BaseProduct
   belongs_to :product, touch: true, optional: true
+  belongs_to :workspace, optional: true
   
   validate :product_attributes_must_exist
   validates_uniqueness_of :product_attributes, scope: :product_id
 
   before_validation :format_product_attributes, if: -> { self.product_attributes.any? }
+  before_validation :set_workspace_id
 
   scope :with_store_quantity, -> (store_id) do
     product_variant_quantity_sql = <<-SQL
@@ -32,5 +34,9 @@ class ProductVariant < BaseProduct
       self.product_attributes = self.product_attributes.map do |product_attribute| 
         product_attribute.is_a?(Hash) ? product_attribute.transform_values!(&:strip) : product_attribute.strip
       end
+    end
+
+    def set_workspace_id
+      self.workspace_id = self.product.workspace_id if self.product.present?
     end
 end

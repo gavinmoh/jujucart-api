@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe PromotionBundle, type: :model do
   describe 'associations' do
+    it { should belong_to(:workspace) }
     it { should have_many(:promotion_bundle_items).dependent(:destroy) }
     it { should have_many(:line_items).dependent(:nullify) }
   end

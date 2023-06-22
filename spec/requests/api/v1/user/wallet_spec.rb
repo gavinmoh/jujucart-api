@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/wallets', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:wallet).id }
+  let(:id) { create(:wallet, workspace: user.current_workspace).id }
 
   path '/api/v1/user/wallets' do
 
@@ -20,7 +20,7 @@ RSpec.describe 'api/v1/user/wallets', type: :request do
       
       response(200, 'successful') do
         before do
-          create_list(:wallet, 3)
+          create_list(:wallet, 3, workspace: user.current_workspace)
         end
 
         run_test!
@@ -36,14 +36,7 @@ RSpec.describe 'api/v1/user/wallets', type: :request do
         tags 'User Wallets'
         produces 'application/json'
         security [ { bearerAuth: nil } ]
-
-        after do |example|
-          example.metadata[:response][:content] = {
-            'application/json' => {
-              example: JSON.parse(response.body, symbolize_names: true)
-            }
-          }
-        end
+        
         run_test!
       end
     end    

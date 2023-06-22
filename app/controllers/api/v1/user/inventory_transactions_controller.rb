@@ -12,7 +12,7 @@ class Api::V1::User::InventoryTransactionsController < Api::V1::User::Applicatio
   end
 
   def create
-    @inventory_transaction = pundit_scope(InventoryTransaction).new(inventory_transaction_params)
+    @inventory_transaction = InventoryTransaction.new(inventory_transaction_params)
     pundit_authorize(@inventory_transaction)
 
     if @inventory_transaction.save
@@ -39,7 +39,7 @@ class Api::V1::User::InventoryTransactionsController < Api::V1::User::Applicatio
   end
 
   def adjustment
-    @inventory = Inventory.find_or_create_by(adjustment_params.slice(:location_id, :product_id))
+    @inventory = Inventory.find_or_create_by(adjustment_params.slice(:location_id, :product_id).merge(workspace_id: current_workspace.id))
     @inventory_transaction = @inventory.inventory_transactions.new(adjustment_params.slice(:quantity, :description))
     pundit_authorize(@inventory_transaction)
 

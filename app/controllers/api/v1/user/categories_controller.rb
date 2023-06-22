@@ -12,7 +12,8 @@ class Api::V1::User::CategoriesController < Api::V1::User::ApplicationController
   end
 
   def create
-    @category = pundit_scope(Category).new(category_params)
+    @category = Category.new(category_params)
+    @category.workspace = current_workspace
     pundit_authorize(@category)
 
     if @category.save

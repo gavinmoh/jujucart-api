@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :coupon do
+    workspace
     name { Faker::Lorem.unique.word }
     code { SecureRandom.alphanumeric(8) }
     redemption_limit { Faker::Number.within(range: 50..1000) }

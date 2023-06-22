@@ -1,6 +1,7 @@
 class Order < ApplicationRecord
   include ActiveModel::Dirty, AASM
 
+  belongs_to :workspace
   belongs_to :customer, optional: true
   belongs_to :created_by, class_name: 'User', optional: true
   belongs_to :store
@@ -128,15 +129,15 @@ class Order < ApplicationRecord
     end
 
     def set_redeemed_coin_value
-      unless self.customer.present? and (Setting.maximum_redeemed_coin_rate > 0) and (self.redeemed_coin > 0)
+      unless self.customer.present? and ((self.workspace&.maximum_redeemed_coin_rate || 0) > 0) and (self.redeemed_coin > 0)
         self.redeemed_coin = 0
         self.redeemed_coin_value_cents = 0
         return
       end
 
-      maximum_coin = self.subtotal_cents * Setting.maximum_redeemed_coin_rate
+      maximum_coin = self.subtotal_cents * self.workspace&.maximum_redeemed_coin_rate
       self.redeemed_coin = [self.redeemed_coin, maximum_coin, self.customer.wallet.current_amount].min
-      self.redeemed_coin_value = Money.from_amount(self.redeemed_coin * Setting.coin_to_cash_rate, "MYR")
+      self.redeemed_coin_value = Money.from_amount(self.redeemed_coin * self.workspace&.coin_to_cash_rate, "MYR")
     end
 
     def set_total
@@ -144,13 +145,13 @@ class Order < ApplicationRecord
     end
 
     def set_reward_amount
-      self.reward_coin = (self.subtotal_cents/100 * Setting.order_reward_amount) if Setting.order_reward_amount > 0
+      self.reward_coin = (self.subtotal_cents/100 * (self.workspace&.order_reward_amount || 0)) if (self.workspace&.order_reward_amount || 0) > 0
     end
 
     def create_inventory_transactions
       self.line_items.includes(:product).each do |line_item|
         next if line_item.product_id.nil?
-        inventory = line_item.product.inventories.find_or_create_by(location_id: self.store.location.id)
+        inventory = line_item.product.inventories.find_or_create_by(location_id: self.store.location.id, workspace_id: self.workspace_id)
         inventory.inventory_transactions.create(
           order_id: self.id,
           quantity: -(line_item.quantity),
@@ -162,7 +163,7 @@ class Order < ApplicationRecord
     def create_return_inventory_transactions
       self.line_items.includes(:product).each do |line_item|
         next if line_item.product_id.nil?
-        inventory = line_item.product.inventories.find_or_create_by(location_id: self.store.location.id)
+        inventory = line_item.product.inventories.find_or_create_by(location_id: self.store.location.id, workspace_id: self.workspace_id)
         inventory.inventory_transactions.create(
           order_id: self.id,
           quantity: line_item.quantity,

@@ -7,6 +7,10 @@ class Account < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :notifications, dependent: :destroy, foreign_key: :recipient_id
   has_many :notification_tokens, dependent: :destroy, foreign_key: :recipient_id
+  has_many :created_workspaces, class_name: 'Workspace', foreign_key: :created_by_id, dependent: :nullify
+  has_many :owned_workspaces, class_name: 'Workspace', foreign_key: :owner_id, dependent: :nullify
+
+  mount_base64_uploader :profile_photo, PhotoUploader
 
   def last_sign_in_at
     self.latest_session&.created_at

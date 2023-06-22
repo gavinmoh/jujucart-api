@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/promotion_bundles', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:promotion_bundle).id }
+  let(:id) { create(:promotion_bundle, workspace: user.current_workspace).id }
   let!(:promotion_bundle_item) { create(:promotion_bundle_item, promotion_bundle_id: id) }
 
   path '/api/v1/user/promotion_bundles' do
@@ -23,7 +23,7 @@ RSpec.describe 'api/v1/user/promotion_bundles', type: :request do
       response(200, 'successful') do
         before do
           3.times do
-            promotion_bundle = create(:promotion_bundle)
+            promotion_bundle = create(:promotion_bundle, workspace: user.current_workspace)
             create(:promotion_bundle_item, promotion_bundle_id: promotion_bundle.id)
           end
         end

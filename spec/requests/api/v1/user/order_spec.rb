@@ -4,8 +4,8 @@ RSpec.describe 'api/v1/user/orders', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:store) { create(:store) }
-  let(:id) { create(:order, store_id: store.id).id }
+  let(:store) { create(:store, workspace: user.current_workspace) }
+  let(:id) { create(:order, store_id: store.id, workspace: user.current_workspace).id }
 
   path '/api/v1/user/orders' do
 
@@ -14,26 +14,27 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       security [ { bearerAuth: nil } ]
       produces 'application/json'
 
-      parameter name: :page,           in: :query, type: :integer, required: false, description: 'Page number'
-      parameter name: :items,          in: :query, type: :integer, required: false, description: 'Number of items per page'
-      parameter name: :query,          in: :query, type: :string,  required: false, description: "Search by order_number"
-      parameter name: :status,         in: :query, type: :string,  required: false, description: "Filter by status, available status: #{Order.aasm.states.map(&:name).map(&:to_s).join(', ')}"
-      parameter name: :customer_id,    in: :query, type: :string,  required: false, description: 'Filter by customer_id'
-      parameter name: :order_type,     in: :query, type: :string, required: false, description: "Filter by order_type, available order_type: #{Order.order_types.keys.join(', ')}"
-      parameter name: :scope,          in: :query, type: :string,  required: false, description: "Filter by scope, available scope: ['delivery', 'pickup']"
-      parameter name: :is_flagged,     in: :query, type: :boolean,  required: false, description: "Filter flagged order"
-      parameter name: :filter_date_by, in: :query, type: :string,  required: false, description: 'Filter by which date column, e.g. created_at, updated_at'
-      parameter name: :from_date,      in: :query, type: :string,  required: false, description: 'Filter by date column specified by the params filter_date_by'
-      parameter name: :to_date,        in: :query, type: :string,  required: false, description: 'Filter by date column specified by the params filter_date_by'
-      parameter name: :store_id,       in: :query, type: :string, required: false, description: 'Filter by store_id'
-      parameter name: :sort_by,        in: :query, type: :string, required: false, description: 'Sort by which column/attribute'
-      parameter name: :sort_order,     in: :query, type: :string, required: false, description: "Default to descending, available sort_order: 'asc', 'desc'"
-      
+      parameter name: :page,            in: :query, type: :integer, required: false, description: 'Page number'
+      parameter name: :items,           in: :query, type: :integer, required: false, description: 'Number of items per page'
+      parameter name: :query,           in: :query, type: :string,  required: false, description: "Search by order_number"
+      parameter name: :status,          in: :query, type: :string,  required: false, description: "Filter by status, available status: #{Order.aasm.states.map(&:name).map(&:to_s).join(', ')}"
+      parameter name: :customer_id,     in: :query, type: :string,  required: false, description: 'Filter by customer_id'
+      parameter name: :order_type,      in: :query, type: :string, required: false, description: "Filter by order_type, available order_type: #{Order.order_types.keys.join(', ')}"
+      parameter name: :scope,           in: :query, type: :string,  required: false, description: "Filter by scope, available scope: ['delivery', 'pickup']"
+      parameter name: :is_flagged,      in: :query, type: :boolean,  required: false, description: "Filter flagged order"
+      parameter name: :filter_date_by,  in: :query, type: :string,  required: false, description: 'Filter by which date column, e.g. created_at, updated_at'
+      parameter name: :from_date,       in: :query, type: :string,  required: false, description: 'Filter by date column specified by the params filter_date_by'
+      parameter name: :to_date,         in: :query, type: :string,  required: false, description: 'Filter by date column specified by the params filter_date_by'
+      parameter name: :store_id,        in: :query, type: :string, required: false, description: 'Filter by store_id'
+      parameter name: :sort_by,         in: :query, type: :string, required: false, description: 'Sort by which column/attribute'
+      parameter name: :sort_order,      in: :query, type: :string, required: false, description: "Default to descending, available sort_order: 'asc', 'desc'"
+      parameter name: :skip_pagination, in: :query, type: :boolean, required: false, description: 'Skip pagination'
+      parameter name: 'ids[]',          in: :query, type: :array,  required: false, description: 'Filter by ids'      
 
       response(200, 'successful') do
         
         before do
-          create_list(:order, 3, store_id: store.id, status: 'confirmed')
+          create_list(:order, 3, store_id: store.id, status: 'confirmed', workspace: user.current_workspace)
         end
 
         run_test!
@@ -125,7 +126,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       }
 
       response(200, 'successful', save_request_example: :data) do
-        let(:id) { create(:order, store_id: store.id, order_type: 'delivery', status: 'confirmed').id }
+        let(:id) { create(:order, store_id: store.id, order_type: 'delivery', status: 'confirmed', workspace: user.current_workspace).id }
         let(:data) { { order: attributes_for(:order).slice(:courier_name, :tracking_number).merge(order_attachments_attributes: [attributes_for(:order_attachment).slice(:name, :file)]) } }
 
         run_test!
@@ -152,7 +153,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       security [ { bearerAuth: nil } ]
 
       let(:user) { create(:user, role: 'cashier') }
-      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending').id }
+      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending', workspace: user.current_workspace).id }
 
       parameter name: :data, in: :body, schema: {
         type: :object,
@@ -202,7 +203,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
 
       response(200, 'successful') do
         let(:user) { create(:user, role: 'cashier') }
-        let(:id) { create(:order, order_type: 'pos', store_id: store.id, status: 'pending_payment', customer_id: nil).id }
+        let(:id) { create(:order, order_type: 'pos', store_id: store.id, status: 'pending_payment', customer_id: nil, workspace: user.current_workspace).id }
         # let(:data) { { order: { transaction_reference: '12345' } } }
 
         before do
@@ -267,7 +268,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       
       response(200, 'successful') do
         let(:user) { create(:user, role: 'admin')}
-        let(:id) { create(:order, order_type: 'delivery', status: 'confirmed').id }
+        let(:id) { create(:order, order_type: 'delivery', status: 'confirmed', workspace: user.current_workspace).id }
 
         run_test!
       end
@@ -298,7 +299,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       
       response(200, 'successful', save_request_example: :data) do
         let(:user) { create(:user, role: 'admin')}
-        let(:id) { create(:order, status: 'packed').id }
+        let(:id) { create(:order, status: 'packed', workspace: user.current_workspace).id }
         let(:data) { { order: { courier_name: 'POS Laju', tracking_number: 'EM12345678' } } }
 
         run_test!
@@ -315,7 +316,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       security [ { bearerAuth: nil } ]
       
       response(200, 'successful') do
-        let(:order) { create(:order, status: 'packed') }
+        let(:order) { create(:order, status: 'packed', workspace: user.current_workspace) }
         let(:id) { order.id }
 
         before do
@@ -349,7 +350,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       }
 
       let(:user) { create(:user, role: 'cashier') }
-      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending').id }
+      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending', workspace: user.current_workspace).id }
 
       before do
         create(:assigned_store, user_id: user.id, store_id: store.id)
@@ -357,7 +358,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       end
       
       response(200, 'successful', save_request_example: :data) do
-        let(:code) { create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10).code }
+        let(:code) { create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, workspace: user.current_workspace).code }
         let(:data) { { code: code } }
 
         run_test! do |response|
@@ -379,13 +380,13 @@ RSpec.describe 'api/v1/user/orders', type: :request do
 
     context 'when minimum spend is not met' do
       let(:user) { create(:user, role: 'cashier') }
-      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending').id }
+      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending', workspace: user.current_workspace).id }
 
       it 'should not apply discount' do
         create(:assigned_store, user_id: user.id, store_id: store.id)
         create_list(:line_item, 2, order_id: id)
         order = Order.find(id)
-        code = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, minimum_spend: order.subtotal + Money.new(100)).code
+        code = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, minimum_spend: order.subtotal + Money.new(100), workspace: user.current_workspace).code
 
         put apply_coupon_api_v1_user_order_url(id: id), params: { code: code }, headers: { Authorization: bearer_token_for(user) }
         expect(response).to have_http_status(:ok)
@@ -402,12 +403,12 @@ RSpec.describe 'api/v1/user/orders', type: :request do
 
     context 'when code limit reached' do
       let(:user) { create(:user, role: 'cashier') }
-      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending').id }
+      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending', workspace: user.current_workspace).id }
 
       it 'should not apply discount' do
         create(:assigned_store, user_id: user.id, store_id: store.id)
         create_list(:line_item, 2, order_id: id)
-        coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, redemption_limit: 1)
+        coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, redemption_limit: 1, workspace: user.current_workspace)
         code = coupon.code
         create(:order_coupon, order_id: create(:order, status: 'confirmed').id, coupon_id: coupon.id, error_code: 'code_valid', is_valid: true)
 
@@ -432,8 +433,8 @@ RSpec.describe 'api/v1/user/orders', type: :request do
         create(:assigned_store, user_id: user.id, store_id: store.id)
         create_list(:line_item, 2, order_id: id)
         order = Order.find(id)
-        code1 = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, minimum_spend: order.subtotal + Money.new(100)).code
-        code2 = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 20).code
+        code1 = create(:coupon, discount_by: 'percentage_discount', workspace: user.current_workspace, discount_percentage: 10, minimum_spend: order.subtotal + Money.new(100)).code
+        code2 = create(:coupon, discount_by: 'percentage_discount', workspace: user.current_workspace, discount_percentage: 20).code
         calculated_discount = order.subtotal * 0.2
 
         put apply_coupon_api_v1_user_order_url(id: id), params: { code: code1 }, headers: { Authorization: bearer_token_for(user) }
@@ -480,8 +481,8 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       }
 
       let(:user) { create(:user, role: 'cashier') }
-      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending').id }
-      let(:code) { create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10).code }
+      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending', workspace: user.current_workspace).id }
+      let(:code) { create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, workspace: user.current_workspace).code }
       
       response(200, 'successful', save_request_example: :data) do
 

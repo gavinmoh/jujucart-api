@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/wallet_transactions', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:wallet_id) { create(:wallet).id }
+  let(:wallet_id) { create(:wallet, workspace: user.current_workspace).id }
   let(:id) { create(:wallet_transaction, wallet_id: wallet_id).id }
 
   path '/api/v1/user/wallets/{wallet_id}/wallet_transactions' do

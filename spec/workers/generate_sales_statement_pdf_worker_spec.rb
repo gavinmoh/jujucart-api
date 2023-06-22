@@ -12,16 +12,25 @@ RSpec.describe GenerateSalesStatementPdfWorker, type: :job do
     it 'perform the job' do
       described_class.new.perform
     end
+
+    it 'should generate sales statement record for each workspace' do
+      create_list(:workspace, 2)
+      expect do
+        described_class.new.perform
+      end.to change(SalesStatement, :count).by(2)
+    end
   end
 
   describe 'file' do
     it 'attaching file to sales statement' do
-      coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10)
+      workspace = create(:workspace)
+      store = create(:store, workspace: workspace)
+      coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, workspace: workspace)
       3.times do
-        order = create(:order, :with_line_items, order_type: 'pos')
+        order = create(:order, :with_line_items, order_type: 'pos', workspace: workspace, store: store)
         create(:order_coupon, order: order, coupon: coupon)
         order.checkout!
-        create(:payment, status: 'success', order: order, created_at: Faker::Time.between(from: Time.current.last_month.beginning_of_month, to: Time.current.last_month.end_of_month))
+        create(:payment, status: 'success', order: order, workspace: order.workspace, created_at: Faker::Time.between(from: Time.current.last_month.beginning_of_month, to: Time.current.last_month.end_of_month))
         order.complete!
       end
       

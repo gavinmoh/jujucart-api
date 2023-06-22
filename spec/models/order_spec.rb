@@ -3,6 +3,8 @@ require 'rails_helper'
 
 RSpec.describe Order, type: :model do
   describe 'associations' do
+    subject { create(:order) }
+    it { should belong_to(:workspace) }
     it { should belong_to(:customer).optional }
     it { should belong_to(:store) }
     it { should belong_to(:created_by).optional }
@@ -47,15 +49,11 @@ RSpec.describe Order, type: :model do
       end
 
       context '#set_redeemed_coin_value' do
-        let!(:customer) { create(:customer) }
-        let!(:order) { create(:order, customer: customer) }
-        let!(:product) { create(:product, price: 10, discount_price: 0) }
+        let!(:workspace) { create(:workspace, maximum_redeemed_coin_rate: 0.5, coin_to_cash_rate: 0.01) }
+        let!(:customer) { create(:customer, workspace: workspace) }
+        let!(:order) { create(:order, customer: customer, workspace: workspace) }
+        let!(:product) { create(:product, price: 10, discount_price: 0, workspace: workspace) }
         let!(:line_item) { create(:line_item, order: order, product: product, quantity: 1) }
-        
-        before do
-          Setting.maximum_redeemed_coin_rate = 0.5
-          Setting.coin_to_cash_rate = 0.01
-        end
 
         it 'should set redeemed_coin_value' do
           create(:wallet_transaction, wallet: customer.wallet, amount: 1_000_000, transaction_type: 'topup')
@@ -63,13 +61,13 @@ RSpec.describe Order, type: :model do
             order.update(redeemed_coin: 100)
           end.to(change { order.reload.redeemed_coin_value }
                     .from(Money.new(0))
-                    .to(Money.from_amount(100*Setting.coin_to_cash_rate)))
+                    .to(Money.from_amount(100*workspace.coin_to_cash_rate)))
         end
 
         it 'should not set redeemed_coin_value if customer not present' do
           order.update(customer: nil)
           expect do
-            order.update(redeemed_coin: order.subtotal_cents * Setting.maximum_redeemed_coin_rate)
+            order.update(redeemed_coin: order.subtotal_cents * workspace.maximum_redeemed_coin_rate)
           end.not_to(change { order.reload.redeemed_coin_value })
         end 
 
@@ -93,32 +91,28 @@ RSpec.describe Order, type: :model do
           end.to(change { order.reload.redeemed_coin }.from(0).to(10)
              .and(change { order.reload.redeemed_coin_value }
                     .from(Money.new(0))
-                    .to(Money.from_amount(10*Setting.coin_to_cash_rate))))
+                    .to(Money.from_amount(10*workspace.coin_to_cash_rate))))
         end
 
         it 'should not set redeemed_coin_value more than maximum_redeemed_coin_rate' do
-          Setting.maximum_redeemed_coin_rate = 0.1
+          workspace.update(maximum_redeemed_coin_rate: 0.1)
           create(:wallet_transaction, wallet: customer.wallet, amount: 1_000_000, transaction_type: 'topup')
           expect do
             order.update(redeemed_coin: 500)
           end.to(change { order.reload.redeemed_coin }.from(0).to(100)
              .and(change { order.reload.redeemed_coin_value }
                     .from(Money.new(0))
-                    .to(Money.from_amount(100*Setting.coin_to_cash_rate))))
+                    .to(Money.from_amount(100*workspace.coin_to_cash_rate))))
         end
       end
 
       context '#set_total' do
-        let!(:customer) { create(:customer) }
+        let!(:workspace) { create(:workspace, maximum_redeemed_coin_rate: 0.5, coin_to_cash_rate: 0.01) }
+        let!(:customer) { create(:customer, workspace: workspace) }
         let!(:wallet_transaction) { create(:wallet_transaction, wallet: customer.wallet, amount: 1_000_000, transaction_type: 'topup') }
-        let!(:order) { create(:order, status: 'pending') }
-        let!(:product) { create(:product, price: 10, discount_price: 0) }
+        let!(:order) { create(:order, status: 'pending', workspace: workspace) }
+        let!(:product) { create(:product, price: 10, discount_price: 0, workspace: workspace) }
         let!(:line_item) { create(:line_item, order: order, quantity: 1, product: product) }
-
-        before do
-          Setting.maximum_redeemed_coin_rate = 0.5
-          Setting.coin_to_cash_rate = 0.01
-        end
 
         it 'should set total' do
           expect do
@@ -135,15 +129,13 @@ RSpec.describe Order, type: :model do
       end
 
       context '#set_reward_amount' do
-        let!(:customer) { create(:customer) }
-        let!(:order) { create(:order, status: 'pending', customer: customer) }
-        let!(:product) { create(:product, price: 10, discount_price: 0) }
-
-        before do
-          Setting.order_reward_amount = 10 # 10%
-        end
+        let!(:workspace) { create(:workspace, order_reward_amount: 0) }
+        let!(:customer) { create(:customer, workspace: workspace) }
+        let!(:order) { create(:order, status: 'pending', customer: customer, workspace: workspace) }
+        let!(:product) { create(:product, price: 10, discount_price: 0, workspace: workspace) }
 
         it 'should set reward_amount' do
+          workspace.update(order_reward_amount: 10)
           expect do
             create(:line_item, order: order, quantity: 1, product: product)
           end.to(change { order.reload.reward_coin }.from(0).to(100))
@@ -440,16 +432,12 @@ RSpec.describe Order, type: :model do
       end
 
       context '#create_redeemed_coin_transaction' do 
-        let!(:customer) { create(:customer) }
+        let!(:workspace) { create(:workspace, maximum_redeemed_coin_rate: 0.5, coin_to_cash_rate: 0.01) }
+        let!(:customer) { create(:customer, workspace: workspace) }
         let!(:wallet_transaction) { create(:wallet_transaction, wallet: customer.wallet, amount: 1_000_000, transaction_type: 'topup') }
-        let!(:order) { create(:order, customer: customer) }
-        let!(:product) { create(:product, price: 10, discount_price: 0) }
+        let!(:order) { create(:order, customer: customer, workspace: workspace) }
+        let!(:product) { create(:product, price: 10, discount_price: 0, workspace: workspace) }
         let!(:line_item) { create(:line_item, order: order, product: product, quantity: 1) }
-
-        before do
-          Setting.maximum_redeemed_coin_rate = 0.5
-          Setting.coin_to_cash_rate = 0.01
-        end
 
         it 'should create redeemed coin transaction' do
           order.update(redeemed_coin: 100)
@@ -471,16 +459,12 @@ RSpec.describe Order, type: :model do
       end
 
       context '#create_refund_coin_wallet_transaction' do
-        let!(:customer) { create(:customer) }
+        let!(:workspace) { create(:workspace, maximum_redeemed_coin_rate: 0.5, coin_to_cash_rate: 0.01) }
+        let!(:customer) { create(:customer, workspace: workspace) }
         let!(:wallet_transaction) { create(:wallet_transaction, wallet: customer.wallet, amount: 1_000_000, transaction_type: 'topup') }
-        let!(:order) { create(:order, customer: customer) }
-        let!(:product) { create(:product, price: 10, discount_price: 0) }
+        let!(:order) { create(:order, customer: customer, workspace: workspace) }
+        let!(:product) { create(:product, price: 10, discount_price: 0, workspace: workspace) }
         let!(:line_item) { create(:line_item, order: order, product: product, quantity: 1) }
-
-        before do
-          Setting.maximum_redeemed_coin_rate = 0.5
-          Setting.coin_to_cash_rate = 0.01
-        end
 
         it 'should create refund coin wallet transaction' do
           order.update(redeemed_coin: 100)
@@ -491,13 +475,13 @@ RSpec.describe Order, type: :model do
       end
 
       context '#create_reward_transaction' do
-        let!(:customer) { create(:customer) }
-        let!(:order) { create(:order, customer: customer) }
-        let!(:product) { create(:product, price: 10, discount_price: 0) }
+        let!(:workspace) { create(:workspace, order_reward_amount: 10) }
+        let!(:customer) { create(:customer, workspace: workspace) }
+        let!(:order) { create(:order, customer: customer, workspace: workspace) }
+        let!(:product) { create(:product, price: 10, discount_price: 0, workspace: workspace) }
         let(:line_item) { create(:line_item, order: order, product: product, quantity: 1) }
 
         before do
-          Setting.order_reward_amount = 10 # 10%
           line_item
         end
 
@@ -509,13 +493,13 @@ RSpec.describe Order, type: :model do
       end
 
       context '#destroy_order_reward' do
-        let!(:customer) { create(:customer) }
-        let!(:order) { create(:order, customer: customer) }
-        let!(:product) { create(:product, price: 10, discount_price: 0) }
+        let!(:workspace) { create(:workspace, order_reward_amount: 10) }
+        let!(:customer) { create(:customer, workspace: workspace) }
+        let!(:order) { create(:order, customer: customer, workspace: workspace) }
+        let!(:product) { create(:product, price: 10, discount_price: 0, workspace: workspace) }
         let(:line_item) { create(:line_item, order: order, product: product, quantity: 1) }
 
         before do
-          Setting.order_reward_amount = 10 # 10%
           line_item
         end
 

@@ -12,7 +12,7 @@ class Api::V1::User::OrderAttachmentsController < Api::V1::User::ApplicationCont
   end
 
   def create
-    @order_attachment = pundit_scope(OrderAttachment).new(order_attachment_params)
+    @order_attachment = OrderAttachment.new(order_attachment_params)
     pundit_authorize(@order_attachment)
 
     if @order_attachment.save

@@ -12,7 +12,8 @@ class Api::V1::User::PromotionBundlesController < Api::V1::User::ApplicationCont
   end
 
   def create
-    @promotion_bundle = pundit_scope(PromotionBundle).new(promotion_bundle_params)
+    @promotion_bundle = PromotionBundle.new(promotion_bundle_params)
+    @promotion_bundle.workspace = current_workspace
     pundit_authorize(@promotion_bundle)
 
     if @promotion_bundle.save

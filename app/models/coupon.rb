@@ -1,8 +1,9 @@
 class Coupon < ApplicationRecord
+  belongs_to :workspace
   has_many :order_coupons, dependent: :nullify
   has_many :orders, through: :order_coupons
 
-  validates :code, presence: true, uniqueness: { case_sensitive: false }
+  validates :code, presence: true, uniqueness: { case_sensitive: false, scope: :workspace_id }
   validates :name, presence: true
   validates :redemption_limit, numericality: { greater_than_or_equal_to: 0 }, allow_nil: false
   validates :start_at, presence: true
@@ -34,10 +35,14 @@ class Coupon < ApplicationRecord
   scope :scheduled, -> { where('start_at > ?', Time.zone.now) }
   scope :expired, -> { where('end_at < ?', Time.zone.now) }
   scope :with_total_redemptions, -> { 
-    select('coupons.*, COUNT(order_coupons.id) AS total_redemptions')
-      .left_joins({order_coupons: :order})
-      .where.not(orders: { status: 'pending'})
-      .where(order_coupons: { is_valid: true })
+    order_coupons_subquery = <<-SQL
+      SELECT * FROM order_coupons
+      LEFT JOIN orders ON orders.id = order_coupons.order_id
+      WHERE orders.status != 'pending' AND order_coupons.is_valid = true
+    SQL
+
+    select('coupons.*, COUNT(order_coupons.coupon_id) AS total_redemptions')
+      .joins("LEFT JOIN (#{order_coupons_subquery.squish}) AS order_coupons ON order_coupons.coupon_id = coupons.id")
       .group('coupons.id') 
   }
 

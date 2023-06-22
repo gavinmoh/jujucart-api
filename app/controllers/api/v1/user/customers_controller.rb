@@ -12,7 +12,8 @@ class Api::V1::User::CustomersController < Api::V1::User::ApplicationController
   end
 
   def create
-    @customer = pundit_scope(Customer).new(customer_params)
+    @customer = Customer.new(customer_params)
+    @customer.workspace = current_workspace
     pundit_authorize(@customer)
 
     if @customer.save
