@@ -7,7 +7,11 @@ class Workspace < ApplicationRecord
 
   mount_base64_uploader :logo, PhotoUploader
 
-  store_accessor :settings, [:web_host, :coin_to_cash_rate, :order_reward_amount, :maximum_redeemed_coin_rate, :statement_address, :invoice_size]
+  store_accessor :settings, [
+    :web_host, :coin_to_cash_rate, :order_reward_amount, :maximum_redeemed_coin_rate, :invoice_size,
+    :company_phone_number, :company_email, :company_name, :company_address, :bank_name, :bank_account_number,
+    :bank_holder_name, :receipt_footer
+  ]
 
   validates :subdomain,
     uniqueness: true,
@@ -31,7 +35,6 @@ class Workspace < ApplicationRecord
       self.coin_to_cash_rate = 0.01 if self.coin_to_cash_rate.blank?
       self.order_reward_amount = 0 if self.order_reward_amount.blank?
       self.maximum_redeemed_coin_rate = 0.5 if self.maximum_redeemed_coin_rate.blank?
-      self.statement_address = '6623 & 6627, Jalan Mengkuang, Kampung Paya, 12200 Butterworth, Pulau Pinang.' if self.statement_address.blank?
       self.invoice_size = 'A4' if self.invoice_size.blank?
     end
 end

@@ -6,6 +6,8 @@ RSpec.describe Account, type: :model do
     it { is_expected.to have_many(:sessions).dependent(:destroy) }
     it { is_expected.to have_many(:notifications).dependent(:destroy).with_foreign_key(:recipient_id) }
     it { is_expected.to have_many(:notification_tokens).dependent(:destroy).with_foreign_key(:recipient_id) }
+    it { is_expected.to have_many(:created_workspaces).class_name('Workspace').with_foreign_key(:created_by_id).dependent(:nullify) }
+    it { is_expected.to have_many(:owned_workspaces).class_name('Workspace').with_foreign_key(:owner_id).dependent(:nullify) }
   end
 
   describe 'allow same email for different type' do

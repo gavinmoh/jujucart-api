@@ -60,6 +60,10 @@ class Api::V1::Admin::WorkspacesController < Api::V1::Admin::ApplicationControll
     end
 
     def workspace_params
-      params.require(:workspace).permit(:name, :logo, :subdomain, :owner_id, :web_host, :coin_to_cash_rate, :order_reward_amount, :maximum_redeemed_coin_rate, :statement_address, :invoice_size)
+      params.require(:workspace).permit(
+        :name, :logo, :subdomain, :owner_id, :web_host, :coin_to_cash_rate, :order_reward_amount, 
+        :maximum_redeemed_coin_rate, :invoice_size, :company_phone_number, :company_email, :company_name, 
+        :company_address, :bank_name, :bank_account_number, :bank_holder_name, :receipt_footer
+      )
     end
 end

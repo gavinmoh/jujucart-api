@@ -86,6 +86,7 @@ Rails.application.routes.draw do
             put :card_payment_refund
           end
         end
+        resource :workspace, only: [:show, :update], controller: :workspace
       end
     end
   end

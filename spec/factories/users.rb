@@ -18,7 +18,7 @@ FactoryBot.define do
     end
 
     after(:create) do |user|
-      create(:user_workspace, user: user)
+      create(:user_workspace, user: user, workspace: create(:workspace, owner: user))
     end
   end
 end

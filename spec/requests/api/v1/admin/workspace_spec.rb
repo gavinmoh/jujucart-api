@@ -47,8 +47,15 @@ RSpec.describe 'api/v1/admin/workspaces', type: :request do
               coin_to_cash_rate: { type: :float },
               order_reward_amount: { type: :integer },
               maximum_redeemed_coin_rate: { type: :float },
-              statement_address: { type: :string },
-              invoice_size: { type: :string }
+              invoice_size: { type: :string },
+              company_phone_number: { type: :string }, 
+              company_email: { type: :string }, 
+              company_name: { type: :string }, 
+              company_address: { type: :string }, 
+              bank_name: { type: :string }, 
+              bank_account_number: { type: :string },
+              bank_holder_name: { type: :string }, 
+              receipt_footer: { type: :string }
             }
           }
         }
@@ -96,8 +103,15 @@ RSpec.describe 'api/v1/admin/workspaces', type: :request do
               coin_to_cash_rate: { type: :float },
               order_reward_amount: { type: :integer },
               maximum_redeemed_coin_rate: { type: :float },
-              statement_address: { type: :string },
-              invoice_size: { type: :string }
+              invoice_size: { type: :string },
+              company_phone_number: { type: :string }, 
+              company_email: { type: :string }, 
+              company_name: { type: :string }, 
+              company_address: { type: :string }, 
+              bank_name: { type: :string }, 
+              bank_account_number: { type: :string },
+              bank_holder_name: { type: :string }, 
+              receipt_footer: { type: :string }
             }
           }
         }
