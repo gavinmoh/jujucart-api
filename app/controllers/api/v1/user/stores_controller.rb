@@ -12,7 +12,8 @@ class Api::V1::User::StoresController < Api::V1::User::ApplicationController
   end
 
   def create
-    @store = pundit_scope(Store).new(store_params)
+    @store = Store.new(store_params)
+    @store.workspace = current_workspace
     pundit_authorize(@store)
 
     if @store.save

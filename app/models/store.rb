@@ -1,4 +1,5 @@
 class Store < ApplicationRecord
+  belongs_to :workspace
   has_one  :location, dependent: :destroy
   has_many :inventories, through: :location
   has_many :orders, dependent: :nullify
@@ -20,6 +21,6 @@ class Store < ApplicationRecord
 
   private
     def create_location
-      Location.find_or_create_by(store_id: self.id)
+      Location.find_or_create_by(store_id: self.id, workspace_id: self.workspace_id)
     end
 end
