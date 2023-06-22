@@ -1,7 +1,8 @@
 class Category < ApplicationRecord
+  belongs_to :workspace
   has_many :products, dependent: :nullify
 
-  validates :name, presence: true, uniqueness: { case_sensitive: false }
+  validates :name, presence: true, uniqueness: { case_sensitive: false, scope: :workspace_id }
 
   mount_base64_uploader :photo, PhotoUploader
 
