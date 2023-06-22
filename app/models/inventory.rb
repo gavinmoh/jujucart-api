@@ -1,4 +1,5 @@
 class Inventory < ApplicationRecord
+  belongs_to :workspace
   belongs_to :location
   belongs_to :product, class_name: 'BaseProduct'
 

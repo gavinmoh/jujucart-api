@@ -1,6 +1,4 @@
 class Api::V1::User::InventoriesController < Api::V1::User::ApplicationController
-
-  skip_before_action :authenticate_user!
   before_action :set_inventory, only: [:show, :update, :destroy]
   before_action :set_inventories, only: [:index]
   
@@ -14,7 +12,8 @@ class Api::V1::User::InventoriesController < Api::V1::User::ApplicationControlle
   end
 
   def create
-    @inventory = pundit_scope(Inventory).new(inventory_params)
+    @inventory = Inventory.new(inventory_params)
+    @inventory.workspace = current_workspace
     pundit_authorize(@inventory)
 
     if @inventory.save
