@@ -3,7 +3,7 @@ require 'swagger_helper'
 RSpec.describe 'api/v1/user/reports', type: :request do
   let(:user) { create(:user) }
   let(:workspace) { user.current_workspace }
-  let(:Authorization) { bearer_token_for(create(:user)) }
+  let(:Authorization) { bearer_token_for(user) }
 
   path '/api/v1/user/reports/overview' do
     get('overview report') do
