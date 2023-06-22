@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :customer do
+    workspace
     sequence(:name) { |n| "#{n}-#{Faker::Name.name}" }
     sequence(:email) { |n| "#{n}-#{Faker::Internet.unique.safe_email}" }
     phone_number { Faker::PhoneNumber.phone_number }

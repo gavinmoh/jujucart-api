@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Customer, type: :model do
   describe 'associations' do
+    it { should belong_to(:workspace) }
     it { should have_one(:wallet) }
     it { should have_many(:wallet_transactions).through(:wallet) }
   end
@@ -9,13 +10,34 @@ RSpec.describe Customer, type: :model do
   describe 'validations' do
     it { should validate_presence_of(:name) }
     it { should validate_presence_of(:phone_number) }
-    it { should validate_uniqueness_of(:email).allow_blank.case_insensitive }
+
+    context 'email uniqueness validation' do
+      it 'should validate email uniqueness' do
+        workspace = create(:workspace)
+        customer1 = create(:customer, workspace: workspace)
+        customer2 = build(:customer, email: customer1.email, workspace: workspace)
+        expect(customer2.valid?).to be_falsey
+      end
+
+      it 'should allow same email for different workspace' do
+        customer1 = create(:customer)
+        customer2 = build(:customer, email: customer1.email, workspace: create(:workspace))
+        expect(customer2.valid?).to be_truthy
+      end
+    end
 
     context 'phone_number uniqueness validation' do
       it 'should validate phone_number uniqueness' do
+        workspace = create(:workspace)
+        customer1 = create(:customer, workspace: workspace)
+        customer2 = build(:customer, phone_number: customer1.phone_number, workspace: workspace)
+        expect(customer2.valid?).to be_falsey
+      end
+
+      it 'should allow same phone number for different workspace' do
         customer1 = create(:customer)
         customer2 = build(:customer, phone_number: customer1.phone_number)
-        expect(customer2.valid?).to be_falsey
+        expect(customer2.valid?).to be_truthy
       end
     end
   end
