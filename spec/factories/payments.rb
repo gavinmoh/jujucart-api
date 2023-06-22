@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :payment do
+    workspace
     order_id { create(:order).id }
     payment_type { 'cash' }
     transaction_reference { SecureRandom.hex(10) }

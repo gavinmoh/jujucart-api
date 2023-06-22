@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/payments', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:payment).id }
+  let(:id) { create(:payment, workspace: user.current_workspace, order: create(:order, workspace: user.current_workspace)).id }
 
   path '/api/v1/user/payments' do
     get('list payments') do
@@ -24,7 +24,9 @@ RSpec.describe 'api/v1/user/payments', type: :request do
 
       response(200, 'successful') do
         before do
-          create_list(:payment, 3)
+          3.times do
+            create(:payment, workspace: user.current_workspace, order: create(:order, workspace: user.current_workspace))
+          end
         end
 
         run_test!

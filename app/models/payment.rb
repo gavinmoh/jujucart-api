@@ -1,5 +1,6 @@
 class Payment < ApplicationRecord
   include ActiveModel::Dirty, AASM
+  belongs_to :workspace
   belongs_to :order, optional: true
   
   enum payment_type: { cash: 'cash', terminal: 'terminal' }
@@ -11,6 +12,8 @@ class Payment < ApplicationRecord
 
   # validates :transaction_reference, presence: true, if: -> { self.cash? }
   validates :transaction_reference, uniqueness: true, allow_blank: true
+
+  before_validation :set_workspace_id
 
   after_commit :confirm_order, if: -> { saved_change_to_status? and self.success? }, on: [:create, :update]
   after_commit :refund_order, if: -> { saved_change_to_status? and self.refunded? }, on: [:create, :update]
@@ -47,5 +50,9 @@ class Payment < ApplicationRecord
 
     def refund_order
       self.order.refund!
+    end
+
+    def set_workspace_id
+      self.workspace_id = self.order.workspace_id if self.order
     end
 end
