@@ -1,4 +1,5 @@
 class Location < ApplicationRecord
+  belongs_to :workspace
   belongs_to :store, optional: true
 
   has_many :inventories, dependent: :destroy

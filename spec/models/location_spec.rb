@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Location, type: :model do
   describe 'associations' do
+    it { should belong_to(:workspace) }
     it { should belong_to(:store).optional }
     it { should have_many(:inventories).dependent(:destroy) }
   end

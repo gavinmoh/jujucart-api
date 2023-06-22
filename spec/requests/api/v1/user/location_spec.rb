@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/locations', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:location, store: nil).id }
+  let(:id) { create(:location, store: nil, workspace: user.current_workspace).id }
 
   path '/api/v1/user/locations' do
     get('list locations') do
@@ -21,8 +21,8 @@ RSpec.describe 'api/v1/user/locations', type: :request do
 
       response(200, 'successful') do
         before do
-          create_list(:location, 3, store: nil)
-          create_list(:store, 3)
+          create_list(:location, 3, store: nil, workspace: user.current_workspace)
+          create_list(:store, 3, workspace: user.current_workspace)
         end
 
         run_test!
