@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
+ActiveRecord::Schema[7.0].define(version: 2023_06_22_020404) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -30,9 +30,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.string "nanoid"
     t.string "role"
     t.string "profile_photo"
+    t.uuid "workspace_id"
     t.index ["email", "type"], name: "index_accounts_on_email_and_type", unique: true, where: "((email IS NOT NULL) AND ((email)::text <> ''::text))"
     t.index ["phone_number", "type"], name: "index_accounts_on_phone_number_and_type", unique: true, where: "((phone_number IS NOT NULL) AND ((phone_number)::text <> ''::text))"
     t.index ["reset_password_token"], name: "index_accounts_on_reset_password_token", unique: true
+    t.index ["workspace_id"], name: "index_accounts_on_workspace_id"
   end
 
   create_table "assigned_stores", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -60,7 +62,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.string "slug"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "workspace_id"
     t.index ["slug"], name: "index_categories_on_slug", unique: true
+    t.index ["workspace_id"], name: "index_categories_on_workspace_id"
   end
 
   create_table "coupons", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -82,6 +86,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.string "discount_on"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "workspace_id"
+    t.index ["workspace_id"], name: "index_coupons_on_workspace_id"
   end
 
   create_table "inventories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -91,9 +97,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "location_id", null: false
+    t.uuid "workspace_id"
     t.index ["location_id"], name: "index_inventories_on_location_id"
     t.index ["nanoid"], name: "index_inventories_on_nanoid", unique: true
     t.index ["product_id"], name: "index_inventories_on_product_id"
+    t.index ["workspace_id"], name: "index_inventories_on_workspace_id"
   end
 
   create_table "inventory_transactions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -144,6 +152,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.uuid "created_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "workspace_id"
     t.index ["accepted_by_id"], name: "index_inventory_transfers_on_accepted_by_id"
     t.index ["cancelled_by_id"], name: "index_inventory_transfers_on_cancelled_by_id"
     t.index ["created_by_id"], name: "index_inventory_transfers_on_created_by_id"
@@ -152,6 +161,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.index ["transfer_from_location_id"], name: "index_inventory_transfers_on_transfer_from_location_id"
     t.index ["transfer_to_location_id"], name: "index_inventory_transfers_on_transfer_to_location_id"
     t.index ["transferred_by_id"], name: "index_inventory_transfers_on_transferred_by_id"
+    t.index ["workspace_id"], name: "index_inventory_transfers_on_workspace_id"
   end
 
   create_table "line_items", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -180,7 +190,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.uuid "store_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "workspace_id"
     t.index ["store_id"], name: "index_locations_on_store_id"
+    t.index ["workspace_id"], name: "index_locations_on_workspace_id"
   end
 
   create_table "notification_tokens", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -277,10 +289,12 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.datetime "updated_at", null: false
     t.datetime "voided_at"
     t.datetime "refunded_at"
+    t.uuid "workspace_id"
     t.index ["created_by_id"], name: "index_orders_on_created_by_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["nanoid"], name: "index_orders_on_nanoid", unique: true
     t.index ["store_id"], name: "index_orders_on_store_id"
+    t.index ["workspace_id"], name: "index_orders_on_workspace_id"
   end
 
   create_table "payments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -294,8 +308,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "transaction_reference"
+    t.uuid "workspace_id"
     t.index ["nanoid"], name: "index_payments_on_nanoid", unique: true
     t.index ["order_id"], name: "index_payments_on_order_id"
+    t.index ["workspace_id"], name: "index_payments_on_workspace_id"
   end
 
   create_table "pos_terminals", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -304,7 +320,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.string "label"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "workspace_id"
     t.index ["store_id"], name: "index_pos_terminals_on_store_id"
+    t.index ["workspace_id"], name: "index_pos_terminals_on_workspace_id"
   end
 
   create_table "products", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -330,10 +348,12 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.uuid "product_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "workspace_id"
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["nanoid"], name: "index_products_on_nanoid", unique: true
     t.index ["product_id"], name: "index_products_on_product_id"
     t.index ["sku"], name: "index_products_on_sku", unique: true, where: "((sku IS NOT NULL) AND ((sku)::text <> ''::text))"
+    t.index ["workspace_id"], name: "index_products_on_workspace_id"
   end
 
   create_table "promotion_bundle_items", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -357,6 +377,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.boolean "active", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "workspace_id"
+    t.index ["workspace_id"], name: "index_promotion_bundles_on_workspace_id"
   end
 
   create_table "sales_statements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -377,6 +399,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.string "file"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "workspace_id"
+    t.index ["workspace_id"], name: "index_sales_statements_on_workspace_id"
   end
 
   create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -409,6 +433,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.boolean "validate_inventory", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "workspace_id"
+    t.index ["workspace_id"], name: "index_stores_on_workspace_id"
   end
 
   create_table "user_workspaces", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -453,7 +479,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.bigint "current_amount", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "workspace_id"
     t.index ["customer_id"], name: "index_wallets_on_customer_id"
+    t.index ["workspace_id"], name: "index_wallets_on_workspace_id"
   end
 
   create_table "workspaces", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -472,10 +500,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
     t.index ["subdomain"], name: "index_workspaces_on_subdomain", unique: true
   end
 
+  add_foreign_key "accounts", "workspaces"
   add_foreign_key "assigned_stores", "accounts", column: "user_id"
   add_foreign_key "assigned_stores", "stores"
+  add_foreign_key "categories", "workspaces"
+  add_foreign_key "coupons", "workspaces"
   add_foreign_key "inventories", "locations"
   add_foreign_key "inventories", "products"
+  add_foreign_key "inventories", "workspaces"
   add_foreign_key "inventory_transactions", "inventories"
   add_foreign_key "inventory_transactions", "inventory_transfers"
   add_foreign_key "inventory_transactions", "orders"
@@ -488,10 +520,12 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
   add_foreign_key "inventory_transfers", "accounts", column: "transferred_by_id"
   add_foreign_key "inventory_transfers", "locations", column: "transfer_from_location_id"
   add_foreign_key "inventory_transfers", "locations", column: "transfer_to_location_id"
+  add_foreign_key "inventory_transfers", "workspaces"
   add_foreign_key "line_items", "orders"
   add_foreign_key "line_items", "products"
   add_foreign_key "line_items", "promotion_bundles"
   add_foreign_key "locations", "stores"
+  add_foreign_key "locations", "workspaces"
   add_foreign_key "notification_tokens", "accounts", column: "recipient_id"
   add_foreign_key "notifications", "accounts", column: "recipient_id"
   add_foreign_key "order_attachments", "orders"
@@ -500,18 +534,26 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_21_121258) do
   add_foreign_key "orders", "accounts", column: "created_by_id"
   add_foreign_key "orders", "accounts", column: "customer_id"
   add_foreign_key "orders", "stores"
+  add_foreign_key "orders", "workspaces"
   add_foreign_key "payments", "orders"
+  add_foreign_key "payments", "workspaces"
   add_foreign_key "pos_terminals", "stores"
+  add_foreign_key "pos_terminals", "workspaces"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "products"
+  add_foreign_key "products", "workspaces"
   add_foreign_key "promotion_bundle_items", "products"
   add_foreign_key "promotion_bundle_items", "promotion_bundles"
+  add_foreign_key "promotion_bundles", "workspaces"
+  add_foreign_key "sales_statements", "workspaces"
   add_foreign_key "sessions", "accounts"
+  add_foreign_key "stores", "workspaces"
   add_foreign_key "user_workspaces", "accounts", column: "user_id"
   add_foreign_key "user_workspaces", "workspaces"
   add_foreign_key "wallet_transactions", "orders"
   add_foreign_key "wallet_transactions", "wallets"
   add_foreign_key "wallets", "accounts", column: "customer_id"
+  add_foreign_key "wallets", "workspaces"
   add_foreign_key "workspaces", "accounts", column: "created_by_id"
   add_foreign_key "workspaces", "accounts", column: "owner_id"
 end
