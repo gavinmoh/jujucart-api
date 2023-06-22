@@ -48,10 +48,11 @@ RSpec.describe OrderCoupon, type: :model do
     end
 
     describe 'after_commit' do
+      let(:workspace) { create(:workspace) }
       it 'update order price' do
-        order = create(:order, status: 'pending')
-        create_list(:line_item, 2, order: order)
-        coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10)
+        order = create(:order, status: 'pending', workspace: workspace)
+        2.times { create(:line_item, order: order, product: create(:product, workspace: workspace)) }
+        coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, workspace: workspace)
         create(:order_coupon, coupon: coupon, code: coupon.code, order: order)
         calculated_discount = order.subtotal * (coupon.discount_percentage / 100.0)
         order.reload

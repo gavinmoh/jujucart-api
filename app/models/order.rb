@@ -125,15 +125,15 @@ class Order < ApplicationRecord
     end
 
     def set_redeemed_coin_value
-      unless self.customer.present? and (Setting.maximum_redeemed_coin_rate > 0) and (self.redeemed_coin > 0)
+      unless self.customer.present? and ((self.workspace&.maximum_redeemed_coin_rate || 0) > 0) and (self.redeemed_coin > 0)
         self.redeemed_coin = 0
         self.redeemed_coin_value_cents = 0
         return
       end
 
-      maximum_coin = self.subtotal_cents * Setting.maximum_redeemed_coin_rate
+      maximum_coin = self.subtotal_cents * self.workspace&.maximum_redeemed_coin_rate
       self.redeemed_coin = [self.redeemed_coin, maximum_coin, self.customer.wallet.current_amount].min
-      self.redeemed_coin_value = Money.from_amount(self.redeemed_coin * Setting.coin_to_cash_rate, "MYR")
+      self.redeemed_coin_value = Money.from_amount(self.redeemed_coin * self.workspace&.coin_to_cash_rate, "MYR")
     end
 
     def set_total
@@ -141,7 +141,7 @@ class Order < ApplicationRecord
     end
 
     def set_reward_amount
-      self.reward_coin = (self.subtotal_cents/100 * Setting.order_reward_amount) if Setting.order_reward_amount > 0
+      self.reward_coin = (self.subtotal_cents/100 * (self.workspace&.order_reward_amount || 0)) if (self.workspace&.order_reward_amount || 0) > 0
     end
 
     def create_inventory_transactions

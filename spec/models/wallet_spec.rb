@@ -15,6 +15,7 @@ RSpec.describe Wallet, type: :model do
           let(:wallet) { build(:wallet, customer: customer) }
 
           it 'sets workspace_id' do
+            wallet.workspace = nil
             expect { wallet.valid? }.to change { wallet.workspace_id }.from(nil).to(customer.workspace_id)
           end
         end

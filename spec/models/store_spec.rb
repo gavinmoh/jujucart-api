@@ -22,8 +22,9 @@ RSpec.describe Store, type: :model do
   describe 'callbacks' do
     describe 'after_commit :create_location, on: :create' do
       it 'should create location' do
+        workspace = create(:workspace)
         expect do
-          create(:store)
+          create(:store, workspace: workspace)
         end.to change(Location, :count).by(1)
       end
     end
