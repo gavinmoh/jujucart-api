@@ -1,10 +1,14 @@
 FactoryBot.define do
   factory :payment do
-    workspace
-    order_id { create(:order).id }
+    transient { workspace { create(:workspace) } }
+    order_id { create(:order, workspace: workspace).id }
     payment_type { 'cash' }
     transaction_reference { SecureRandom.hex(10) }
     amount { Faker::Number.within(range: 10..1000).to_s }
+
+    after(:build) do |payment, evaluator|
+      payment.workspace = evaluator.workspace if payment.workspace.nil?
+    end
 
     trait :revenue_monster do
       payment_type { 'terminal' }

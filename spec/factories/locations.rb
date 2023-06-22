@@ -1,7 +1,12 @@
 FactoryBot.define do
   factory :location do
-    workspace
+    transient { workspace { create(:workspace) } }
+    transient { store { create(:store, workspace: workspace) } }
     sequence(:name) { |n| "#{Faker::Address.community} #{n}" }
-    store
+    
+    after(:build) do |location, evaluator|
+      location.workspace = evaluator.workspace if location.workspace.nil?
+      location.store = evaluator.store if location.store.nil?
+    end
   end
 end

@@ -1,7 +1,8 @@
 FactoryBot.define do
   factory :line_item do
-    order_id { create(:order).id }
-    product_id { create(:product).id }
+    transient { workspace { create(:workspace) } }
+    order_id { create(:order, workspace: workspace).id }
+    product_id { create(:product, workspace: workspace).id }
     quantity { Faker::Number.within(range: 1..20) }
     name { Faker::Lorem.word }
     product_deleted { false }

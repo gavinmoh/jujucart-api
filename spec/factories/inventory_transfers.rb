@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :inventory_transfer do
-    workspace
-    transfer_from_location_id { create(:location).id }
-    transfer_to_location_id { create(:location).id }
+    transient { workspace { create(:workspace) } }
+    transfer_from_location_id { create(:location, workspace: workspace).id }
+    transfer_to_location_id { create(:location, workspace: workspace).id }
     remark { Faker::Lorem.sentence }
     acceptance_remark { Faker::Lorem.sentence }
     # accepted_at { Faker::Time.between(from: Time.zone.now - 30.days, to: Time.zone.now) }
@@ -12,6 +12,10 @@ FactoryBot.define do
     # cancelled_by_id { create(:cancelled_by).id }
     # reverted_by_id { create(:reverted_by).id }
     created_by_id { create(:user).id }
+
+    after(:build) do |inventory_transfer, evaluator|
+      inventory_transfer.workspace = evaluator.workspace if inventory_transfer.workspace.nil?
+    end
 
     trait :with_inventory_transfer_items do
       transient do

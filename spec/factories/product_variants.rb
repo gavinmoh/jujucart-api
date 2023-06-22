@@ -1,6 +1,7 @@
 FactoryBot.define do
   factory :product_variant do
-    product_id { create(:product).id }
+    transient { workspace { create(:workspace) } }
+    product_id { create(:product, workspace: workspace).id }
     sequence(:name) { |n| "#{Faker::Name.name}-#{n}" }
     price { Faker::Number.within(range: 100..1000).to_s }
     discount_price { Faker::Number.within(range: 100..1000).to_s }
