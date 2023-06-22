@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :inventory_transfer do
+    workspace
     transfer_from_location_id { create(:location).id }
     transfer_to_location_id { create(:location).id }
     remark { Faker::Lorem.sentence }

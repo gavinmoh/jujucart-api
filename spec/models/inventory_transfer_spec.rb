@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe InventoryTransfer, type: :model do
   describe 'associations' do
     subject { build(:inventory_transfer) }
+    it { should belong_to(:workspace) }
     it { should belong_to(:transfer_from_location).optional }
     it { should belong_to(:transfer_to_location).optional }
     it { should belong_to(:transferred_by).optional }

@@ -1,5 +1,6 @@
 class InventoryTransfer < ApplicationRecord
   include AASM
+  belongs_to :workspace
   belongs_to :transfer_from_location, optional: true, class_name: 'Location'
   belongs_to :transfer_to_location, optional: true, class_name: 'Location'
   belongs_to :transferred_by, optional: true, class_name: 'Account'
@@ -52,7 +53,7 @@ class InventoryTransfer < ApplicationRecord
     def create_transfer_out_inventory_transactions
       ActiveRecord::Base.transaction do
         self.inventory_transfer_items.includes(:product).each do |item|
-          inventory = Inventory.find_or_create_by!(location_id: self.transfer_from_location.id, product_id: item.product_id)
+          inventory = Inventory.find_or_create_by!(workspace_id: self.workspace_id, location_id: self.transfer_from_location.id, product_id: item.product_id)
           InventoryTransaction.find_or_create_by!(inventory_id: inventory.id, 
                                                  quantity: item.quantity * -1,
                                                  inventory_transfer_id: self.id)
@@ -63,7 +64,7 @@ class InventoryTransfer < ApplicationRecord
     def create_transfer_in_inventory_transactions
       ActiveRecord::Base.transaction do
         self.inventory_transfer_items.includes(:product).each do |item|
-          inventory = Inventory.find_or_create_by!(location_id: self.transfer_to_location.id, product_id: item.product_id)
+          inventory = Inventory.find_or_create_by!(workspace_id: self.workspace_id, location_id: self.transfer_to_location.id, product_id: item.product_id)
           InventoryTransaction.find_or_create_by!(inventory_id: inventory.id, 
                                                   quantity: item.quantity,
                                                   inventory_transfer_id: self.id)
