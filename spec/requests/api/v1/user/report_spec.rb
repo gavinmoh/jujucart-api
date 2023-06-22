@@ -2,6 +2,7 @@ require 'swagger_helper'
 
 RSpec.describe 'api/v1/user/reports', type: :request do
   let(:user) { create(:user) }
+  let(:workspace) { user.current_workspace }
   let(:Authorization) { bearer_token_for(create(:user)) }
 
   path '/api/v1/user/reports/overview' do
@@ -17,10 +18,10 @@ RSpec.describe 'api/v1/user/reports', type: :request do
 
       before do
         5.times do
-          order = create(:order, completed_at: Faker::Time.between(from: Time.current.beginning_of_month, to: Time.current), created_by_id: create(:user).id)
-          create(:customer, created_at: Faker::Time.between(from: Time.current.beginning_of_month, to: Time.current))
+          order = create(:order, workspace: workspace, completed_at: Faker::Time.between(from: Time.current.beginning_of_month, to: Time.current), created_by_id: create(:user).id)
+          create(:customer, workspace: workspace, created_at: Faker::Time.between(from: Time.current.beginning_of_month, to: Time.current))
 
-          product = create(:product)
+          product = create(:product, workspace: workspace)
           create(:line_item, order: order, product: product)
 
           order.update!(status: 'completed')
@@ -36,8 +37,6 @@ RSpec.describe 'api/v1/user/reports', type: :request do
           number_of_payments.times do
             create(:payment, order: order, amount_cents: amount_for_each_payment, status: 'success', updated_at: order.completed_at)
           end
-
-          order
         end
       end
 
@@ -95,8 +94,8 @@ RSpec.describe 'api/v1/user/reports', type: :request do
 
       response(200, 'successful') do
         before do
-          products = create_list(:product, 5)
-          orders = create_list(:order, 3)
+          products = create_list(:product, 5, workspace: workspace)
+          orders = create_list(:order, 3, workspace: workspace)
           orders.each { create(:line_item, product: products.sample) }
           Order.update_all(completed_at: Time.current, status: :completed)
         end
@@ -120,12 +119,12 @@ RSpec.describe 'api/v1/user/reports', type: :request do
 
       response(200, 'successful') do
         before do
-          categories = create_list(:category, 10)
+          categories = create_list(:category, 10, workspace: workspace)
           products =
             3.times.map do
-              create(:product, category: categories.sample)
+              create(:product, category: categories.sample, workspace: workspace)
             end
-          orders = create_list(:order, 3)
+          orders = create_list(:order, 3, workspace: workspace)
           orders.each { create(:line_item, product: products.sample) }
           Order.update_all(completed_at: Time.current, status: :completed)
         end
