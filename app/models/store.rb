@@ -6,7 +6,7 @@ class Store < ApplicationRecord
   has_many :products, through: :inventories
   has_many :assigned_stores, dependent: :destroy
   has_many :users, through: :assigned_stores
-  has_many :pos_terminals, dependent: :destroy
+  has_many :pos_terminals, dependent: :nullify
 
   after_commit :create_location, on: :create
 
