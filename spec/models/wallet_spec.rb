@@ -24,7 +24,7 @@ RSpec.describe Wallet, type: :model do
           let(:wallet) { build(:wallet, customer: nil) }
 
           it 'does not set workspace_id' do
-            expect { wallet.valid? }.not_to change { wallet.workspace_id }
+            expect { wallet.valid? }.not_to(change{ wallet.workspace_id })
           end
         end
       end
