@@ -1,4 +1,5 @@
 class PromotionBundle < ApplicationRecord
+  belongs_to :workspace
   has_many :promotion_bundle_items, dependent: :destroy
   has_many :line_items, dependent: :nullify
 

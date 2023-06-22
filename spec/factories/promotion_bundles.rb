@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :promotion_bundle do
+    workspace
     name { Faker::Lorem.sentence }
     discount_by { PromotionBundle.discount_bies.keys.sample }
     discount_price { Faker::Number.within(range: 1..1000).to_s }

@@ -13,7 +13,7 @@ class Api::V1::User::PromotionBundleItemsController < Api::V1::User::Application
   end
 
   def create
-    @promotion_bundle_item = pundit_scope(@promotion_bundle.promotion_bundle_items).new(promotion_bundle_item_params)
+    @promotion_bundle_item = @promotion_bundle.promotion_bundle_items.new(promotion_bundle_item_params)
     pundit_authorize(@promotion_bundle_item)
 
     if @promotion_bundle_item.save
@@ -41,18 +41,18 @@ class Api::V1::User::PromotionBundleItemsController < Api::V1::User::Application
 
   private
     def set_promotion_bundle
-      @promotion_bundle = pundit_scope(PromotionBundle).find(params[:promotion_bundle_id])
+      @promotion_bundle = policy_scope(PromotionBundle, policy_scope_class: Api::V1::User::PromotionBundlePolicy::Scope).find(params[:promotion_bundle_id])
       authorize(@promotion_bundle, policy_class: Api::V1::User::PromotionBundlePolicy) if @promotion_bundle
     end
 
     def set_promotion_bundle_item
-      @promotion_bundle_item = pundit_scope(@promotion_bundle.promotion_bundle_items).find(params[:id])
+      @promotion_bundle_item = @promotion_bundle.promotion_bundle_items.find(params[:id])
       pundit_authorize(@promotion_bundle_item) if @promotion_bundle_item
     end
 
     def set_promotion_bundle_items
       pundit_authorize(PromotionBundleItem)      
-      @promotion_bundle_items = pundit_scope(@promotion_bundle.promotion_bundle_items.includes(:promotion_bundle, :product))
+      @promotion_bundle_items = @promotion_bundle.promotion_bundle_items.includes(:promotion_bundle, :product)
       @promotion_bundle_items = attribute_sortable(@promotion_bundle_items)
     end
 
