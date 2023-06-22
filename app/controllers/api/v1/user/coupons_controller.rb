@@ -46,8 +46,9 @@ class Api::V1::User::CouponsController < Api::V1::User::ApplicationController
     end
 
     def set_coupons
-      pundit_authorize(Coupon)      
-      @coupons = pundit_scope(Coupon.with_total_redemptions.all)
+      pundit_authorize(Coupon)
+      @coupons = pundit_scope(Coupon.all)
+      @coupons = @coupons.with_total_redemptions
       if params[:scope].present?
         case params[:scope]
         when 'active'
