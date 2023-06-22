@@ -4,6 +4,20 @@ class Workspace < ApplicationRecord
 
   has_many :user_workspaces, dependent: :destroy
   has_many :users, through: :user_workspaces
+  has_many :categories, dependent: :destroy
+  has_many :coupons, dependent: :destroy
+  has_many :customers, dependent: :destroy
+  has_many :inventories, dependent: :destroy
+  has_many :inventory_transfers, dependent: :destroy
+  has_many :locations, dependent: :destroy
+  has_many :orders, dependent: :destroy
+  has_many :payments, dependent: :destroy
+  has_many :pos_terminals, dependent: :destroy
+  has_many :products, dependent: :destroy
+  has_many :promotion_bundles, dependent: :destroy
+  has_many :sales_statements, dependent: :destroy
+  has_many :stores, dependent: :destroy
+  has_many :wallets, dependent: :destroy
 
   mount_base64_uploader :logo, PhotoUploader
 

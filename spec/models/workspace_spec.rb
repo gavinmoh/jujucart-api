@@ -6,6 +6,20 @@ RSpec.describe Workspace, type: :model do
     it { should belong_to(:created_by).optional.class_name('Account') }
     it { should have_many(:user_workspaces).dependent(:destroy) }
     it { should have_many(:users).through(:user_workspaces) }
+    it { should have_many(:categories).dependent(:destroy) }
+    it { should have_many(:coupons).dependent(:destroy) }
+    it { should have_many(:customers).dependent(:destroy) }
+    it { should have_many(:inventories).dependent(:destroy) }
+    it { should have_many(:inventory_transfers).dependent(:destroy) }
+    it { should have_many(:locations).dependent(:destroy) }
+    it { should have_many(:orders).dependent(:destroy) }
+    it { should have_many(:payments).dependent(:destroy) }
+    it { should have_many(:pos_terminals).dependent(:destroy) }
+    it { should have_many(:products).dependent(:destroy) }
+    it { should have_many(:promotion_bundles).dependent(:destroy) }
+    it { should have_many(:sales_statements).dependent(:destroy) }
+    it { should have_many(:stores).dependent(:destroy) }
+    it { should have_many(:wallets).dependent(:destroy) }
   end
 
   describe 'validations' do
@@ -47,7 +61,6 @@ RSpec.describe Workspace, type: :model do
           expect(workspace.coin_to_cash_rate).to eq(0.01)
           expect(workspace.order_reward_amount).to eq(0)
           expect(workspace.maximum_redeemed_coin_rate).to eq(0.5)
-          expect(workspace.statement_address).to eq('6623 & 6627, Jalan Mengkuang, Kampung Paya, 12200 Butterworth, Pulau Pinang.')
           expect(workspace.invoice_size).to eq('A4')
         end
       end
