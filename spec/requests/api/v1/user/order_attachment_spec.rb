@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/order_attachments', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:order_attachment).id }
+  let(:id) { create(:order_attachment, order: create(:order, workspace: user.current_workspace)).id }
 
   path '/api/v1/user/order_attachments' do
     get('list order attachments') do
@@ -21,7 +21,7 @@ RSpec.describe 'api/v1/user/order_attachments', type: :request do
 
       response(200, 'successful') do
         before do
-          create_list(:order_attachment, 2)
+          create_list(:order_attachment, 2, order: create(:order, workspace: user.current_workspace))
         end
 
         run_test!
