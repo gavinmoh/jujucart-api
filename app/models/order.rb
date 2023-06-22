@@ -1,6 +1,7 @@
 class Order < ApplicationRecord
   include ActiveModel::Dirty, AASM
 
+  belongs_to :workspace
   belongs_to :customer, optional: true
   belongs_to :created_by, class_name: 'User', optional: true
   belongs_to :store
@@ -145,7 +146,7 @@ class Order < ApplicationRecord
 
     def create_inventory_transactions
       self.line_items.each do |line_item|
-        inventory = line_item.product.inventories.find_or_create_by(location_id: self.store.location.id)
+        inventory = line_item.product.inventories.find_or_create_by(location_id: self.store.location.id, workspace_id: self.workspace_id)
         inventory.inventory_transactions.create(
           order_id: self.id,
           quantity: -(line_item.quantity),
@@ -157,7 +158,7 @@ class Order < ApplicationRecord
     def create_return_inventory_transactions
       self.line_items.includes(:product).each do |line_item|
         next if line_item.product_deleted?
-        inventory = line_item.product.inventories.find_or_create_by(location_id: self.store.location.id)
+        inventory = line_item.product.inventories.find_or_create_by(location_id: self.store.location.id, workspace_id: self.workspace_id)
         inventory.inventory_transactions.create(
           order_id: self.id,
           quantity: line_item.quantity,

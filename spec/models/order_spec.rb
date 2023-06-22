@@ -3,6 +3,7 @@ require 'rails_helper'
 
 RSpec.describe Order, type: :model do
   describe 'associations' do
+    it { should belong_to(:workspace) }
     it { should belong_to(:customer).optional }
     it { should belong_to(:store) }
     it { should belong_to(:created_by).optional }

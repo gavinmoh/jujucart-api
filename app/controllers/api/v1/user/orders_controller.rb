@@ -17,6 +17,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     @order = pundit_scope(Order).new(create_params)
     @order.order_type = 'pos'
     @order.created_by = current_user
+    @order.workspace = current_workspace
     pundit_authorize(@order)
     
     if @order.save

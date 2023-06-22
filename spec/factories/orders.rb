@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :order do
+    workspace
     customer_id { create(:customer).id }
     store_id { create(:store).id }
     unit_number { Faker::Address.building_number }
