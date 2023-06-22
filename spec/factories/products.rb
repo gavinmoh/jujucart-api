@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :product do
-    workspace
+    transient { workspace { create(:workspace) } }
     name { "#{Faker::Lorem.word} #{SecureRandom.hex(6)}" }
     description { Faker::Lorem.paragraph }
     active { true }
@@ -13,6 +13,10 @@ FactoryBot.define do
     product_attributes { 
       [{ name: 'Colour', values: ['Red', 'Green', 'Blue'] }, 
        { name: 'Size', values: ['XL', 'L', 'M', 'S'] }]
-     }
+    }
+
+    after(:build) do |product, evaluator|
+      product.workspace = evaluator.workspace if product.workspace.nil?
+    end
   end
 end
