@@ -12,7 +12,7 @@ class User < Account
   
   validates :name, presence: true
   validates :phone_number, uniqueness: { conditions: -> { where.not(phone_number: [nil, '']) } }, allow_blank: true, allow_nil: true
-  enum role: { admin: 'admin', cashier: 'cashier' }
+  enum role: { admin: 'admin', cashier: 'cashier' }, _default: 'admin'
   validates :role, presence: true  
   
   scope :query, -> (keyword) { where('name ILIKE :keyword OR phone_number ILIKE :keyword OR email ILIKE :keyword', {keyword: "%#{keyword}%"}) }

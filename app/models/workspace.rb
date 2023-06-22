@@ -40,6 +40,8 @@ class Workspace < ApplicationRecord
   before_validation :set_owner_id, on: :create
   before_validation :set_default_settings, on: :create
 
+  after_commit :create_default_store, on: :create
+
   private
     def set_owner_id
       self.owner_id = self.created_by_id if self.owner_id.nil?
@@ -50,5 +52,9 @@ class Workspace < ApplicationRecord
       self.order_reward_amount = 0 if self.order_reward_amount.blank?
       self.maximum_redeemed_coin_rate = 0.5 if self.maximum_redeemed_coin_rate.blank?
       self.invoice_size = 'A4' if self.invoice_size.blank?
+    end
+
+    def create_default_store
+      self.stores.create!(name: "Default Store")
     end
 end

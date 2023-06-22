@@ -18,8 +18,9 @@ Rails.application.routes.draw do
 
       namespace :user do
         devise_scope :user do
-          post 'sign_in' => 'sessions#create'
+          post   'sign_in'  => 'sessions#create'
           delete 'sign_out' => 'sessions#destroy'
+          post   'sign_up'  => 'registrations#create'
           resource :passwords, only: [:create, :update]
         end
         
