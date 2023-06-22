@@ -1,6 +1,7 @@
 class Product < BaseProduct
   include ActiveModel::Dirty
 
+  belongs_to :workspace
   has_many :product_variants, dependent: :destroy, foreign_key: :product_id
 
   monetize :price_cents

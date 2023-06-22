@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :product do
+    workspace
     name { "#{Faker::Lorem.word} #{SecureRandom.hex(6)}" }
     description { Faker::Lorem.paragraph }
     active { true }

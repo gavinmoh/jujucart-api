@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/user/products', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:product).id }
+  let(:id) { create(:product, workspace: user.current_workspace).id }
 
   path '/api/v1/user/products' do
     get('list products') do
@@ -26,11 +26,11 @@ RSpec.describe 'api/v1/user/products', type: :request do
         let(:store_id) { store.id }
         before do
           3.times do
-            product = create(:product)
+            product = create(:product, workspace: user.current_workspace)
             variant = create(:product_variant, product_id: product.id)
-            product_inventory = create(:inventory, product_id: product.id, location_id: store.location.id)
+            product_inventory = create(:inventory, product_id: product.id, location_id: store.location.id, workspace: user.current_workspace)
             create(:inventory_transaction, inventory_id: product_inventory.id)
-            variant_inventory = create(:inventory, product_id: variant.id, location_id: store.location.id)
+            variant_inventory = create(:inventory, product_id: variant.id, location_id: store.location.id, workspace: user.current_workspace)
             create(:inventory_transaction, inventory_id: variant_inventory.id)
           end
         end
@@ -126,19 +126,19 @@ RSpec.describe 'api/v1/user/products', type: :request do
       produces 'application/json'
       security [ { bearerAuth: nil } ]
 
-      let(:store) { create(:store) }
+      let(:store) { create(:store, workspace: user.current_workspace) }
       let(:store_id) { store.id }
 
       response(200, 'successful') do
         before do
           variant1 = create(:product_variant, product_id: id, product_attributes: [{name: 'Color', value: 'Red'}])
-          inventory1 = Inventory.find_or_create_by(product_id: variant1.id, location_id: store.location.id)
+          inventory1 = Inventory.find_or_create_by(product_id: variant1.id, location_id: store.location.id, workspace: user.current_workspace)
           create(:inventory_transaction, inventory_id: inventory1.id)
           variant2 = create(:product_variant, product_id: id, product_attributes: [{name: 'Color', value: 'Blue'}])
-          inventory2 = Inventory.find_or_create_by(product_id: variant2.id, location_id: store.location.id)
+          inventory2 = Inventory.find_or_create_by(product_id: variant2.id, location_id: store.location.id, workspace: user.current_workspace)
           create(:inventory_transaction, inventory_id: inventory2.id)
           variant3 = create(:product_variant, product_id: id, product_attributes: [{name: 'Color', value: 'Green'}])
-          inventory3 = Inventory.find_or_create_by(product_id: variant3.id, location_id: store.location.id)
+          inventory3 = Inventory.find_or_create_by(product_id: variant3.id, location_id: store.location.id, workspace: user.current_workspace)
           create(:inventory_transaction, inventory_id: inventory3.id)
         end
         run_test!

@@ -26,6 +26,17 @@ RSpec.describe ProductVariant, type: :model do
           expect(product_variant.product_attributes).to eq([{"name" => 'Colour', "value" => 'Red'}])
         end
       end
+
+      context '#set_workspace_id' do
+        let(:workspace) { create(:workspace) }
+        let(:product) { create(:product, workspace: workspace) }
+        let(:product_variant) { build(:product_variant, product: product) }
+
+        it 'should set workspace_id' do
+          product_variant.valid?
+          expect(product_variant.workspace_id).to eq(workspace.id)
+        end
+      end
     end
   end
 

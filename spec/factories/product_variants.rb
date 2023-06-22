@@ -9,6 +9,6 @@ FactoryBot.define do
     product_attributes { 
       [{ name: 'Colour', value: ['Red', 'Green', 'Blue'].sample }, 
        { name: 'Size', value: ['XL', 'L', 'M', 'S'].sample }]
-     }
+    }
   end
 end

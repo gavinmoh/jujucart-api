@@ -17,7 +17,8 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
   end
 
   def create
-    @product = pundit_scope(Product).new(product_params)
+    @product = Product.new(product_params)
+    @product.workspace = current_workspace
     pundit_authorize(@product)
 
     if @product.save
@@ -67,6 +68,7 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
           x[:category_id] = category.id
         end
         x[:tags] = x[:tags].split if x[:tags].present?
+        x[:workspace_id] = current_workspace.id
         x.except(:category)
       end
       @products_array = Product.create!(products_attributes)
