@@ -14,11 +14,11 @@ RSpec.describe 'api/v1/user/pos_terminals', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:id) { create(:pos_terminal).id }
-  let(:store) { create(:store) }
-  let(:order) { create(:order, :with_line_items, order_type: 'pos') }
+  let(:store) { create(:store, workspace: user.current_workspace) }
+  let(:order) { create(:order, :with_line_items, order_type: 'pos', workspace: user.current_workspace) }
   let(:payment) { create(:payment, :revenue_monster, status: 'success', order_id: order.id) }
   let(:pos_terminal) { create(:pos_terminal, store_id: store.id) }
+  let(:id) { pos_terminal.id }
 
   path '/api/v1/user/pos_terminals' do
 

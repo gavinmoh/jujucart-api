@@ -14,7 +14,7 @@ class Api::V1::User::PosTerminalsController < Api::V1::User::ApplicationControll
   end
 
   def create
-    @pos_terminal = pundit_scope(PosTerminal).new(pos_terminal_params)
+    @pos_terminal = PosTerminal.new(pos_terminal_params)
     pundit_authorize(@pos_terminal)
     
     if @pos_terminal.save
