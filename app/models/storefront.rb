@@ -1,0 +1,2 @@
+class Storefront < Account
+end  

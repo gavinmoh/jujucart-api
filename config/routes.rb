@@ -1,11 +1,4 @@
 Rails.application.routes.draw do
-  namespace :api do
-    namespace :v1 do
-      namespace :admin do
-        resources :workspaces
-      end
-    end
-  end
   devise_for :admins, only: []
   devise_for :users,  only: []
   devise_for :customers, only: [] 
@@ -14,6 +7,10 @@ Rails.application.routes.draw do
     namespace :v1 do
       namespace :revenue_monster do
         post :callback, to: 'application#callback'
+      end
+
+      namespace :admin do
+        resources :workspaces
       end
 
       namespace :user do
@@ -96,6 +93,10 @@ Rails.application.routes.draw do
           end
         end
         resource :workspace, only: [:show, :update], controller: :workspace
+      end
+
+      namespace :storefront do
+        resource :store, only: [:show], controller: :store
       end
     end
   end
