@@ -62,6 +62,7 @@ class Api::V1::User::StoresController < Api::V1::User::ApplicationController
     def store_params
       params.require(:store).permit(
         :name, :description, :logo, :remove_logo, :validate_inventory,
+        :store_type, :hostname,
         assigned_stores_attributes: [:id, :user_id, :_destroy],
         pos_terminals_attributes: [:id, :terminal_id, :label, :_destroy]
       )

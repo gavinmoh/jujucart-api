@@ -9,5 +9,9 @@ FactoryBot.define do
     after(:build) do |store, evaluator|
       store.workspace = evaluator.workspace if store.workspace.nil?
     end
+
+    trait :with_hostname do
+      hostname { Faker::Internet.domain_name }
+    end
   end
 end

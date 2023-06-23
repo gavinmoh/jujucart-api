@@ -49,6 +49,8 @@ RSpec.describe 'api/v1/user/stores', type: :request do
               description: { type: :string },
               logo: { type: :string },
               validate_inventory: { type: :boolean },
+              store_type: { type: :string, enum: Store.store_types.keys },
+              hostname: { type: :string },
               assigned_stores_attributes: {
                 type: :array,
                 items: {
@@ -112,6 +114,8 @@ RSpec.describe 'api/v1/user/stores', type: :request do
               logo: { type: :string },
               remove_logo: { type: :boolean },
               validate_inventory: { type: :boolean },
+              store_type: { type: :string, enum: Store.store_types.keys },
+              hostname: { type: :string },
               assigned_stores_attributes: {
                 type: :array,
                 items: {

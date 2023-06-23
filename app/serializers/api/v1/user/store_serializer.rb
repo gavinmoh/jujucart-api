@@ -1,5 +1,6 @@
 class Api::V1::User::StoreSerializer < ActiveModel::Serializer
-  attributes :id, :name, :description, :logo, :validate_inventory
+  attributes :id, :name, :description, :logo, :validate_inventory,
+             :store_type, :hostname
   attributes :created_at, :updated_at
 
   has_many :assigned_stores
