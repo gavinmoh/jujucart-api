@@ -522,7 +522,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
         let(:order2) { create(:order, :with_line_items, order_type: 'manual', status: 'pending', customer: nil, workspace: user.current_workspace) }
         let(:data) { { ids: [order1.id, order2.id] } }
 
-        run_test! do |response|
+        run_test!
           expect(Order.find(order1.id).status).to eq('confirmed')
           expect(Order.find(order2.id).status).to eq('confirmed')
         end
@@ -550,7 +550,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
         let(:order2) { create(:order, order_type: 'delivery', status: 'confirmed', workspace: user.current_workspace) }
         let(:data) { { ids: [order1.id, order2.id] } }
 
-        run_test! do |response|
+        run_test!
           expect(Order.find(order1.id).status).to eq('packed')
           expect(Order.find(order2.id).status).to eq('packed')
         end
@@ -578,7 +578,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
         let(:order2) { create(:order, :with_line_items, order_type: 'delivery', status: 'shipped', customer: nil, workspace: user.current_workspace) }
         let(:data) { { ids: [order1.id, order2.id] } }
 
-        run_test! do |response|
+        run_test!
           expect(Order.find(order1.id).status).to eq('completed')
           expect(Order.find(order2.id).status).to eq('completed')
         end
@@ -606,7 +606,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
         let(:order2) { create(:order, :with_line_items, order_type: 'pos', status: 'completed', customer: nil, workspace: user.current_workspace) }
         let(:data) { { ids: [order1.id, order2.id] } }
 
-        run_test! do |response|
+        run_test! do
           expect(Order.find(order1.id).status).to eq('voided')
           expect(Order.find(order2.id).status).to eq('voided')
         end
