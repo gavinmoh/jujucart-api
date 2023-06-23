@@ -97,6 +97,9 @@ Rails.application.routes.draw do
 
       namespace :storefront do
         resource :store, only: [:show], controller: :store
+        resources :products, only: [:index, :show] do
+          get :all, on: :collection
+        end
       end
     end
   end
