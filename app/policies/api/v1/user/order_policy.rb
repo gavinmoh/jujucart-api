@@ -92,6 +92,34 @@ class Api::V1::User::OrderPolicy < ApplicationPolicy
     end
   end
 
+  def bulk_pack?
+    if @user.admin?
+      true
+    elsif @user.cashier?
+      @user.assigned_stores.exists?(store_id: @record.pluck(:store_id).uniq)
+    end
+  end
+
+  def bulk_confirm?
+    if @user.admin?
+      true
+    elsif @user.cashier?
+      @user.assigned_stores.exists?(store_id: @record.pluck(:store_id).uniq)
+    end
+  end
+
+  def bulk_complete?
+    if @user.admin?
+      true
+    elsif @user.cashier?
+      @user.assigned_stores.exists?(store_id: @record.pluck(:store_id).uniq)
+    end
+  end
+
+  def bulk_void?
+    @user.admin?
+  end
+
   class Scope < Scope
     def resolve
       if @user.admin?

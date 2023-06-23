@@ -1,9 +1,13 @@
 class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
   before_action :set_order, only: [:show, :update, :destroy, :pack, :ship, :complete, :void, :checkout, :versions, :apply_coupon, :remove_coupon]
   before_action :set_orders, only: [:index]
+  before_action :set_bulk_orders, only: [:bulk_confirm, :bulk_pack, :bulk_complete, :bulk_void]
   
   def index
-    unless params[:skip_pagination].present? and ActiveModel::Type::Boolean.new.cast(params[:skip_pagination])
+    if params[:skip_pagination].present? and ActiveModel::Type::Boolean.new.cast(params[:skip_pagination])
+      # only allow filter by params[:ids] when skip_pagination is true
+      @orders = @orders.where(id: params[:ids]) if params[:ids].present?
+    else
       @pagy, @orders = pagy(@orders)
     end
     render json: @orders, adapter: :json, include: index_included_associations
@@ -144,6 +148,38 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     end
   end
 
+  def bulk_confirm
+    @orders.find_each do |order|
+      ActiveRecord::Base.transaction { order.confirm! } rescue next
+    end
+    @orders.reload
+    render json: @orders, adapter: :json, include: index_included_associations
+  end
+
+  def bulk_pack
+    @orders.find_each do |order|
+      ActiveRecord::Base.transaction { order.pack! } rescue next
+    end
+    @orders.reload
+    render json: @orders, adapter: :json, include: index_included_associations
+  end
+
+  def bulk_complete
+    @orders.find_each do |order|
+      ActiveRecord::Base.transaction { order.complete! } rescue next
+    end
+    @orders.reload
+    render json: @orders, adapter: :json, include: index_included_associations
+  end
+
+  def bulk_void
+    @orders.find_each do |order|
+      ActiveRecord::Base.transaction { order.void! } rescue next
+    end
+    @orders.reload
+    render json: @orders, adapter: :json, include: index_included_associations
+  end
+
   private
     def set_order
       @order = pundit_scope(Order).includes(:customer, :created_by, :store, :order_coupon, {line_items: :product}).find(params[:id])
@@ -159,9 +195,14 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
       @orders = @orders.where(customer_id: params[:customer_id]) if params[:customer_id].present?
       @orders = @orders.where(is_flagged: ActiveModel::Type::Boolean.new.cast(params[:is_flagged])) if params[:is_flagged].present?
       @orders = @orders.where(order_type: params[:order_type]) if params[:order_type].present?
-      @orders = @orders.where(id: params[:ids]) if params[:ids].present?
       @orders = attribute_date_scopable(@orders)
       @orders = attribute_sortable(@orders)
+    end
+
+    def set_bulk_orders
+      pundit_authorize(Order)
+      @orders = pundit_scope(Order).includes(:customer, :workspace, :success_payment, :created_by, :order_coupon, {store: :location}, {line_items: :product})
+      @orders = @orders.where(id: bulk_order_ids_params)
     end
 
     def index_included_associations
@@ -214,5 +255,9 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
 
     def coupon_code_params
       params.require(:code)
+    end
+
+    def bulk_order_ids_params
+      params.require(:ids)
     end
 end

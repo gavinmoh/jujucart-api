@@ -32,15 +32,23 @@ Rails.application.routes.draw do
         resources :customers, only: [:index, :show, :create, :update]
         resources :payments, only: [:index, :show]
         resources :orders do
-          put :pack, on: :member
-          put :ship, on: :member
-          put :checkout, on: :member
-          put :complete, on: :member
-          put :void, on: :member
-          get :versions, on: :member
-          put :apply_coupon, on: :member
-          put :remove_coupon, on: :member
           resources :line_items
+          collection do
+            put :bulk_confirm
+            put :bulk_pack
+            put :bulk_complete
+            put :bulk_void
+          end
+          member do
+            put :pack
+            put :ship
+            put :checkout
+            put :complete
+            put :void
+            get :versions
+            put :apply_coupon
+            put :remove_coupon
+          end
         end
         resources :order_attachments
         resources :inventories

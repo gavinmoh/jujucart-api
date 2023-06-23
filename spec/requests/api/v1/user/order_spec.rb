@@ -501,4 +501,118 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       end
     end
   end
+
+  path '/api/v1/user/orders/bulk_confirm' do
+    put('bulk confirm orders') do
+      tags 'User Orders'
+      produces 'application/json'
+      consumes 'application/json'
+      security [ { bearerAuth: nil } ]
+
+      parameter name: :data, in: :body, schema: {
+        type: :object,
+        properties: {
+          ids: { type: :array, items: { type: :string } }
+        }
+      }
+
+      response(200, 'successful', save_request_example: :data) do
+        let(:user) { create(:user, role: 'admin')}
+        let(:order1) { create(:order, :with_line_items, order_type: 'manual', status: 'pending', workspace: user.current_workspace) }
+        let(:order2) { create(:order, :with_line_items, order_type: 'manual', status: 'pending', customer: nil, workspace: user.current_workspace) }
+        let(:data) { { ids: [order1.id, order2.id] } }
+
+        run_test! do |response|
+          expect(Order.find(order1.id).status).to eq('confirmed')
+          expect(Order.find(order2.id).status).to eq('confirmed')
+        end
+      end
+    end    
+  end
+
+  path '/api/v1/user/orders/bulk_pack' do
+    put('bulk pack orders') do
+      tags 'User Orders'
+      produces 'application/json'
+      consumes 'application/json'
+      security [ { bearerAuth: nil } ]
+
+      parameter name: :data, in: :body, schema: {
+        type: :object,
+        properties: {
+          ids: { type: :array, items: { type: :string } }
+        }
+      }
+
+      response(200, 'successful', save_request_example: :data) do
+        let(:user) { create(:user, role: 'admin')}
+        let(:order1) { create(:order, order_type: 'delivery', status: 'confirmed', workspace: user.current_workspace) }
+        let(:order2) { create(:order, order_type: 'delivery', status: 'confirmed', workspace: user.current_workspace) }
+        let(:data) { { ids: [order1.id, order2.id] } }
+
+        run_test! do |response|
+          expect(Order.find(order1.id).status).to eq('packed')
+          expect(Order.find(order2.id).status).to eq('packed')
+        end
+      end
+    end    
+  end
+
+  path '/api/v1/user/orders/bulk_complete' do
+    put('bulk complete orders') do
+      tags 'User Orders'
+      produces 'application/json'
+      consumes 'application/json'
+      security [ { bearerAuth: nil } ]
+
+      parameter name: :data, in: :body, schema: {
+        type: :object,
+        properties: {
+          ids: { type: :array, items: { type: :string } }
+        }
+      }
+
+      response(200, 'successful', save_request_example: :data) do
+        let(:user) { create(:user, role: 'admin')}
+        let(:order1) { create(:order, :with_line_items, order_type: 'delivery', status: 'shipped', workspace: user.current_workspace) }
+        let(:order2) { create(:order, :with_line_items, order_type: 'delivery', status: 'shipped', customer: nil, workspace: user.current_workspace) }
+        let(:data) { { ids: [order1.id, order2.id] } }
+
+        run_test! do |response|
+          expect(Order.find(order1.id).status).to eq('completed')
+          expect(Order.find(order2.id).status).to eq('completed')
+        end
+      end
+    end    
+  end
+
+  path '/api/v1/user/orders/bulk_void' do
+    put('bulk void orders') do
+      tags 'User Orders'
+      produces 'application/json'
+      consumes 'application/json'
+      security [ { bearerAuth: nil } ]
+
+      parameter name: :data, in: :body, schema: {
+        type: :object,
+        properties: {
+          ids: { type: :array, items: { type: :string } }
+        }
+      }
+
+      response(200, 'successful', save_request_example: :data) do
+        let(:user) { create(:user, role: 'admin')}
+        let(:order1) { create(:order, :with_line_items, order_type: 'pos', status: 'completed', workspace: user.current_workspace) }
+        let(:order2) { create(:order, :with_line_items, order_type: 'pos', status: 'completed', customer: nil, workspace: user.current_workspace) }
+        let(:data) { { ids: [order1.id, order2.id] } }
+
+        run_test! do |response|
+          expect(Order.find(order1.id).status).to eq('voided')
+          expect(Order.find(order2.id).status).to eq('voided')
+        end
+      end
+    end    
+  end
+
+  
 end
