@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_22_041224) do
+ActiveRecord::Schema[7.0].define(version: 2023_06_23_030629) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -173,7 +173,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_22_041224) do
     t.bigint "total_price_cents", default: 0, null: false
     t.string "total_price_currency", default: "MYR", null: false
     t.string "name"
-    t.boolean "product_deleted"
+    t.boolean "product_deleted", default: false
     t.jsonb "product_data", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
