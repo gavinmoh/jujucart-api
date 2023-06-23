@@ -1,10 +1,11 @@
 class ApplicationPolicy
-  attr_reader :user, :record, :workspace
+  attr_reader :user, :record, :workspace, :store
 
   def initialize(context, record)
     if context.class == PunditContext
       @user = context.user
       @workspace = context.workspace
+      @store = context.store
     else
       @user = context
     end
@@ -32,12 +33,13 @@ class ApplicationPolicy
   end
 
   class Scope
-    attr_reader :user, :scope, :workspace
+    attr_reader :user, :scope, :workspace, :store
 
     def initialize(context, scope)
       if context.class == PunditContext
         @user = context.user
         @workspace = context.workspace
+        @store = context.store
       else
         @user = context
       end

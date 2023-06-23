@@ -3,7 +3,7 @@ class Api::V1::Storefront::ApplicationController < ApplicationController
 
   # define pundit user here if the default user object is not current_user
   def pundit_user
-    current_customer
+    PunditContext.new(current_customer, store: current_store, workspace: current_workspace)
   end
 
   def set_store
@@ -21,5 +21,9 @@ class Api::V1::Storefront::ApplicationController < ApplicationController
 
   def current_store
     @store
+  end
+
+  def current_workspace
+    current_store.workspace
   end
 end
