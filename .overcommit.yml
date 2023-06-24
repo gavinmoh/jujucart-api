@@ -15,7 +15,7 @@
 #
 # Uncomment the following lines to make the configuration take effect.
 
-PreCommit:
+PrePush:
  RuboCop:
    enabled: true
    on_warn: fail # Treat all warnings as failures
@@ -27,6 +27,17 @@ PreCommit:
    on_warn: fail
    quiet: true
    command: ['bundle', 'exec', 'brakeman', '-w3']
+ 
+ RSpec:
+   enabled: true
+   command: ['bundle', 'exec', 'rspec', 'spec']
+   required_executable: ['bundle', 'rspec']
+   args: ['--color', '--tty', '--format', 'progress']
+   include: '\.rb$'
+   exclude: '\.feature$'
+   quiet: true
+
+#PreCommit:
 #
 #  TrailingWhitespace:
 #    enabled: true
