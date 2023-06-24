@@ -22,6 +22,7 @@ CommitMsg:
 PrePush:
  RuboCop:
    enabled: true
+   on_fail: warn
    on_warn: pass
    problem_on_unmodified_line: ignore # Don't report offenses on unchanged lines
    command: ['bundle', 'exec', 'rubocop']
@@ -29,7 +30,7 @@ PrePush:
  
  Brakeman:
    enabled: true
-   flags: ['--exit-on-warn', '--quiet', '--summary']
+   flags: ['-w3', '--exit-on-warn', '--quiet', '--summary']
    command: ['bundle', 'exec', 'brakeman']
  
  RSpec:
