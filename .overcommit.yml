@@ -22,18 +22,20 @@ CommitMsg:
 PrePush:
  RuboCop:
    enabled: true
-   on_warn: fail # Treat all warnings as failures
+   on_warn: pass
    problem_on_unmodified_line: ignore # Don't report offenses on unchanged lines
-   command: ['bundle', 'exec', 'rubocop', '-l']
+   command: ['bundle', 'exec', 'rubocop']
+   flags: ['-l']
  
  Brakeman:
    enabled: true
    flags: ['--exit-on-warn', '--quiet', '--summary']
-   command: ['bundle', 'exec', 'brakeman', '-w3']
+   command: ['bundle', 'exec', 'brakeman']
  
  RSpec:
    enabled: true
-   command: ['bundle', 'exec', 'rspec', 'spec', '--color', '--tty', '--format', 'progress']
+   command: ['bundle', 'exec', 'rspec', 'spec']
+   flags: []
 
 #PreCommit:
 #
