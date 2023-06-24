@@ -15,6 +15,10 @@
 #
 # Uncomment the following lines to make the configuration take effect.
 
+CommitMsg:
+  ALL:
+   enabled: false
+
 PrePush:
  RuboCop:
    enabled: true
