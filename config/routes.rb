@@ -1,9 +1,9 @@
 Rails.application.routes.draw do
   devise_for :admins, only: []
   devise_for :users,  only: []
-  devise_for :customers, only: [] 
-  
-  namespace :api, :defaults => { format: :json } do
+  devise_for :customers, only: []
+
+  namespace :api, defaults: { format: :json } do
     namespace :v1 do
       namespace :revenue_monster do
         post :callback, to: 'application#callback'
@@ -20,11 +20,11 @@ Rails.application.routes.draw do
           post   'sign_up'  => 'registrations#create'
           resource :passwords, only: [:create, :update]
         end
-        
+
         resource :accounts, only: [:show, :update] do
           put :password, on: :collection
         end
-        
+
         resources :users
         resources :customers, only: [:index, :show, :create, :update]
         resources :payments, only: [:index, :show]
@@ -100,6 +100,7 @@ Rails.application.routes.draw do
         resources :products, only: [:index, :show] do
           get :all, on: :collection
         end
+        resources :categories, only: [:index]
       end
     end
   end
@@ -118,5 +119,5 @@ Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Defines the root path route ("/")
-  # root "articles#index"  
+  # root "articles#index"
 end
