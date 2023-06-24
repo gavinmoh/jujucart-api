@@ -55,3 +55,12 @@ Rails/InverseOf:
 
 Rails/SkipsModelValidations:
   Enabled: false
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
+RSpec/LetSetup:
+  Enabled: false
