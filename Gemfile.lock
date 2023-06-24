@@ -370,6 +370,8 @@ GEM
       activesupport (>= 4.2.0)
       rack (>= 1.1)
       rubocop (>= 1.7.0, < 2.0)
+    rubocop-rspec (2.12.1)
+      rubocop (~> 1.31)
     ruby-progressbar (1.11.0)
     ruby-vips (2.1.4)
       ffi (~> 1.12)
@@ -443,7 +445,7 @@ DEPENDENCIES
   aasm (~> 5.1)
   active_model_serializers (~> 0.10.10)
   bootsnap
-  brakeman (~> 5.2)
+  brakeman
   bullet
   carrierwave (~> 2.1)
   carrierwave-base64 (~> 2.8)
@@ -477,7 +479,9 @@ DEPENDENCIES
   rspec-rails
   rspec-sidekiq (~> 3.1)
   rswag-specs
-  rubocop-rails (~> 2.13)
+  rubocop
+  rubocop-rails
+  rubocop-rspec
   scenic
   shoulda-matchers
   sidekiq
