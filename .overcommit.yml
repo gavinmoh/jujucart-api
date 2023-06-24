@@ -28,8 +28,7 @@ PrePush:
  
  Brakeman:
    enabled: true
-   on_warn: fail
-   quiet: true
+   flags: ['--exit-on-warn', '--quiet', '--summary']
    command: ['bundle', 'exec', 'brakeman', '-w3']
  
  RSpec:
