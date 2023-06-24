@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_23_093846) do
+ActiveRecord::Schema[7.0].define(version: 2023_06_24_040646) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -63,7 +63,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_23_093846) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "workspace_id"
-    t.index ["slug"], name: "index_categories_on_slug", unique: true
+    t.index ["name", "workspace_id"], name: "index_categories_on_name_and_workspace_id", unique: true
+    t.index ["slug", "workspace_id"], name: "index_categories_on_slug_and_workspace_id", unique: true, where: "((slug IS NOT NULL) AND ((slug)::text <> ''::text))"
     t.index ["workspace_id"], name: "index_categories_on_workspace_id"
   end
 
