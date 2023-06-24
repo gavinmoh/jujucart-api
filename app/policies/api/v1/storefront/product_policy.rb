@@ -7,7 +7,7 @@ class Api::V1::Storefront::ProductPolicy < ApplicationPolicy
     # NOTE: Be explicit about which records you allow access to!
     def resolve
       scope.where(workspace_id: @workspace.id, is_hidden: false, active: true)
-           .with_store_quantity(@store.id, include_all_products: false)
+           .with_store_quantity(@store.id, false)
     end
   end
 end
