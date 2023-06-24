@@ -26,7 +26,7 @@ PrePush:
    on_warn: pass
    problem_on_unmodified_line: ignore # Don't report offenses on unchanged lines
    command: ['bundle', 'exec', 'rubocop']
-   flags: ['-l']
+   flags: ['-l', '--format=emacs', '--force-exclusion', '--display-cop-names']
  
  Brakeman:
    enabled: true
@@ -36,7 +36,7 @@ PrePush:
  RSpec:
    enabled: true
    command: ['bundle', 'exec', 'rspec', 'spec']
-   flags: []
+   flags: ['--fail-fast', '--color', '--format', 'progress']
 
 #PreCommit:
 #
