@@ -34,12 +34,7 @@ PrePush:
  
  RSpec:
    enabled: true
-   command: ['bundle', 'exec', 'rspec', 'spec']
-   required_executable: ['bundle', 'rspec']
-   args: ['--color', '--tty', '--format', 'progress']
-   include: '\.rb$'
-   exclude: '\.feature$'
-   quiet: true
+   command: ['bundle', 'exec', 'rspec', 'spec', '--color', '--tty', '--format', 'progress']
 
 #PreCommit:
 #
