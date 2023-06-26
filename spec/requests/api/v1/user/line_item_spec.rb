@@ -52,10 +52,13 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
       response(200, 'successful') do
         let(:data) { { line_item: attributes_for(:line_item) } }
 
-        run_test!
+        run_test! do |response|
+          response_body = JSON.parse(response.body)
+          expect(response_body['line_item']['quantity']).to eq(data[:line_item][:quantity])
+        end
       end
 
-      context 'manual order' do
+      context 'when manual order' do
         let(:order) { create(:order, workspace: user.current_workspace, order_type: 'manual', status: 'pending') }
         let(:product) { create(:product, price_cents: 1000, discount_price_cents: 0) }
 
@@ -63,7 +66,7 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
           expect do
             post api_v1_user_order_line_items_url(order_id: order.id), headers: { Authorization: bearer_token_for(user) },
                                                                        params: { line_item: { product_id: product.id, quantity: 1, name: 'test', unit_price: 1 } }
-          end.to change { LineItem.count }.by(1)
+          end.to change(LineItem, :count).by(1)
           expect(response).to have_http_status(:ok)
           response_body = JSON.parse(response.body)
           expect(response_body['line_item']['name']).to eq('test')
@@ -71,7 +74,7 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
         end
       end
 
-      context 'pos order' do
+      context 'when pos order' do
         let(:order) { create(:order, workspace: user.current_workspace, order_type: 'pos', status: 'pending') }
         let(:product) { create(:product, workspace: user.current_workspace, price_cents: 1000, discount_price_cents: 0) }
 
@@ -79,7 +82,7 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
           expect do
             post api_v1_user_order_line_items_url(order_id: order.id), headers: { Authorization: bearer_token_for(user) },
                                                                        params: { line_item: { product_id: product.id, quantity: 1, name: 'test', unit_price: 100 } }
-          end.to change { LineItem.count }.by(1)
+          end.to change(LineItem, :count).by(1)
           expect(response).to have_http_status(:ok)
           response_body = JSON.parse(response.body)
           expect(response_body['line_item']['name']).to eq(product.name)
@@ -192,7 +195,7 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
         end
       end
 
-      context 'manual order' do
+      context 'when manual order' do
         let(:order) { create(:order, workspace: user.current_workspace, order_type: 'manual', status: 'pending') }
         let(:product) { create(:product, workspace: user.current_workspace, price_cents: 100, discount_price_cents: 0) }
         let(:id) { create(:line_item, product_id: product.id, order_id: order.id).id }
@@ -206,7 +209,7 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
         end
       end
 
-      context 'pos order' do
+      context 'when pos order' do
         let(:order) { create(:order, workspace: user.current_workspace, order_type: 'pos', status: 'pending') }
         let(:product) { create(:product, workspace: user.current_workspace, price_cents: 100, discount_price_cents: 0) }
         let(:id) { create(:line_item, product_id: product.id, order_id: order.id).id }

@@ -2,7 +2,8 @@ class Api::V1::User::LineItemsController < Api::V1::User::ApplicationController
   before_action :set_order
   before_action :set_line_item, only: [:show, :update, :destroy]
   before_action :set_line_items, only: [:index]
-  
+  before_action :find_or_create_line_item, only: [:create]
+
   def index
     render json: @line_items.includes(:product), adapter: :json
   end
@@ -12,20 +13,12 @@ class Api::V1::User::LineItemsController < Api::V1::User::ApplicationController
   end
 
   def create
-    if @order.manual?
-      @line_item = @order.line_items.find_or_initialize_by(product_id: line_item_params[:product_id], name: line_item_params[:name])
-      @line_item.assign_attributes(line_item_params.except(:quantity))
-    else
-      @line_item = @order.line_items.find_or_initialize_by(product_id: line_item_params[:product_id])
-    end
-    pundit_authorize(@line_item) if @line_item
+    @line_item.quantity = if @line_item.persisted?
+                            @line_item.quantity + (line_item_params[:quantity].to_i || 1)
+                          else
+                            line_item_params[:quantity] || 1
+                          end
 
-    if @line_item.quantity != 0
-      @line_item.quantity = @line_item.quantity + line_item_params[:quantity].to_i
-    else
-      @line_item.quantity = line_item_params[:quantity]
-    end
-    
     if @line_item.save
       render json: @line_item, adapter: :json
     else
@@ -50,8 +43,9 @@ class Api::V1::User::LineItemsController < Api::V1::User::ApplicationController
   end
 
   private
+
     def set_order
-      @order = policy_scope(Order.includes({line_items: :product}), policy_scope_class: Api::V1::User::OrderPolicy::Scope).find(params[:order_id])      
+      @order = policy_scope(Order.includes({ line_items: :product }), policy_scope_class: Api::V1::User::OrderPolicy::Scope).find(params[:order_id])
     end
 
     def set_line_item
@@ -74,5 +68,15 @@ class Api::V1::User::LineItemsController < Api::V1::User::ApplicationController
       else
         params.require(:line_item).permit(:product_id, :quantity)
       end
+    end
+
+    def find_or_create_line_item
+      if @order.manual?
+        @line_item = @order.line_items.find_or_initialize_by(product_id: line_item_params[:product_id], name: line_item_params[:name])
+        @line_item.assign_attributes(line_item_params.except(:quantity))
+      else
+        @line_item = @order.line_items.find_or_initialize_by(product_id: line_item_params[:product_id])
+      end
+      pundit_authorize(@line_item)
     end
 end
