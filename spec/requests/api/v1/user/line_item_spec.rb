@@ -4,7 +4,7 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:user) }
   let(:Authorization) { bearer_token_for(user) }
-  let(:order) { create(:order, status: 'pending', order_type: 'pos') }
+  let(:order) { create(:order, status: 'pending', order_type: 'pos', workspace: user.current_workspace) }
   let(:order_id) { order.id }
   let(:id) { create(:line_item, order_id: order_id).id }
 
@@ -13,7 +13,7 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
 
     get('list line items') do
       tags 'User Line Items'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
       produces 'application/json'
 
       parameter name: :sort_by, in: :query, type: :string, required: false, description: 'Sort by which column/attribute'
@@ -23,17 +23,16 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
         before do
           create_list(:line_item, 3, order_id: order_id)
         end
-        
+
         run_test!
       end
-
     end
 
     post('create line items') do
       tags 'User Line Items'
       produces 'application/json'
       consumes 'application/json'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
 
       parameter name: :data, in: :body, schema: {
         type: :object,
@@ -52,18 +51,19 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
 
       response(200, 'successful') do
         let(:data) { { line_item: attributes_for(:line_item) } }
-        
+
         run_test!
       end
 
       context 'manual order' do
-        let(:order) { create(:order, order_type: 'manual', status: 'pending') }
+        let(:order) { create(:order, workspace: user.current_workspace, order_type: 'manual', status: 'pending') }
         let(:product) { create(:product, price_cents: 1000, discount_price_cents: 0) }
 
-        it 'should allow setting name and unit price' do
-          expect {
-            post api_v1_user_order_line_items_url(order_id: order.id), headers: { Authorization: bearer_token_for(user) }, params: { line_item: { product_id: product.id, quantity: 1, name: 'test', unit_price: 1 } }
-          }.to change { LineItem.count }.by(1)
+        it 'allows setting name and unit price' do
+          expect do
+            post api_v1_user_order_line_items_url(order_id: order.id), headers: { Authorization: bearer_token_for(user) },
+                                                                       params: { line_item: { product_id: product.id, quantity: 1, name: 'test', unit_price: 1 } }
+          end.to change { LineItem.count }.by(1)
           expect(response).to have_http_status(:ok)
           response_body = JSON.parse(response.body)
           expect(response_body['line_item']['name']).to eq('test')
@@ -72,13 +72,14 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
       end
 
       context 'pos order' do
-        let(:order) { create(:order, order_type: 'pos', status: 'pending') }
-        let(:product) { create(:product, price_cents: 1000, discount_price_cents: 0) }
+        let(:order) { create(:order, workspace: user.current_workspace, order_type: 'pos', status: 'pending') }
+        let(:product) { create(:product, workspace: user.current_workspace, price_cents: 1000, discount_price_cents: 0) }
 
-        it 'should not allow setting name and unit price' do
-          expect {
-            post api_v1_user_order_line_items_url(order_id: order.id), headers: { Authorization: bearer_token_for(user) }, params: { line_item: { product_id: product.id, quantity: 1, name: 'test', unit_price: 100 } }
-          }.to change { LineItem.count }.by(1)
+        it 'does not allow setting name and unit price' do
+          expect do
+            post api_v1_user_order_line_items_url(order_id: order.id), headers: { Authorization: bearer_token_for(user) },
+                                                                       params: { line_item: { product_id: product.id, quantity: 1, name: 'test', unit_price: 100 } }
+          end.to change { LineItem.count }.by(1)
           expect(response).to have_http_status(:ok)
           response_body = JSON.parse(response.body)
           expect(response_body['line_item']['name']).to eq(product.name)
@@ -96,8 +97,8 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
       response(200, 'successful') do
         tags 'User Line Items'
         produces 'application/json'
-        security [ { bearerAuth: nil } ]
-        
+        security [{ bearerAuth: nil }]
+
         run_test!
       end
     end
@@ -106,7 +107,7 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
       tags 'User Line Items'
       produces 'application/json'
       consumes 'application/json'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
 
       parameter name: :data, in: :body, schema: {
         type: :object,
@@ -124,14 +125,14 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
       }
 
       response(200, 'successful') do
-        let(:data) { { line_item: attributes_for(:line_item) } }      
-        
+        let(:data) { { line_item: attributes_for(:line_item) } }
+
         run_test!
       end
 
       context 'when line item update met coupon minimum spend' do
         let(:user) { create(:user, role: 'cashier') }
-        let(:order) { create(:order, order_type: 'pos', status: 'pending') }
+        let(:order) { create(:order, workspace: user.current_workspace, order_type: 'pos', status: 'pending') }
         let(:order_id) { order.id }
         let(:id) { create(:line_item, order_id: order_id, quantity: 1).id }
 
@@ -141,9 +142,9 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
           id
         end
 
-        it 'should apply discount' do
+        it 'applies discount' do
           order.reload
-          coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, minimum_spend: order.subtotal + Money.new(100))
+          coupon = create(:coupon, workspace: user.current_workspace, discount_by: 'percentage_discount', discount_percentage: 10, minimum_spend: order.subtotal + Money.new(100))
           OrderCoupon.create(order: order, coupon_id: coupon.id, code: coupon.code)
           order.reload
 
@@ -156,13 +157,13 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
           calculated_discount = order.subtotal * coupon.discount_percentage / 100
           expect(order.valid_order_coupon).to be_present
           expect(order.discount.cents).to eq(calculated_discount.cents)
-          expect(order.order_coupon.discount.cents).to eq(calculated_discount.cents)          
+          expect(order.order_coupon.discount.cents).to eq(calculated_discount.cents)
         end
       end
 
       context 'when line item update does not met coupon minimum spend' do
         let(:user) { create(:user, role: 'cashier') }
-        let(:order) { create(:order, order_type: 'pos', status: 'pending') }
+        let(:order) { create(:order, workspace: user.current_workspace, order_type: 'pos', status: 'pending') }
         let(:order_id) { order.id }
         let(:id) { create(:line_item, order_id: order_id, quantity: 2).id }
 
@@ -172,9 +173,9 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
           id
         end
 
-        it 'should apply discount' do
+        it 'applies discount' do
           order.reload
-          coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, minimum_spend: order.subtotal)
+          coupon = create(:coupon, workspace: user.current_workspace, discount_by: 'percentage_discount', discount_percentage: 10, minimum_spend: order.subtotal)
           OrderCoupon.create(order: order, coupon_id: coupon.id, code: coupon.code)
           order.reload
 
@@ -192,11 +193,11 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
       end
 
       context 'manual order' do
-        let(:order) { create(:order, order_type: 'manual', status: 'pending') }
-        let(:product) { create(:product, price_cents: 100, discount_price_cents: 0) }
+        let(:order) { create(:order, workspace: user.current_workspace, order_type: 'manual', status: 'pending') }
+        let(:product) { create(:product, workspace: user.current_workspace, price_cents: 100, discount_price_cents: 0) }
         let(:id) { create(:line_item, product_id: product.id, order_id: order.id).id }
 
-        it 'should allow overriding unit price and name' do
+        it 'allows overriding unit price and name' do
           put api_v1_user_order_line_item_url(order_id: order.id, id: id), headers: { Authorization: bearer_token_for(user) }, params: { line_item: { name: 'test', unit_price: 10 } }
           expect(response).to have_http_status(:ok)
           response_body = JSON.parse(response.body)
@@ -206,11 +207,11 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
       end
 
       context 'pos order' do
-        let(:order) { create(:order, order_type: 'pos', status: 'pending') }
-        let(:product) { create(:product, price_cents: 100, discount_price_cents: 0) }
+        let(:order) { create(:order, workspace: user.current_workspace, order_type: 'pos', status: 'pending') }
+        let(:product) { create(:product, workspace: user.current_workspace, price_cents: 100, discount_price_cents: 0) }
         let(:id) { create(:line_item, product_id: product.id, order_id: order.id).id }
 
-        it 'should not allow overriding unit price and name' do
+        it 'does not allow overriding unit price and name' do
           put api_v1_user_order_line_item_url(order_id: order.id, id: id), headers: { Authorization: bearer_token_for(user) }, params: { line_item: { name: 'test', unit_price: 10 } }
           expect(response).to have_http_status(:ok)
           response_body = JSON.parse(response.body)
@@ -223,12 +224,10 @@ RSpec.describe 'api/v1/admin/line_items', type: :request do
     delete('delete line items') do
       response(204, 'successful') do
         tags 'User Line Items'
-        security [ { bearerAuth: nil } ]
+        security [{ bearerAuth: nil }]
 
         run_test!
       end
     end
-
-    
   end
 end

@@ -5,17 +5,17 @@ class DeliveryMethods::Macrokiosk < Noticed::DeliveryMethods::Base
     response = Excon.post(
       API_ENDPOINT,
       headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json"
+        Accept: "application/json",
+        'Content-Type': "application/json"
       },
       body: {
-        "user": ENV['MACROKIOSK_USERNAME'],
-        "pass": ENV['MACROKIOSK_PASSWORD'],
-        "type": "0",
-        "from": 'Jujucart',
-        "to": formatted_phone_number,
-        "text": notification.sms_message,
-        "servid": ENV['MACROKIOSK_SERVICE_ID']
+        user: ENV.fetch('MACROKIOSK_USERNAME', nil),
+        pass: ENV.fetch('MACROKIOSK_PASSWORD', nil),
+        type: "0",
+        from: 'Jujucart',
+        to: formatted_phone_number,
+        text: notification.sms_message,
+        servid: ENV.fetch('MACROKIOSK_SERVICE_ID', nil)
       }.to_json,
       idempotent: true,
       expects: [200],

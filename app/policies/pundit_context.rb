@@ -1,9 +1,10 @@
 class PunditContext
-  attr_reader :user, :workspace
+  attr_reader :user, :workspace, :store
 
-  def initialize(user, workspace=nil)
+  def initialize(user, opt = {})
     @user = user
-    @workspace = workspace
+    @store = opt[:store]
+    @workspace = opt[:workspace]
   end
   
 end

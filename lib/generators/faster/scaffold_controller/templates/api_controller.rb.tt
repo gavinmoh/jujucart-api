@@ -96,6 +96,7 @@ class <%= controller_class_name %>Controller < <%= parent_class_name %>
       <%- else -%>
       @<%= plural_name %> = <%= singular_name.camelize %>.all
       <%- end -%>
+      @<%= plural_name %> = attribute_sortable(@<%= plural_name %>)
     end
 
     <%- unless skip_pundit? -%>

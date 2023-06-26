@@ -15,10 +15,10 @@ class Product < BaseProduct
 
   scope :active, -> { where(active: true) }
   scope :query, -> (keyword) { where('products.name ILIKE ?', "%#{keyword}%") }
-  scope :with_store_quantity, -> (store_id) do
+  scope :with_store_quantity, -> (store_id, include_all_products = true) do
     product_quantity_sql = <<-SQL
       LEFT OUTER JOIN (
-        SELECT product_id, quantity AS product_quantity 
+        SELECT product_id, quantity AS product_quantity, inventories.id as inventory_id
         FROM inventories
         LEFT JOIN locations on inventories.location_id = locations.id
         WHERE locations.store_id = \'#{store_id}\'
@@ -28,7 +28,8 @@ class Product < BaseProduct
       LEFT OUTER JOIN (
         SELECT
           sum(inventories.quantity) AS variant_quantity,
-          products.product_id
+          products.product_id,
+          array_agg(inventories.id) as variant_inventory_ids
         FROM
           inventories
           LEFT JOIN locations on inventories.location_id = locations.id
@@ -40,9 +41,20 @@ class Product < BaseProduct
           products.product_id
       ) AS product_variant_inventories ON products.id = product_variant_inventories.product_id
     SQL
-    select('products.*, coalesce(product_inventories.product_quantity, 0) AS product_quantity, coalesce(product_variant_inventories.variant_quantity, 0) AS variant_quantity')
-      .joins(product_quantity_sql.squish)
-      .joins(product_variant_quantity_sql.squish)
+    selection_query = <<-SQL
+      products.*, 
+      product_inventories.inventory_id, 
+      product_variant_inventories.variant_inventory_ids, 
+      coalesce(product_inventories.product_quantity, 0) AS product_quantity, 
+      coalesce(product_variant_inventories.variant_quantity, 0) AS variant_quantity
+    SQL
+    scope = select(selection_query.squish)
+              .joins(product_quantity_sql.squish)
+              .joins(product_variant_quantity_sql.squish)
+    unless include_all_products
+      scope = scope.where('inventory_id IS NOT NULL OR variant_inventory_ids IS NOT NULL')
+    end
+    scope
   end
 
   private

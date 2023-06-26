@@ -8,10 +8,9 @@ RSpec.describe 'api/v1/user/orders', type: :request do
   let(:id) { create(:order, store_id: store.id, workspace: user.current_workspace).id }
 
   path '/api/v1/user/orders' do
-
     get('list orders') do
       tags 'User Orders'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
       produces 'application/json'
 
       parameter name: :page,            in: :query, type: :integer, required: false, description: 'Page number'
@@ -20,8 +19,8 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       parameter name: :status,          in: :query, type: :string,  required: false, description: "Filter by status, available status: #{Order.aasm.states.map(&:name).map(&:to_s).join(', ')}"
       parameter name: :customer_id,     in: :query, type: :string,  required: false, description: 'Filter by customer_id'
       parameter name: :order_type,      in: :query, type: :string, required: false, description: "Filter by order_type, available order_type: #{Order.order_types.keys.join(', ')}"
-      parameter name: :scope,           in: :query, type: :string,  required: false, description: "Filter by scope, available scope: ['delivery', 'pickup']"
-      parameter name: :is_flagged,      in: :query, type: :boolean,  required: false, description: "Filter flagged order"
+      parameter name: :scope,           in: :query, type: :string, required: false, description: "Filter by scope, available scope: ['delivery', 'pickup']"
+      parameter name: :is_flagged,      in: :query, type: :boolean, required: false, description: "Filter flagged order"
       parameter name: :filter_date_by,  in: :query, type: :string,  required: false, description: 'Filter by which date column, e.g. created_at, updated_at'
       parameter name: :from_date,       in: :query, type: :string,  required: false, description: 'Filter by date column specified by the params filter_date_by'
       parameter name: :to_date,         in: :query, type: :string,  required: false, description: 'Filter by date column specified by the params filter_date_by'
@@ -29,24 +28,22 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       parameter name: :sort_by,         in: :query, type: :string, required: false, description: 'Sort by which column/attribute'
       parameter name: :sort_order,      in: :query, type: :string, required: false, description: "Default to descending, available sort_order: 'asc', 'desc'"
       parameter name: :skip_pagination, in: :query, type: :boolean, required: false, description: 'Skip pagination'
-      parameter name: 'ids[]',          in: :query, type: :array,  required: false, description: 'Filter by ids'      
+      parameter name: 'ids[]',          in: :query, type: :array, required: false, description: 'Filter by ids'
 
       response(200, 'successful') do
-        
         before do
           create_list(:order, 3, store_id: store.id, status: 'confirmed', workspace: user.current_workspace)
         end
 
         run_test!
       end
-
     end
 
     post('create orders') do
       tags 'User Orders'
       produces 'application/json'
       consumes 'application/json'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
 
       parameter name: :data, in: :body, schema: {
         type: :object,
@@ -76,7 +73,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       response(200, 'successful') do
         tags 'User Orders'
         produces 'application/json'
-        security [ { bearerAuth: nil } ]
+        security [{ bearerAuth: nil }]
 
         run_test!
       end
@@ -86,7 +83,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       tags 'User Orders'
       produces 'application/json'
       consumes 'application/json'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
 
       parameter name: :data, in: :body, schema: {
         type: :object,
@@ -136,11 +133,11 @@ RSpec.describe 'api/v1/user/orders', type: :request do
     delete('delete orders') do
       response(204, 'successful') do
         tags 'User Orders'
-        security [ { bearerAuth: nil } ]
+        security [{ bearerAuth: nil }]
 
         run_test!
       end
-    end 
+    end
   end
 
   path '/api/v1/user/orders/{id}/checkout' do
@@ -150,7 +147,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       tags 'User Orders'
       produces 'application/json'
       consumes 'application/json'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
 
       let(:user) { create(:user, role: 'cashier') }
       let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending', workspace: user.current_workspace).id }
@@ -177,7 +174,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
 
         run_test!
       end
-    end    
+    end
   end
 
   path '/api/v1/user/orders/{id}/complete' do
@@ -187,7 +184,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       tags 'User Orders'
       produces 'application/json'
       consumes 'application/json'
-      security [ { bearerAuth: nil } ]    
+      security [{ bearerAuth: nil }]
 
       parameter name: :data, in: :body, required: false, schema: {
         type: :object,
@@ -217,17 +214,17 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       end
 
       context 'when order is packed' do
-        let(:user) { create(:user, role: 'admin')}
-        let(:id) { create(:order, order_type: 'pickup', status: 'packed').id }
+        let(:user) { create(:user, role: 'admin') }
+        let(:id) { create(:order, workspace: user.current_workspace, order_type: 'pickup', status: 'packed').id }
 
-        it 'should complete order' do
+        it 'completes order' do
           put complete_api_v1_user_order_url(id: id), headers: { Authorization: bearer_token_for(user) }
           expect(response).to have_http_status(:ok)
           parsed_response = JSON.parse(response.body)
           expect(parsed_response.dig('order', 'status')).to eq('completed')
         end
       end
-    end 
+    end
   end
 
   path '/api/v1/user/orders/{id}/void' do
@@ -236,11 +233,11 @@ RSpec.describe 'api/v1/user/orders', type: :request do
     put('void orders') do
       tags 'User Orders'
       produces 'application/json'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
 
       response(200, 'successful') do
         let(:user) { create(:user) }
-        let(:id) { create(:order, order_type: 'pos', store_id: store.id, status: 'pending_payment', customer_id: nil).id }
+        let(:id) { create(:order, workspace: user.current_workspace, order_type: 'pos', store_id: store.id, status: 'pending_payment', customer_id: nil).id }
 
         before do
           create(:assigned_store, user_id: user.id, store_id: store.id)
@@ -255,7 +252,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
           expect(response_body.dig('order', 'voided_at')).to be_present
         end
       end
-    end 
+    end
   end
 
   path '/api/v1/user/orders/{id}/pack' do
@@ -264,15 +261,15 @@ RSpec.describe 'api/v1/user/orders', type: :request do
     put('pack orders') do
       tags 'User Orders'
       produces 'application/json'
-      security [ { bearerAuth: nil } ]
-      
+      security [{ bearerAuth: nil }]
+
       response(200, 'successful') do
-        let(:user) { create(:user, role: 'admin')}
+        let(:user) { create(:user, role: 'admin') }
         let(:id) { create(:order, order_type: 'delivery', status: 'confirmed', workspace: user.current_workspace).id }
 
         run_test!
       end
-    end    
+    end
   end
 
   path '/api/v1/user/orders/{id}/ship' do
@@ -282,7 +279,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       tags 'User Orders'
       consumes 'application/json'
       produces 'application/json'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
 
       parameter name: :data, in: :body, schema: {
         type: :object,
@@ -296,15 +293,15 @@ RSpec.describe 'api/v1/user/orders', type: :request do
           }
         }
       }
-      
+
       response(200, 'successful', save_request_example: :data) do
-        let(:user) { create(:user, role: 'admin')}
+        let(:user) { create(:user, role: 'admin') }
         let(:id) { create(:order, status: 'packed', workspace: user.current_workspace).id }
         let(:data) { { order: { courier_name: 'POS Laju', tracking_number: 'EM12345678' } } }
 
         run_test!
       end
-    end    
+    end
   end
 
   path '/api/v1/user/orders/{id}/versions' do
@@ -313,8 +310,8 @@ RSpec.describe 'api/v1/user/orders', type: :request do
     get('order versions') do
       tags 'User Orders'
       produces 'application/json'
-      security [ { bearerAuth: nil } ]
-      
+      security [{ bearerAuth: nil }]
+
       response(200, 'successful') do
         let(:order) { create(:order, status: 'packed', workspace: user.current_workspace) }
         let(:id) { order.id }
@@ -329,7 +326,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
 
         run_test!
       end
-    end    
+    end
   end
 
   path '/api/v1/user/orders/{id}/apply_coupon' do
@@ -339,14 +336,14 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       tags 'User Orders'
       consumes 'application/json'
       produces 'application/json'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
 
       parameter name: :data, in: :body, schema: {
         type: :object,
         properties: {
           code: { type: :string }
         },
-        required: [ 'code' ]
+        required: ['code']
       }
 
       let(:user) { create(:user, role: 'cashier') }
@@ -356,7 +353,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
         create(:assigned_store, user_id: user.id, store_id: store.id)
         create_list(:line_item, 2, order_id: id)
       end
-      
+
       response(200, 'successful', save_request_example: :data) do
         let(:code) { create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, workspace: user.current_workspace).code }
         let(:data) { { code: code } }
@@ -374,7 +371,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
 
       response(404, 'not_found') do
         let(:data) { { code: SecureRandom.alphanumeric(10) } }
-        run_test!        
+        run_test!
       end
     end
 
@@ -382,7 +379,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       let(:user) { create(:user, role: 'cashier') }
       let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending', workspace: user.current_workspace).id }
 
-      it 'should not apply discount' do
+      it 'does not apply discount' do
         create(:assigned_store, user_id: user.id, store_id: store.id)
         create_list(:line_item, 2, order_id: id)
         order = Order.find(id)
@@ -397,7 +394,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
         expect(parsed_response.dig('order', 'order_coupon', 'is_valid')).to be_falsey
         expect(parsed_response.dig('order', 'order_coupon', 'error_code')).to eq(OrderCoupon.error_codes[:minimum_spend_not_reached])
         expect(parsed_response.dig('order', 'order_coupon', 'discount', 'cents')).to eq(0)
-        expect(parsed_response.dig('order', 'discount', 'cents')).to eq(0)        
+        expect(parsed_response.dig('order', 'discount', 'cents')).to eq(0)
       end
     end
 
@@ -405,12 +402,12 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       let(:user) { create(:user, role: 'cashier') }
       let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending', workspace: user.current_workspace).id }
 
-      it 'should not apply discount' do
+      it 'does not apply discount' do
         create(:assigned_store, user_id: user.id, store_id: store.id)
         create_list(:line_item, 2, order_id: id)
         coupon = create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, redemption_limit: 1, workspace: user.current_workspace)
         code = coupon.code
-        create(:order_coupon, order_id: create(:order, status: 'confirmed').id, coupon_id: coupon.id, error_code: 'code_valid', is_valid: true)
+        create(:order_coupon, order_id: create(:order, workspace: user.current_workspace, status: 'confirmed').id, coupon_id: coupon.id, error_code: 'code_valid', is_valid: true)
 
         put apply_coupon_api_v1_user_order_url(id: id), params: { code: code }, headers: { Authorization: bearer_token_for(user) }
         expect(response).to have_http_status(:ok)
@@ -421,15 +418,15 @@ RSpec.describe 'api/v1/user/orders', type: :request do
         expect(parsed_response.dig('order', 'order_coupon', 'is_valid')).to be_falsey
         expect(parsed_response.dig('order', 'order_coupon', 'error_code')).to eq(OrderCoupon.error_codes[:limit_reached])
         expect(parsed_response.dig('order', 'order_coupon', 'discount', 'cents')).to eq(0)
-        expect(parsed_response.dig('order', 'discount', 'cents')).to eq(0)        
+        expect(parsed_response.dig('order', 'discount', 'cents')).to eq(0)
       end
     end
 
     context 'reapply different coupon' do
       let(:user) { create(:user, role: 'cashier') }
-      let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending').id }
+      let(:id) { create(:order, workspace: user.current_workspace, store_id: store.id, order_type: 'pos', status: 'pending').id }
 
-      it 'should apply different coupon' do
+      it 'applies different coupon' do
         create(:assigned_store, user_id: user.id, store_id: store.id)
         create_list(:line_item, 2, order_id: id)
         order = Order.find(id)
@@ -460,7 +457,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
         expect(parsed_response.dig('order', 'order_coupon', 'error_code')).to eq(OrderCoupon.error_codes[:code_valid])
         expect(parsed_response.dig('order', 'order_coupon', 'discount', 'cents')).to eq(calculated_discount.cents)
         expect(parsed_response.dig('order', 'discount', 'cents')).to eq(calculated_discount.cents)
-      end      
+      end
     end
   end
 
@@ -471,7 +468,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       tags 'User Orders'
       consumes 'application/json'
       produces 'application/json'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
 
       parameter name: :data, in: :body, required: false, schema: {
         type: :object,
@@ -483,9 +480,8 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       let(:user) { create(:user, role: 'cashier') }
       let(:id) { create(:order, store_id: store.id, order_type: 'pos', status: 'pending', workspace: user.current_workspace).id }
       let(:code) { create(:coupon, discount_by: 'percentage_discount', discount_percentage: 10, workspace: user.current_workspace).code }
-      
-      response(200, 'successful', save_request_example: :data) do
 
+      response(200, 'successful', save_request_example: :data) do
         before do
           create(:assigned_store, user_id: user.id, store_id: store.id)
           create_list(:line_item, 2, order_id: id)
@@ -507,7 +503,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       tags 'User Orders'
       produces 'application/json'
       consumes 'application/json'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
 
       parameter name: :data, in: :body, schema: {
         type: :object,
@@ -517,7 +513,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       }
 
       response(200, 'successful', save_request_example: :data) do
-        let(:user) { create(:user, role: 'admin')}
+        let(:user) { create(:user, role: 'admin') }
         let(:order1) { create(:order, :with_line_items, order_type: 'manual', status: 'pending', workspace: user.current_workspace) }
         let(:order2) { create(:order, :with_line_items, order_type: 'manual', status: 'pending', customer: nil, workspace: user.current_workspace) }
         let(:data) { { ids: [order1.id, order2.id] } }
@@ -527,7 +523,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
           expect(Order.find(order2.id).status).to eq('confirmed')
         end
       end
-    end    
+    end
   end
 
   path '/api/v1/user/orders/bulk_pack' do
@@ -535,7 +531,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       tags 'User Orders'
       produces 'application/json'
       consumes 'application/json'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
 
       parameter name: :data, in: :body, schema: {
         type: :object,
@@ -545,7 +541,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       }
 
       response(200, 'successful', save_request_example: :data) do
-        let(:user) { create(:user, role: 'admin')}
+        let(:user) { create(:user, role: 'admin') }
         let(:order1) { create(:order, order_type: 'delivery', status: 'confirmed', workspace: user.current_workspace) }
         let(:order2) { create(:order, order_type: 'delivery', status: 'confirmed', workspace: user.current_workspace) }
         let(:data) { { ids: [order1.id, order2.id] } }
@@ -555,7 +551,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
           expect(Order.find(order2.id).status).to eq('packed')
         end
       end
-    end    
+    end
   end
 
   path '/api/v1/user/orders/bulk_complete' do
@@ -563,7 +559,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       tags 'User Orders'
       produces 'application/json'
       consumes 'application/json'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
 
       parameter name: :data, in: :body, schema: {
         type: :object,
@@ -573,7 +569,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       }
 
       response(200, 'successful', save_request_example: :data) do
-        let(:user) { create(:user, role: 'admin')}
+        let(:user) { create(:user, role: 'admin') }
         let(:order1) { create(:order, :with_line_items, order_type: 'delivery', status: 'shipped', workspace: user.current_workspace) }
         let(:order2) { create(:order, :with_line_items, order_type: 'delivery', status: 'shipped', customer: nil, workspace: user.current_workspace) }
         let(:data) { { ids: [order1.id, order2.id] } }
@@ -583,7 +579,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
           expect(Order.find(order2.id).status).to eq('completed')
         end
       end
-    end    
+    end
   end
 
   path '/api/v1/user/orders/bulk_void' do
@@ -591,7 +587,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       tags 'User Orders'
       produces 'application/json'
       consumes 'application/json'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
 
       parameter name: :data, in: :body, schema: {
         type: :object,
@@ -601,7 +597,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       }
 
       response(200, 'successful', save_request_example: :data) do
-        let(:user) { create(:user, role: 'admin')}
+        let(:user) { create(:user, role: 'admin') }
         let(:order1) { create(:order, :with_line_items, order_type: 'pos', status: 'completed', workspace: user.current_workspace) }
         let(:order2) { create(:order, :with_line_items, order_type: 'pos', status: 'completed', customer: nil, workspace: user.current_workspace) }
         let(:data) { { ids: [order1.id, order2.id] } }
@@ -611,8 +607,6 @@ RSpec.describe 'api/v1/user/orders', type: :request do
           expect(Order.find(order2.id).status).to eq('voided')
         end
       end
-    end    
+    end
   end
-
-  
 end

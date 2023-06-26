@@ -30,13 +30,6 @@ RUN bundle install
 # copy files
 COPY . ${APP_HOME}
 
-# added rubocop test to catch syntax error 
-# and prevent success build
-RUN bundle exec rubocop -l
-
-# vulnerability check
-RUN bundle exec brakeman -w3
-
 # expose port
 EXPOSE 3000
 

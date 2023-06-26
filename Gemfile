@@ -47,6 +47,12 @@ end
 group :development, :test do
   gem 'rspec-rails'
   gem 'rswag-specs'
+  # linter and syntax checking
+  gem "rubocop", require: false
+  gem "rubocop-rails", require: false
+  gem "rubocop-rspec", require: false
+  # vulnerability scanning
+  gem "brakeman", require: false
 end
 
 group :development do
@@ -131,12 +137,6 @@ gem "geocoder"
 
 # record tracking
 gem "paper_trail"
-
-# linter and syntax checking
-gem "rubocop-rails", "~> 2.13"
-
-# vulnerability scanning
-gem "brakeman", "~> 5.2"
 
 # env variables loading
 gem "dotenv-rails", "~> 2.7"
