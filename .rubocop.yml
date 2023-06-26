@@ -64,3 +64,6 @@ RSpec/MultipleMemoizedHelpers:
 
 RSpec/LetSetup:
   Enabled: false
+
+RSpec/ExampleLength:
+  Max: 30
