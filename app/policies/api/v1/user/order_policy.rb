@@ -1,5 +1,4 @@
 class Api::V1::User::OrderPolicy < ApplicationPolicy
-
   def index?
     true
   end
@@ -123,9 +122,9 @@ class Api::V1::User::OrderPolicy < ApplicationPolicy
   class Scope < Scope
     def resolve
       if @user.admin?
-        scope.all
+        scope.where(workspace_id: @workspace.id)
       else
-        scope.where(store_id: @user.assigned_stores.pluck(:store_id))
+        scope.where(workspace_id: @workspace.id, store_id: @user.assigned_stores.pluck(:store_id))
       end
     end
   end
