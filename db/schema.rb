@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_23_030629) do
+ActiveRecord::Schema[7.0].define(version: 2023_06_26_024817) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -63,7 +63,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_23_030629) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "workspace_id"
-    t.index ["slug"], name: "index_categories_on_slug", unique: true
+    t.index ["name", "workspace_id"], name: "index_categories_on_name_and_workspace_id", unique: true
+    t.index ["slug", "workspace_id"], name: "index_categories_on_slug_and_workspace_id", unique: true, where: "((slug IS NOT NULL) AND ((slug)::text <> ''::text))"
     t.index ["workspace_id"], name: "index_categories_on_workspace_id"
   end
 
@@ -352,7 +353,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_23_030629) do
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["nanoid"], name: "index_products_on_nanoid", unique: true
     t.index ["product_id"], name: "index_products_on_product_id"
-    t.index ["sku"], name: "index_products_on_sku", unique: true, where: "((sku IS NOT NULL) AND ((sku)::text <> ''::text))"
+    t.index ["sku", "workspace_id"], name: "index_products_on_sku_and_workspace_id", unique: true, where: "((sku IS NOT NULL) AND ((sku)::text <> ''::text))"
     t.index ["workspace_id"], name: "index_products_on_workspace_id"
   end
 
@@ -434,6 +435,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_23_030629) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "workspace_id"
+    t.string "store_type"
+    t.string "hostname"
+    t.index ["hostname"], name: "index_stores_on_hostname", unique: true, where: "((hostname IS NOT NULL) AND ((hostname)::text <> ''::text))"
     t.index ["workspace_id"], name: "index_stores_on_workspace_id"
   end
 
