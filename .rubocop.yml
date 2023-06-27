@@ -32,6 +32,9 @@ Metrics/ClassLength:
 Metrics/MethodLength:
   Enabled: false
 
+Naming/PredicateName:
+  Enabled: false
+
 Style/ClassAndModuleChildren:
   Enabled: false
 
@@ -39,6 +42,9 @@ Style/Documentation:
   Enabled: false
 
 Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Stype/OptionalBooleanParameter:
   Enabled: false
 
 Style/StringLiterals:
@@ -65,5 +71,11 @@ RSpec/MultipleMemoizedHelpers:
 RSpec/LetSetup:
   Enabled: false
 
+RSpec/EmptyExampleGroup:
+  Enabled: false
+
 RSpec/ExampleLength:
   Max: 30
+
+RSpec/ScatteredSetup:
+  Enabled: false
