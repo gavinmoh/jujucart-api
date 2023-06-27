@@ -43,6 +43,12 @@ RSpec.configure do |config|
     stub_request(:any, /revenuemonster.my/).to_rack(FakeRevenueMonster)
   end
 
+  config.after(:suite) do
+    puts '\n'
+    puts 'Clean up files'
+    FileUtils.rm_rf(Dir[Rails.public_path.join('test'), Rails.root.join('log/test.log'), Rails.root.join('tmp/uploads')])
+  end
+
   # helper for generating jwt token
   config.include BearerTokenHelper
 
