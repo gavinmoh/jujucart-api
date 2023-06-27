@@ -30,6 +30,7 @@ class Order < ApplicationRecord
 
   scope :query, ->(keyword) { left_joins(:customer).where('orders.nanoid ILIKE :keyword OR accounts.name ILIKE :keyword', { keyword: "%#{keyword}%" }) }
   scope :paid, -> { where.not(status: %w[pending pending_payment failed]) }
+  scope :include_pending_manual_order, -> { where("(status != 'pending' AND order_type != 'manual') OR order_type = 'manual'") }
 
   reverse_geocoded_by :latitude, :longitude
 

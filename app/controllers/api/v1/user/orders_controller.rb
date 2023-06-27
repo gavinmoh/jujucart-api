@@ -198,7 +198,7 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
 
     def set_orders
       pundit_authorize(Order)
-      @orders = pundit_scope(Order.where.not(status: 'pending')).includes(:customer, :success_payment, :created_by, :store, :order_coupon, { line_items: :product })
+      @orders = pundit_scope(Order.include_pending_manual_order).includes(:customer, :success_payment, :created_by, :store, :order_coupon, { line_items: :product })
       @orders = status_scopable(@orders)
       @orders = keyword_queryable(@orders)
       @orders = @orders.where(store_id: params[:store_id]) if params[:store_id].present?
