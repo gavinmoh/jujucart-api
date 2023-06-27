@@ -35,6 +35,14 @@ class Api::V1::User::OrderPolicy < ApplicationPolicy
     @record.pending? and @user.admin?
   end
 
+  def confirm?
+    if @user.admin?
+      true
+    elsif @user.cashier?
+      @record.manual? and @user.assigned_stores.exists?(store_id: @record.store_id)
+    end
+  end
+
   def complete?
     if @user.admin?
       true

@@ -262,6 +262,30 @@ RSpec.describe 'api/v1/user/orders', type: :request do
     end
   end
 
+  path '/api/v1/user/orders/{id}/confirm' do
+    parameter name: 'id', in: :path, type: :string, description: 'id'
+
+    put('confirm orders') do
+      tags 'User Orders'
+      produces 'application/json'
+      security [{ bearerAuth: nil }]
+
+      response(200, 'successful') do
+        let(:user) { create(:user, role: 'cashier') }
+        let(:id) { create(:order, :with_line_items, order_type: 'manual', store_id: store.id, status: 'pending', customer_id: nil, workspace: user.current_workspace).id }
+
+        before do
+          create(:assigned_store, user_id: user.id, store_id: store.id)
+        end
+
+        run_test! do |response|
+          response_body = JSON.parse(response.body)
+          expect(response_body.dig('order', 'status')).to eq('confirmed')
+        end
+      end
+    end
+  end
+
   path '/api/v1/user/orders/{id}/complete' do
     parameter name: 'id', in: :path, type: :string, description: 'id'
 

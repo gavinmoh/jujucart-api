@@ -1,5 +1,5 @@
 class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
-  before_action :set_order, only: [:show, :update, :destroy, :pack, :ship, :complete, :void, :checkout, :versions, :apply_coupon, :remove_coupon]
+  before_action :set_order, only: [:show, :update, :destroy, :confirm, :pack, :ship, :complete, :void, :checkout, :versions, :apply_coupon, :remove_coupon]
   before_action :set_orders, only: [:index]
   before_action :set_bulk_orders, only: [:bulk_confirm, :bulk_pack, :bulk_complete, :bulk_void]
 
@@ -56,6 +56,14 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
     @order.assign_attributes(checkout_params) if params[:order].present?
 
     if @order.pos_checkout!
+      render json: @order, adapter: :json, include: included_associations
+    else
+      render json: ErrorResponse.new(@order), status: :unprocessable_entity
+    end
+  end
+
+  def confirm
+    if @order.confirmed? || @order.confirm!
       render json: @order, adapter: :json, include: included_associations
     else
       render json: ErrorResponse.new(@order), status: :unprocessable_entity
