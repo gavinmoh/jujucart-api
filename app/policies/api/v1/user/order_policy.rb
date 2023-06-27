@@ -17,9 +17,9 @@ class Api::V1::User::OrderPolicy < ApplicationPolicy
 
   def create?
     if @user.admin?
-      @record.pos? and @record.pending?
+      @record.pos? or @record.manual?
     elsif @user.cashier?
-      @record.pos? and @record.pending? and @user.assigned_stores.exists?(store_id: @record.store_id)
+      (@record.pos? or @record.manual?) and @user.assigned_stores.exists?(store_id: @record.store_id)
     end
   end
 
@@ -27,7 +27,7 @@ class Api::V1::User::OrderPolicy < ApplicationPolicy
     if @user.admin?
       true
     elsif @user.cashier?
-      @record.pos? and @record.pending? and @user.assigned_stores.exists?(store_id: @record.store_id)
+      (@record.pos? or @record.manual?) and @user.assigned_stores.exists?(store_id: @record.store_id)
     end
   end
 

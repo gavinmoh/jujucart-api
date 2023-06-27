@@ -52,16 +52,101 @@ RSpec.describe 'api/v1/user/orders', type: :request do
             type: :object,
             properties: {
               store_id: { type: :string },
-              customer_id: { type: :string }
+              customer_id: { type: :string },
+              order_type: { type: :string, enum: %w[manual pos] },
+              is_flagged: { type: :boolean },
+              flagged_reason: { type: :string },
+              unit_number: { type: :string },
+              street_address1: { type: :string },
+              street_address2: { type: :string },
+              postcode: { type: :string },
+              city: { type: :string },
+              state: { type: :string },
+              latitude: { type: :float },
+              longitude: { type: :float },
+              courier_name: { type: :string },
+              tracking_number: { type: :string },
+              line_items_attributes: {
+                type: :array,
+                items: {
+                  type: :object,
+                  properties: {
+                    id: { type: :string },
+                    name: { type: :string },
+                    product_id: { type: :string },
+                    quantity: { type: :integer },
+                    unit_price: { type: :string },
+                    _destroy: { type: :boolean }
+                  }
+                }
+              },
+              order_attachments_attributes: {
+                type: :array,
+                items: {
+                  type: :object,
+                  properties: {
+                    id: { type: :string },
+                    file: { type: :string },
+                    name: { type: :string },
+                    _destroy: { type: :boolean }
+                  }
+                }
+              }
             }
           }
         }
       }
 
       response(200, 'successful', save_request_example: :data) do
-        let(:data) { { order: attributes_for(:order).slice(:store_id, :customer_id) } }
+        context 'when order_type is pos' do
+          let(:data) { { order: attributes_for(:order).slice(:store_id, :customer_id) } }
 
-        run_test!
+          after do |example|
+            content = example.metadata[:response][:content] || {}
+            example_spec = {
+              "application/json" => {
+                examples: {
+                  "when order_type is pos" => {
+                    value: JSON.parse(response.body, symbolize_names: true)
+                  }
+                }
+              }
+            }
+            example.metadata[:response][:content] = content.deep_merge(example_spec)
+          end
+
+          run_test!
+        end
+
+        context 'when order_type is manual' do
+          let(:data) do
+            {
+              order: attributes_for(:order, order_type: 'manual')
+                .slice(:store_id, :order_type)
+                .merge(line_items_attributes: [attributes_for(:line_item)])
+                .merge(order_attachments_attributes: [attributes_for(:order_attachment)])
+            }
+          end
+
+          after do |example|
+            content = example.metadata[:response][:content] || {}
+            example_spec = {
+              "application/json" => {
+                examples: {
+                  "when order_type is manual" => {
+                    value: JSON.parse(response.body, symbolize_names: true)
+                  }
+                }
+              }
+            }
+            example.metadata[:response][:content] = content.deep_merge(example_spec)
+          end
+
+          run_test! do |response|
+            response_body = JSON.parse(response.body, symbolize_names: true)
+            expect(response_body[:order][:line_items].size).to eq(1)
+          end
+        end
       end
     end
   end
@@ -422,7 +507,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
       end
     end
 
-    context 'reapply different coupon' do
+    context 'when reapply different coupon' do
       let(:user) { create(:user, role: 'cashier') }
       let(:id) { create(:order, workspace: user.current_workspace, store_id: store.id, order_type: 'pos', status: 'pending').id }
 
@@ -447,7 +532,7 @@ RSpec.describe 'api/v1/user/orders', type: :request do
 
         expect do
           put apply_coupon_api_v1_user_order_url(id: id), params: { code: code2 }, headers: { Authorization: bearer_token_for(user) }
-        end.not_to(change { OrderCoupon.count })
+        end.not_to(change(OrderCoupon, :count))
         expect(response).to have_http_status(:ok)
 
         parsed_response = JSON.parse(response.body)
