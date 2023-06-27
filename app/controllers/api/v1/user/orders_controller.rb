@@ -39,6 +39,8 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
   def update
     allowed_params = if @order.pending? && @order.pos?
                        pos_order_params
+                     elsif @order.manual?
+                       manual_order_params
                      else
                        update_params
                      end
