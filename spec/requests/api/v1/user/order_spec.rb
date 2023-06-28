@@ -632,6 +632,18 @@ RSpec.describe 'api/v1/user/orders', type: :request do
           expect(Order.find(order2.id).status).to eq('confirmed')
         end
       end
+
+      response(422, 'unprocessable entity') do
+        let(:user) { create(:user, role: 'admin') }
+        let(:order1) { create(:order, :with_line_items, order_type: 'manual', status: 'completed', workspace: user.current_workspace) }
+        let(:order2) { create(:order, :with_line_items, order_type: 'manual', status: 'pending', customer: nil, workspace: user.current_workspace) }
+        let(:data) { { ids: [order1.id, order2.id] } }
+
+        run_test! do
+          expect(Order.find(order1.id).status).to eq('completed')
+          expect(Order.find(order2.id).status).to eq('pending')
+        end
+      end
     end
   end
 
@@ -658,6 +670,18 @@ RSpec.describe 'api/v1/user/orders', type: :request do
         run_test! do
           expect(Order.find(order1.id).status).to eq('packed')
           expect(Order.find(order2.id).status).to eq('packed')
+        end
+      end
+
+      response(422, 'unprocessable entity') do
+        let(:user) { create(:user, role: 'admin') }
+        let(:order1) { create(:order, order_type: 'delivery', status: 'completed', workspace: user.current_workspace) }
+        let(:order2) { create(:order, order_type: 'delivery', status: 'confirmed', workspace: user.current_workspace) }
+        let(:data) { { ids: [order1.id, order2.id] } }
+
+        run_test! do
+          expect(Order.find(order1.id).status).to eq('completed')
+          expect(Order.find(order2.id).status).to eq('confirmed')
         end
       end
     end
@@ -688,6 +712,18 @@ RSpec.describe 'api/v1/user/orders', type: :request do
           expect(Order.find(order2.id).status).to eq('completed')
         end
       end
+
+      response(422, 'unprocessable entity') do
+        let(:user) { create(:user, role: 'admin') }
+        let(:order1) { create(:order, :with_line_items, order_type: 'delivery', status: 'packed', workspace: user.current_workspace) }
+        let(:order2) { create(:order, :with_line_items, order_type: 'delivery', status: 'pending', customer: nil, workspace: user.current_workspace) }
+        let(:data) { { ids: [order1.id, order2.id] } }
+
+        run_test! do
+          expect(Order.find(order1.id).status).to eq('packed')
+          expect(Order.find(order2.id).status).to eq('pending')
+        end
+      end
     end
   end
 
@@ -714,6 +750,18 @@ RSpec.describe 'api/v1/user/orders', type: :request do
         run_test! do
           expect(Order.find(order1.id).status).to eq('voided')
           expect(Order.find(order2.id).status).to eq('voided')
+        end
+      end
+
+      response(422, 'unprocessable entity') do
+        let(:user) { create(:user, role: 'admin') }
+        let(:order1) { create(:order, :with_line_items, order_type: 'pos', status: 'completed', workspace: user.current_workspace) }
+        let(:order2) { create(:order, :with_line_items, order_type: 'pos', status: 'pending', customer: nil, workspace: user.current_workspace) }
+        let(:data) { { ids: [order1.id, order2.id] } }
+
+        run_test! do
+          expect(Order.find(order1.id).status).to eq('completed')
+          expect(Order.find(order2.id).status).to eq('pending')
         end
       end
     end

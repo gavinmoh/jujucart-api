@@ -160,43 +160,51 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
   end
 
   def bulk_confirm
-    @orders.find_each do |order|
-      ActiveRecord::Base.transaction { order.confirm! }
-    rescue StandardError
-      next
+    success, error_object, error = bulk_status_action(@orders, :confirm!)
+    if success
+      @orders.reload
+      render json: @orders, adapter: :json, include: index_included_associations
+    elsif error_object&.errors
+      render json: ErrorResponse.new(error_object), status: :unprocessable_entity
+    else
+      render json: ErrorResponse.new(error), status: :unprocessable_entity
     end
-    @orders.reload
-    render json: @orders, adapter: :json, include: index_included_associations
   end
 
   def bulk_pack
-    @orders.find_each do |order|
-      ActiveRecord::Base.transaction { order.pack! }
-    rescue StandardError
-      next
+    success, error_object, error = bulk_status_action(@orders, :pack!)
+    if success
+      @orders.reload
+      render json: @orders, adapter: :json, include: index_included_associations
+    elsif error_object&.errors
+      render json: ErrorResponse.new(error_object), status: :unprocessable_entity
+    else
+      render json: ErrorResponse.new(error), status: :unprocessable_entity
     end
-    @orders.reload
-    render json: @orders, adapter: :json, include: index_included_associations
   end
 
   def bulk_complete
-    @orders.find_each do |order|
-      ActiveRecord::Base.transaction { order.complete! }
-    rescue StandardError
-      next
+    success, error_object, error = bulk_status_action(@orders, :complete!)
+    if success
+      @orders.reload
+      render json: @orders, adapter: :json, include: index_included_associations
+    elsif error_object&.errors
+      render json: ErrorResponse.new(error_object), status: :unprocessable_entity
+    else
+      render json: ErrorResponse.new(error), status: :unprocessable_entity
     end
-    @orders.reload
-    render json: @orders, adapter: :json, include: index_included_associations
   end
 
   def bulk_void
-    @orders.find_each do |order|
-      ActiveRecord::Base.transaction { order.void! }
-    rescue StandardError
-      next
+    success, error_object, error = bulk_status_action(@orders, :void!)
+    if success
+      @orders.reload
+      render json: @orders, adapter: :json, include: index_included_associations
+    elsif error_object&.errors
+      render json: ErrorResponse.new(error_object), status: :unprocessable_entity
+    else
+      render json: ErrorResponse.new(error), status: :unprocessable_entity
     end
-    @orders.reload
-    render json: @orders, adapter: :json, include: index_included_associations
   end
 
   private
@@ -289,5 +297,19 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
 
     def bulk_order_ids_params
       params.require(:ids)
+    end
+
+    def bulk_status_action(records, event)
+      current_record = nil
+      ActiveRecord::Base.transaction do
+        records.find_each do |record|
+          current_record = record
+          raise unless record.send(event)
+        end
+      end
+      [true, nil, nil]
+    rescue StandardError => e
+      current_record.errors.add(:status, "cannot transition from #{current_record.status}") unless current_record.errors.any?
+      [false, current_record, e]
     end
 end
