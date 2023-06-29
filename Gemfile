@@ -150,3 +150,5 @@ gem "faraday"
 gem "wicked_pdf", "~> 2.6"
 
 gem "wkhtmltopdf-binary", "~> 0.12.6"
+
+gem "oj"
