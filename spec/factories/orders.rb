@@ -27,5 +27,9 @@ FactoryBot.define do
         end
       end
     end
+
+    trait :guest_order do
+      customer_id { nil }
+    end
   end
 end
