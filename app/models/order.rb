@@ -7,16 +7,17 @@ class Order < ApplicationRecord
   belongs_to :created_by, class_name: 'Account', optional: true
   belongs_to :store
 
-  has_one  :success_payment, -> { where(status: 'success') }, class_name: 'Payment'
+  has_one  :success_payment, -> { where(status: 'success') }, class_name: 'Payment', dependent: :destroy
   has_one  :order_coupon, dependent: :destroy
   has_one  :coupon, through: :order_coupon
-  has_one  :valid_order_coupon, -> { code_valid.where(is_valid: true) }, class_name: 'OrderCoupon'
+  has_one  :valid_order_coupon, -> { code_valid.where(is_valid: true) }, class_name: 'OrderCoupon', dependent: :destroy
   has_many :line_items, -> { order(name: :asc) }, dependent: :destroy
   has_many :products, through: :line_items
   has_many :payments, dependent: :nullify
   has_many :inventory_transactions, dependent: :nullify
   has_many :order_attachments, dependent: :destroy
 
+  accepts_nested_attributes_for :line_items, allow_destroy: true
   accepts_nested_attributes_for :order_attachments, allow_destroy: true, reject_if: proc { |attributes| attributes['file'].blank? }
 
   has_paper_trail
@@ -29,6 +30,7 @@ class Order < ApplicationRecord
 
   scope :query, ->(keyword) { left_joins(:customer).where('orders.nanoid ILIKE :keyword OR accounts.name ILIKE :keyword', { keyword: "%#{keyword}%" }) }
   scope :paid, -> { where.not(status: %w[pending pending_payment failed]) }
+  scope :include_pending_manual_order, -> { where("(status != 'pending' AND order_type != 'manual') OR order_type = 'manual'") }
 
   reverse_geocoded_by :latitude, :longitude
 
@@ -58,7 +60,8 @@ class Order < ApplicationRecord
     end
 
     event :confirm do
-      transitions from: :pending, to: :confirmed, guard: [:is_manual_order?]
+      transitions from: :pending, to: :confirmed, guard: [:is_manual_order?, :has_line_items?],
+                  after: [:create_inventory_transactions, :create_redeemed_coin_transaction]
       transitions from: :pending_payment, to: :confirmed, guard: [:has_success_payment?]
     end
 
@@ -119,7 +122,7 @@ class Order < ApplicationRecord
   end
 
   def display_address
-    [unit_number, street_address1, street_address2, postcode, city, state].reject(&:blank?).join(', ')
+    [unit_number, street_address1, street_address2, postcode, city, state].compact_blank.join(', ')
   end
 
   private
@@ -252,8 +255,8 @@ class Order < ApplicationRecord
     end
 
     def create_reward_transaction
-      return unless reward_coin > 0
-      return unless customer.present?
+      return unless reward_coin.positive?
+      return if customer.blank?
 
       transaction = customer.wallet.wallet_transactions.find_or_create_by(
         order_id: id,
@@ -263,8 +266,8 @@ class Order < ApplicationRecord
     end
 
     def create_redeemed_coin_transaction
-      return unless redeemed_coin_value > 0
-      return unless customer.present?
+      return unless redeemed_coin_value.positive?
+      return if customer.blank?
 
       transaction = customer.wallet.wallet_transactions.find_or_create_by(
         order_id: id,
@@ -274,8 +277,8 @@ class Order < ApplicationRecord
     end
 
     def create_refund_coin_wallet_transaction
-      return unless redeemed_coin_value > 0
-      return unless customer.present?
+      return unless redeemed_coin_value.positive?
+      return if customer.blank?
 
       transaction = customer.wallet.wallet_transactions.find_or_create_by(
         order_id: id,
@@ -285,8 +288,8 @@ class Order < ApplicationRecord
     end
 
     def destroy_order_reward
-      return unless reward_coin > 0
-      return unless customer.present?
+      return unless reward_coin.positive?
+      return if customer.blank?
 
       transaction = customer.wallet.wallet_transactions.find_by(
         order_id: id,

@@ -180,6 +180,19 @@ RSpec.describe Order, type: :model do
         expect(orders).not_to include(order2, order3, order4)
       end
     end
+
+    describe '.include_pending_manual_order' do
+      let!(:order1) { create(:order, status: 'pending', order_type: 'delivery') }
+      let!(:order2) { create(:order, status: 'confirmed', order_type: 'delivery') }
+      let!(:order3) { create(:order, status: 'completed', order_type: 'pickup') }
+      let!(:order4) { create(:order, status: 'voided', order_type: 'pos') }
+      let!(:order5) { create(:order, status: 'pending', order_type: 'manual') }
+      let!(:order6) { create(:order, status: 'confirmed', order_type: 'manual') }
+      let(:orders) { Order.include_pending_manual_order }
+
+      it { expect(orders).not_to include(order1) }  # pending delivery order
+      it { expect(orders).to include(order2, order3, order4, order5, order6) }
+    end
   end
 
   describe 'methods' do

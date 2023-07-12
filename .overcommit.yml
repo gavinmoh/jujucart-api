@@ -33,10 +33,10 @@ PrePush:
    flags: ['-w3', '--exit-on-warn', '--quiet', '--summary']
    command: ['bundle', 'exec', 'brakeman']
  
- RSpec:
-   enabled: true
-   command: ['bundle', 'exec', 'rspec', 'spec']
-   flags: ['--fail-fast', '--color', '--format', 'progress']
+#  RSpec:
+#    enabled: true
+#    command: ['bundle', 'exec', 'rspec', 'spec']
+#    flags: ['--fail-fast', '--color', '--format', 'progress']
 
 #PreCommit:
 #

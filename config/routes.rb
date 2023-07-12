@@ -40,6 +40,7 @@ Rails.application.routes.draw do
             put :pack
             put :ship
             put :checkout
+            put :confirm
             put :complete
             put :void
             get :versions

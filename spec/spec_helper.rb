@@ -14,17 +14,18 @@
 #
 # See https://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 require 'simplecov'
-SimpleCov.start 'rails' do
-  add_filter '/lib/' # exclude lib files
-end
-require 'bearer_token_helper'
+require 'webmock/rspec' # remember to uncomment webmock gem in Gemfile
 require "pundit/rspec"
 require 'aasm/rspec'
-
-# remember to uncomment webmock gem in Gemfile
-# disable all external connections
-require 'webmock/rspec'
+require 'bearer_token_helper'
 require 'support/fake_revenue_monster'
+
+SimpleCov.start 'rails' do
+  add_filter 'lib/' # exclude lib files
+  add_filter 'vendor/'
+end
+
+# disable all external connections
 WebMock.disable_net_connect!(allow_localhost: true)
 
 RSpec.configure do |config|
@@ -41,6 +42,17 @@ RSpec.configure do |config|
       headers: { 'Content-Type': "application/json" }
     )
     stub_request(:any, /revenuemonster.my/).to_rack(FakeRevenueMonster)
+  end
+
+  config.after(:suite) do
+    FileUtils.rm_rf(
+      Dir[
+        Rails.public_path.join('test'),
+        Rails.root.join('log/bullet.log'),
+        Rails.root.join('log/test.log'),
+        Rails.root.join('tmp/uploads')
+      ]
+    )
   end
 
   # helper for generating jwt token

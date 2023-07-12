@@ -264,6 +264,7 @@ GEM
     noticed (1.6.0)
       http (>= 4.0.0)
       rails (>= 5.2.0)
+    oj (3.15.0)
     orm_adapter (0.5.0)
     os (1.1.4)
     pagy (5.10.1)
@@ -467,6 +468,7 @@ DEPENDENCIES
   money-rails
   nanoid (~> 2.0)
   noticed (~> 1.6)
+  oj
   pagy
   paper_trail
   pg (~> 1.1)
