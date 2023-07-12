@@ -281,6 +281,7 @@ Devise.setup do |config|
     manager.failure_app = WardenCustomFailureApp
     manager.default_strategies(scope: :user).push :token_authenticatable
     manager.default_strategies(scope: :admin).push :token_authenticatable
+    manager.default_strategies(scope: :customer).push :token_authenticatable
     # manager.intercept_401 = false
   end
 
