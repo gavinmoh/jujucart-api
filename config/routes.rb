@@ -101,6 +101,15 @@ Rails.application.routes.draw do
           get :all, on: :collection
         end
         resources :categories, only: [:index]
+        resources :orders do
+          resources :line_items
+          member do
+            put :checkout
+            put :complete
+            put :apply_coupon
+            put :remove_coupon
+          end
+        end
       end
     end
   end
