@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_26_024817) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_13_093853) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -163,6 +163,19 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_26_024817) do
     t.index ["transfer_to_location_id"], name: "index_inventory_transfers_on_transfer_to_location_id"
     t.index ["transferred_by_id"], name: "index_inventory_transfers_on_transferred_by_id"
     t.index ["workspace_id"], name: "index_inventory_transfers_on_workspace_id"
+  end
+
+  create_table "line_item_addons", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "line_item_id", null: false
+    t.uuid "product_addon_id", null: false
+    t.bigint "price_cents", default: 0, null: false
+    t.string "price_currency", default: "MYR", null: false
+    t.string "product_addon_name"
+    t.boolean "product_addon_deleted", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["line_item_id"], name: "index_line_item_addons_on_line_item_id"
+    t.index ["product_addon_id"], name: "index_line_item_addons_on_product_addon_id"
   end
 
   create_table "line_items", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -525,6 +538,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_26_024817) do
   add_foreign_key "inventory_transfers", "locations", column: "transfer_from_location_id"
   add_foreign_key "inventory_transfers", "locations", column: "transfer_to_location_id"
   add_foreign_key "inventory_transfers", "workspaces"
+  add_foreign_key "line_item_addons", "line_items"
+  add_foreign_key "line_item_addons", "products", column: "product_addon_id"
   add_foreign_key "line_items", "orders"
   add_foreign_key "line_items", "products"
   add_foreign_key "line_items", "promotion_bundles"

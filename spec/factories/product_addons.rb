@@ -4,7 +4,14 @@ FactoryBot.define do
       workspace { create(:workspace) }
       product { create(:product, workspace: workspace) }
     end
-    product_id { product.id }
+    product_id do
+      case product.type
+      when 'Product'
+        product.id
+      when 'ProductVariant'
+        product.product_id
+      end
+    end
     sequence(:name) { |n| "#{Faker::Name.name}-#{n}" }
     price { Faker::Number.within(range: 100..1000).to_s }
     discount_price { Faker::Number.within(range: 100..1000).to_s }

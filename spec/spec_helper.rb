@@ -17,6 +17,7 @@ require 'simplecov'
 require 'webmock/rspec' # remember to uncomment webmock gem in Gemfile
 require "pundit/rspec"
 require 'aasm/rspec'
+require 'money-rails/test_helpers'
 require 'bearer_token_helper'
 require 'support/fake_revenue_monster'
 
