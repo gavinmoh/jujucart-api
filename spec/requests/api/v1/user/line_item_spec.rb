@@ -50,11 +50,15 @@ RSpec.describe 'api/v1/user/line_items', type: :request do
       }
 
       response(200, 'successful') do
-        let(:data) { { line_item: attributes_for(:line_item) } }
+        let(:product) { create(:product, workspace: user.current_workspace) }
+        let(:product_addon) { create(:product_addon, product: product) }
+        let(:data) { { line_item: { product_id: product.id, quantity: 1, line_item_addons_attributes: [{ product_addon_id: product_addon.id }] } } }
 
         run_test! do |response|
           response_body = JSON.parse(response.body)
           expect(response_body['line_item']['quantity']).to eq(data[:line_item][:quantity])
+          line_item = LineItem.find(response_body['line_item']['id'])
+          expect(line_item.total_price).to eq((line_item.unit_price + line_item.line_item_addons_price) * line_item.quantity)
         end
       end
 

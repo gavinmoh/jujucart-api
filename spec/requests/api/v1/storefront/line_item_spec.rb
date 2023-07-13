@@ -48,18 +48,33 @@ RSpec.describe 'api/v1/storefront/line_items', type: :request do
             type: :object,
             properties: {
               product_id: { type: :string },
-              quantity: { type: :integer }
+              quantity: { type: :integer },
+              line_item_addons_attributes: {
+                type: :array,
+                items: {
+                  type: :object,
+                  properties: {
+                    product_addon_id: { type: :string }
+                  }
+                }
+              }
             }
           }
         }
       }
 
       response(200, 'successful') do
-        let(:data) { { line_item: attributes_for(:line_item) } }
+        let(:product) { create(:product, workspace: user.workspace) }
+        let(:product_addon) { create(:product_addon, product: product) }
+        let(:data) do
+          { line_item: { product_id: product.id, quantity: 1, line_item_addons_attributes: [{ product_addon_id: product_addon.id }] } }
+        end
 
         run_test! do |response|
           response_body = JSON.parse(response.body)
           expect(response_body['line_item']['quantity']).to eq(data[:line_item][:quantity])
+          line_item = LineItem.find(response_body['line_item']['id'])
+          expect(line_item.total_price).to eq((line_item.product_unit_price + line_item.line_item_addons_price) * line_item.quantity)
         end
       end
 
@@ -105,7 +120,18 @@ RSpec.describe 'api/v1/storefront/line_items', type: :request do
             type: :object,
             properties: {
               product_id: { type: :string },
-              quantity: { type: :integer }
+              quantity: { type: :integer },
+              line_item_addons_attributes: {
+                type: :array,
+                items: {
+                  type: :object,
+                  properties: {
+                    id: { type: :string },
+                    _destroy: { type: :boolean },
+                    product_addon_id: { type: :string }
+                  }
+                }
+              }
             }
           }
         }

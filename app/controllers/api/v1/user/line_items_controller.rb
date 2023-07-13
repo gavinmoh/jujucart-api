@@ -64,14 +64,16 @@ class Api::V1::User::LineItemsController < Api::V1::User::ApplicationController
 
     def line_item_params
       if @order.manual?
-        params.require(:line_item).permit(:product_id, :quantity, :name, :unit_price)
+        params.require(:line_item).permit(:product_id, :quantity, :name, :unit_price, line_item_addons_attributes: [:id, :product_addon_id, :_destroy])
       else
-        params.require(:line_item).permit(:product_id, :quantity)
+        params.require(:line_item).permit(:product_id, :quantity, line_item_addons_attributes: [:id, :product_addon_id, :_destroy])
       end
     end
 
     def find_or_create_line_item
-      if @order.manual?
+      if line_item_params[:line_item_addons_attributes].present?
+        @line_item = @order.line_items.new(line_item_params)
+      elsif @order.manual?
         @line_item = @order.line_items.find_or_initialize_by(product_id: line_item_params[:product_id], name: line_item_params[:name])
         @line_item.assign_attributes(line_item_params.except(:quantity))
       else

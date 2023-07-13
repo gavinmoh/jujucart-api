@@ -28,8 +28,7 @@ class LineItemAddon < ApplicationRecord
     end
 
     def product_addon_must_belongs_to_line_item_product
-      return if product_addon.blank?
-      return if line_item.blank?
+      return if product_addon.blank? || line_item.blank?
 
       case line_item.product.type
       when 'Product'
