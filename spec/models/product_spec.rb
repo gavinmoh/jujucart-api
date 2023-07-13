@@ -5,8 +5,10 @@ RSpec.describe Product, type: :model do
     it { is_expected.to belong_to(:workspace) }
     it { is_expected.to belong_to(:category).optional }
     it { is_expected.to have_many(:product_variants).dependent(:destroy) }
+    it { is_expected.to have_many(:product_addons).dependent(:destroy) }
 
     it { is_expected.to accept_nested_attributes_for(:product_variants).allow_destroy(true) }
+    it { is_expected.to accept_nested_attributes_for(:product_addons).allow_destroy(true) }
   end
 
   describe 'validations' do
@@ -14,13 +16,21 @@ RSpec.describe Product, type: :model do
   end
 
   describe 'callbacks' do
-    describe '#update_slug' do
+    describe '#set_slug' do
       let(:product) { build(:product, name: 'Product Name') }
 
-      it 'updates slug' do
+      it 'set slug' do
         expect do
           product.save!
         end.to change(product, :slug).from(nil).to('product-name')
+      end
+
+      context 'when slug is already present' do
+        let(:workspace) { create(:workspace) }
+        let(:product) { create(:product, workspace: workspace) }
+        let(:new_product) { create(:product, workspace: workspace, name: product.name) }
+
+        it { expect(new_product.slug).not_to eq(product.slug) }
       end
     end
 
@@ -72,11 +82,15 @@ RSpec.describe Product, type: :model do
       let!(:product_variant_inventory2) { create(:inventory, product: product_variant2, location: location) }
       let!(:product_variant_inventory_transaction1) { create(:inventory_transaction, inventory: product_variant_inventory1, quantity: 5) }
       let!(:product_variant_inventory_transaction2) { create(:inventory_transaction, inventory: product_variant_inventory2, quantity: 6) }
+      let!(:product_addon) { create(:product_addon, product: product1) }
+      let!(:product_addon_inventory) { create(:inventory, product: product_addon, location: location) }
+      let!(:product_addon_inventory_transaction) { create(:inventory_transaction, inventory: product_addon_inventory, quantity: 7) }
 
       it 'returns products with quantity' do
         products = described_class.with_store_quantity(store.id)
         expect(products.first['product_quantity']).to eq(10)
         expect(products.first['variant_quantity']).to eq(11)
+        expect(products.first['addon_quantity']).to eq(7)
       end
     end
   end
