@@ -1,11 +1,9 @@
 class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
   before_action :set_product, only: [:show, :update, :destroy]
   before_action :set_products, only: [:index]
-  
+
   def index
-    if params[:store_id].present?
-      @products = @products.with_store_quantity(params[:store_id])
-    end
+    @products = @products.with_store_quantity(params[:store_id]) if params[:store_id].present?
 
     @pagy, @products = pagy(@products)
     render json: @products, adapter: :json, include: ['category'], include_store_quantity: params[:store_id].present?
@@ -13,7 +11,11 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
 
   def show
     @product_variants = @product.product_variants.with_store_quantity(params[:store_id]) if params[:store_id].present?
-    render json: @product, adapter: :json, product_variants: @product_variants, include_store_quantity: params[:store_id].present?
+    @product_addons = @product.product_addons.with_store_quantity(params[:store_id]) if params[:store_id].present?
+    render json: @product, adapter: :json,
+           product_variants: @product_variants,
+           product_addons: @product_addons,
+           include_store_quantity: params[:store_id].present?
   end
 
   def create
@@ -29,8 +31,14 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
   end
 
   def update
+    @product_variants = @product.product_variants.with_store_quantity(params[:store_id]) if params[:store_id].present?
+    @product_addons = @product.product_addons.with_store_quantity(params[:store_id]) if params[:store_id].present?
+
     if @product.update(product_params)
-      render json: @product, adapter: :json, product_variants: @product_variants
+      render json: @product, adapter: :json,
+             product_variants: @product_variants,
+             product_addons: @product_addons,
+             include_store_quantity: params[:store_id].present?
     else
       render json: ErrorResponse.new(@product), status: :unprocessable_entity
     end
@@ -47,20 +55,17 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
   def import
     pundit_authorize(Product)
     raise ActionController::ParameterMissing unless import_params[:file].is_a?(String)
+
     decoded = Base64.decode64(import_params[:file].split(',').second).force_encoding('utf-8').sub("\xEF\xBB\xBF", '')
     file = StringIO.new(decoded)
 
     products_attributes = SmarterCSV.process(file).map { |x| x.slice(*importable_attributes) }
-    category_names = products_attributes.map { |x| x[:category] }.uniq
+    category_names = products_attributes.pluck(:category).uniq
     categories = Category.where(name: category_names).as_json.map { |x| ActiveSupport::HashWithIndifferentAccess.new(x) }
 
     ActiveRecord::Base.transaction do
       products_attributes = products_attributes.map do |x|
-        if categories.any?
-          category_id = categories.find { |category| category[:name] == x[:category] }.dig(:id)
-        else
-          category_id = nil
-        end
+        category_id = (categories.find { |category| category[:name] == x[:category] }.dig(:id) if categories.any?)
         if category_id.present?
           x[:category_id] = category_id
         else
@@ -76,8 +81,8 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
 
     @products = pundit_scope(Product).where(id: @products_array.map(&:id))
     render json: @products, adapter: :json
-  rescue => exception
-    render json: { error: exception }, status: :unprocessable_entity
+  rescue StandardError => e
+    render json: { error: e }, status: :unprocessable_entity
   end
 
   def import_template
@@ -90,19 +95,20 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
   end
 
   private
+
     def set_product
-      if params[:store_id].present?
-        product_scope = Product.with_store_quantity(params[:store_id])
-      else
-        product_scope = Product.all
-      end
+      product_scope = if params[:store_id].present?
+                        Product.with_store_quantity(params[:store_id])
+                      else
+                        Product.all
+                      end
       @product = pundit_scope(product_scope).find(params[:id])
       pundit_authorize(@product) if @product
     end
 
     def set_products
-      pundit_authorize(Product)      
-      @products = pundit_scope(Product.includes(:category, :product_variants))
+      pundit_authorize(Product)
+      @products = pundit_scope(Product.includes(:category, :product_variants, :product_addons))
       @products = keyword_queryable(@products)
       @products = @products.where(sku: params[:sku]) if params[:sku].present?
       @products = @products.where(category_id: params[:category_id]) if params[:category_id].present?
@@ -119,15 +125,19 @@ class Api::V1::User::ProductsController < Api::V1::User::ApplicationController
 
     def product_params
       params.require(:product).permit(
-        :name, :description, :active, :featured_photo, :category_id, :price, :discount_price, 
+        :name, :description, :active, :featured_photo, :category_id, :price, :discount_price,
         :is_featured, :has_no_variant, :is_cartable, :is_hidden, :sku, :remove_featured_photo,
-        tags: [], 
-        product_attributes: [:name, values: []],
+        tags: [],
+        product_attributes: [:name, { values: [] }],
         product_variants_attributes: [
           :id, :name, :description, :featured_photo, :remove_featured_photo, :sku,
-          :price, :discount_price, :_destroy,
-          product_attributes: [:name, :value]
-        ] 
+          :price, :discount_price, :active, :_destroy,
+          { product_attributes: [:name, :value] }
+        ],
+        product_addons_attributes: [
+          :id, :name, :description, :featured_photo, :remove_featured_photo, :sku,
+          :price, :discount_price, :active, :_destroy
+        ]
       )
     end
 
