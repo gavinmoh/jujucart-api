@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_07_13_093853) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_18_080742) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -304,6 +304,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_13_093853) do
     t.datetime "voided_at"
     t.datetime "refunded_at"
     t.uuid "workspace_id"
+    t.string "customer_name"
+    t.string "customer_email"
+    t.string "customer_phone_number"
     t.index ["created_by_id"], name: "index_orders_on_created_by_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["nanoid"], name: "index_orders_on_nanoid", unique: true
@@ -323,6 +326,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_13_093853) do
     t.datetime "updated_at", null: false
     t.string "transaction_reference"
     t.uuid "workspace_id"
+    t.datetime "reconciled_at"
     t.index ["nanoid"], name: "index_payments_on_nanoid", unique: true
     t.index ["order_id"], name: "index_payments_on_order_id"
     t.index ["workspace_id"], name: "index_payments_on_workspace_id"
@@ -450,7 +454,12 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_13_093853) do
     t.uuid "workspace_id"
     t.string "store_type"
     t.string "hostname"
+    t.string "subdomain"
+    t.string "nanoid"
+    t.jsonb "data", default: {}
     t.index ["hostname"], name: "index_stores_on_hostname", unique: true, where: "((hostname IS NOT NULL) AND ((hostname)::text <> ''::text))"
+    t.index ["nanoid"], name: "index_stores_on_nanoid", unique: true
+    t.index ["subdomain"], name: "index_stores_on_subdomain", unique: true
     t.index ["workspace_id"], name: "index_stores_on_workspace_id"
   end
 

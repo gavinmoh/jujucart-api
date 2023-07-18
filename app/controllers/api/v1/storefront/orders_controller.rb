@@ -47,7 +47,14 @@ class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationCo
     @order.customer = current_customer if @order.customer.blank?
     @order.created_by = current_customer if @order.created_by.blank?
 
-    if @order.checkout!
+    transaction_success = false
+    ActiveRecord::Base.transaction do
+      transaction_success = @order.checkout!
+      create_billplz_payment if transaction_success
+    end
+
+    if transaction_success
+      @order.reload
       render json: @order, adapter: :json
     else
       render json: ErrorResponse.new(@order), status: :unprocessable_entity
@@ -120,11 +127,51 @@ class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationCo
       params.require(:order).permit(
         :unit_number, :street_address1, :street_address2,
         :postcode, :city, :state, :latitude, :longitude,
+        :customer_name, :customer_email, :customer_phone_number,
         order_attachments_attributes: [:id, :name, :file, :_destroy]
       )
     end
 
     def coupon_code_params
       params.require(:code)
+    end
+
+    def create_billplz_payment
+      return if @order.pending_billplz_payment.present?
+
+      collection = billplz_collection
+      uuid = SecureRandom.uuid
+      bill = create_billplz_bill(collection, uuid)
+      @order.payments.create(
+        id: uuid,
+        payment_type: :online,
+        service_provider: 'Billplz',
+        transaction_reference: bill.id,
+        billplz: bill,
+        created_source: request.host
+      )
+    end
+
+    def billplz_collection
+      if current_store.billplz_collection_id.present?
+        Billplz::Collection.get(current_store.billplz_collection_id)
+      else
+        Billplz::Collection.create(title: "#{current_store.name} - #{current_store.nanoid}")
+      end
+    end
+
+    def create_billplz_bill(collection, uuid)
+      Billplz::Bill.create(
+        collection.id,
+        @order.customer&.email || @order.customer_email,
+        @order.customer&.phone_number || @order.customer_phone_number,
+        @order.customer&.name || @order.customer_name,
+        @order.total_cents,
+        api_v1_billplz_callback_url(uuid),
+        "Order ##{@order.nanoid}",
+        redirect_url: api_v1_billplz_return_url(uuid),
+        reference_1_label: 'order_id',
+        reference_1: @order.nanoid
+      )
     end
 end

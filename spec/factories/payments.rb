@@ -12,6 +12,7 @@ FactoryBot.define do
 
     trait :revenue_monster do
       payment_type { 'terminal' }
+      service_provider { 'RevenueMonster' }
       payment_method { 'CARD' }
       terminal_id { create(:pos_terminal).terminal_id }
       revenue_monster do
@@ -67,6 +68,11 @@ FactoryBot.define do
           updatedAt: "2021-02-17T18:39:37Z"
         }
       end
+    end
+
+    trait :billplz do
+      payment_type { 'online' }
+      service_provider { 'Billplz' }
     end
   end
 end

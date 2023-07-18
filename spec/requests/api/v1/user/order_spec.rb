@@ -66,6 +66,9 @@ RSpec.describe 'api/v1/user/orders', type: :request do
               longitude: { type: :float },
               courier_name: { type: :string },
               tracking_number: { type: :string },
+              customer_name: { type: :string },
+              customer_email: { type: :string },
+              customer_phone_number: { type: :string },
               line_items_attributes: {
                 type: :array,
                 items: {
@@ -190,6 +193,9 @@ RSpec.describe 'api/v1/user/orders', type: :request do
               tracking_number: { type: :string },
               customer_id: { type: :string, description: 'POS order only' },
               redeemed_coin: { type: :integer, description: 'POS order only' },
+              customer_name: { type: :string },
+              customer_email: { type: :string },
+              customer_phone_number: { type: :string },
               order_attachments_attributes: {
                 type: :array,
                 items: {

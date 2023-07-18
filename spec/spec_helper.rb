@@ -20,6 +20,7 @@ require 'aasm/rspec'
 require 'money-rails/test_helpers'
 require 'bearer_token_helper'
 require 'support/fake_revenue_monster'
+require 'support/fake_billplz'
 
 SimpleCov.start 'rails' do
   add_filter 'lib/' # exclude lib files
@@ -43,6 +44,8 @@ RSpec.configure do |config|
       headers: { 'Content-Type': "application/json" }
     )
     stub_request(:any, /revenuemonster.my/).to_rack(FakeRevenueMonster)
+    stub_request(:any, /billplz.com/).to_rack(FakeBillplz)
+    stub_request(:any, /billplz-sandbox.com/).to_rack(FakeBillplz)
   end
 
   config.after(:suite) do

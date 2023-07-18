@@ -4,8 +4,9 @@ class Api::V1::Storefront::OrderSerializer < ActiveModel::Serializer
              :unit_number, :street_address1, :street_address2, :postcode, :city, :state, :latitude, :longitude,
              :courier_name, :tracking_number, :reward_coin, :pending_payment_at, :confirmed_at, :packed_at,
              :shipped_at, :completed_at, :cancelled_at, :failed_at, :created_by_id, :redeemed_coin, :redeemed_coin_value,
-             :voided_at, :refunded_at
+             :voided_at, :refunded_at, :customer_name, :customer_email, :customer_phone_number
   attributes :created_at, :updated_at
+  attribute :billplz_url, if: -> { object.pending_payment? }
 
   has_one :store
   has_one :order_coupon
@@ -13,4 +14,8 @@ class Api::V1::Storefront::OrderSerializer < ActiveModel::Serializer
   has_one :success_payment
   has_many :payments
   has_many :order_attachments
+
+  def billplz_url
+    object.pending_billplz_payment&.billplz&.dig('url')
+  end
 end

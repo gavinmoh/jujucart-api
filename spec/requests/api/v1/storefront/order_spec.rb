@@ -109,6 +109,9 @@ RSpec.describe 'api/v1/storefront/orders', type: :request do
               latitude: { type: :float },
               longitude: { type: :float },
               redeemed_coin: { type: :integer },
+              customer_name: { type: :string },
+              customer_email: { type: :string },
+              customer_phone_number: { type: :string },
               order_attachments_attributes: {
                 type: :array,
                 items: {

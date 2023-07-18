@@ -15,6 +15,9 @@ FactoryBot.define do
     order_type { 'delivery' }
     courier_name { ['POS Laju', 'DHL', 'J&T Express'].sample }
     tracking_number { Faker::Number.number(digits: 10) }
+    customer_email { Faker::Internet.email }
+    customer_phone_number { Faker::PhoneNumber.cell_phone }
+    customer_name { Faker::Name.name }
 
     after(:build) do |order, evaluator|
       order.workspace = evaluator.workspace if order.workspace.nil?

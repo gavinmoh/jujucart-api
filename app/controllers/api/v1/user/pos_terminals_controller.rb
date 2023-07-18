@@ -3,7 +3,7 @@ class Api::V1::User::PosTerminalsController < Api::V1::User::ApplicationControll
   before_action :set_pos_terminals, only: [:index]
   before_action :set_order, only: [:initiate_payment]
   before_action :set_payment, only: [:card_payment_refund]
-  
+
   def index
     @pagy, @pos_terminals = pagy(@pos_terminals)
     render json: @pos_terminals, adapter: :json
@@ -16,7 +16,7 @@ class Api::V1::User::PosTerminalsController < Api::V1::User::ApplicationControll
   def create
     @pos_terminal = PosTerminal.new(pos_terminal_params)
     pundit_authorize(@pos_terminal)
-    
+
     if @pos_terminal.save
       render json: @pos_terminal, adapter: :json
     else
@@ -41,7 +41,13 @@ class Api::V1::User::PosTerminalsController < Api::V1::User::ApplicationControll
   end
 
   def initiate_payment
-    @payment = @order.payments.create(payment_type: 'terminal', payment_method: initiate_payment_params[:type], terminal_id: @pos_terminal.terminal_id, amount: @order.total)
+    @payment = @order.payments.create(
+      payment_type: 'terminal',
+      payment_method: initiate_payment_params[:type],
+      terminal_id: @pos_terminal.terminal_id,
+      amount: @order.total,
+      service_provider: 'RevenueMonster'
+    )
     @rm_order = RevenueMonster::Order.new(
       id: @payment.nanoid,
       amount: @payment.amount_cents,
@@ -103,13 +109,14 @@ class Api::V1::User::PosTerminalsController < Api::V1::User::ApplicationControll
   end
 
   private
+
     def set_pos_terminal
       @pos_terminal = pundit_scope(PosTerminal).find(params[:id])
       pundit_authorize(@pos_terminal) if @pos_terminal
     end
 
     def set_pos_terminals
-      pundit_authorize(PosTerminal)      
+      pundit_authorize(PosTerminal)
       @pos_terminals = pundit_scope(PosTerminal.includes(:store))
       @pos_terminals = @pos_terminals.where(store_id: params[:store_id]) if params[:store_id].present?
     end

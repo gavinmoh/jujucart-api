@@ -7,7 +7,8 @@ class Order < ApplicationRecord
   belongs_to :created_by, class_name: 'Account', optional: true
   belongs_to :store
 
-  has_one  :success_payment, -> { where(status: 'success') }, class_name: 'Payment', dependent: :destroy
+  has_one  :success_payment, -> { where(status: 'success') }, class_name: 'Payment', dependent: :nullify
+  has_one  :pending_billplz_payment, -> { where(status: 'pending').where('data->>\'service_provider\' = ?', 'Billplz') }, class_name: 'Payment', dependent: :nullify
   has_one  :order_coupon, dependent: :destroy
   has_one  :coupon, through: :order_coupon
   has_one  :valid_order_coupon, -> { code_valid.where(is_valid: true) }, class_name: 'OrderCoupon', dependent: :destroy

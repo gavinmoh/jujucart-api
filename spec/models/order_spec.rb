@@ -8,7 +8,8 @@ RSpec.describe Order, type: :model do
     it { is_expected.to belong_to(:customer).optional }
     it { is_expected.to belong_to(:store) }
     it { is_expected.to belong_to(:created_by).optional }
-    it { is_expected.to have_one(:success_payment) }
+    it { is_expected.to have_one(:success_payment).dependent(:nullify).class_name('Payment').dependent(:nullify) }
+    it { is_expected.to have_one(:pending_billplz_payment).dependent(:nullify).class_name('Payment').dependent(:nullify) }
     it { is_expected.to have_one(:order_coupon).dependent(:destroy) }
     it { is_expected.to have_one(:coupon).through(:order_coupon) }
     it { is_expected.to have_one(:valid_order_coupon).class_name('OrderCoupon') }

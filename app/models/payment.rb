@@ -1,22 +1,26 @@
 class Payment < ApplicationRecord
-  include ActiveModel::Dirty, AASM
+  include AASM
+  include ActiveModel::Dirty
   belongs_to :workspace
   belongs_to :order, optional: true
-  
-  enum payment_type: { cash: 'cash', terminal: 'terminal' }
+
+  enum payment_type: { cash: 'cash', terminal: 'terminal', online: 'online' }
 
   validates :payment_type, presence: true
   monetize :amount_cents
-  
-  store_accessor :data, :revenue_monster, :payment_method, :terminal_id
+
+  store_accessor :data, [
+    :revenue_monster, :payment_method, :terminal_id, :billplz, :service_provider,
+    :created_source
+  ]
 
   # validates :transaction_reference, presence: true, if: -> { self.cash? }
   validates :transaction_reference, uniqueness: true, allow_blank: true
 
   before_validation :set_workspace_id
 
-  after_commit :confirm_order, if: -> { saved_change_to_status? and self.success? }, on: [:create, :update]
-  after_commit :refund_order, if: -> { saved_change_to_status? and self.refunded? }, on: [:create, :update]
+  after_commit :confirm_order, if: -> { saved_change_to_status? and success? }, on: [:create, :update]
+  after_commit :refund_order, if: -> { saved_change_to_status? and refunded? }, on: [:create, :update]
 
   aasm column: :status do
     state :pending, initial: true
@@ -44,15 +48,16 @@ class Payment < ApplicationRecord
   end
 
   private
+
     def confirm_order
-      self.order.confirm!
+      order.confirm!
     end
 
     def refund_order
-      self.order.refund!
+      order.refund!
     end
 
     def set_workspace_id
-      self.workspace_id = self.order.workspace_id if self.order
+      self.workspace_id = order.workspace_id if order
     end
 end

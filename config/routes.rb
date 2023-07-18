@@ -5,6 +5,11 @@ Rails.application.routes.draw do
 
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
+      namespace :billplz do
+        get  '/return/:jujucart_payment_id',   to: 'application#return',   as: :return
+        post '/callback/:jujucart_payment_id', to: 'application#callback', as: :callback
+      end
+
       namespace :revenue_monster do
         post :callback, to: 'application#callback'
       end
