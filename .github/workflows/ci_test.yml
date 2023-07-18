@@ -9,6 +9,9 @@ env:
   DATABASE_URL: postgres://postgres:postgres@localhost:5432/ci_test
   MAIL_FROM: test@example.com
   ASSET_HOST: http://example.com
+  BILLPLZ_API_KEY: '47dbd2f6-ed6f-4075-9987-488d2365c8b1'
+  BILLPLZ_BASE_URL: 'https://www.billplz-sandbox.com'
+  BILLPLZ_X_SIGNATURE_KEY: 'S-k0tEjR74OlGl0iRlKM-U9Q'
 
 jobs:
   rspec:
