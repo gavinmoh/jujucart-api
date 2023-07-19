@@ -68,6 +68,7 @@ group :test do
   # only enable if it is necessary
   gem "webmock", "~> 3.14"
   gem "sinatra", "~> 2.2"
+  gem 'stripe-ruby-mock', '~> 3.1.0.rc3', require: 'stripe_mock'
 end
 
 group :production do
@@ -152,3 +153,5 @@ gem "wicked_pdf", "~> 2.6"
 gem "wkhtmltopdf-binary", "~> 0.12.6"
 
 gem "oj"
+
+gem "stripe", "~> 5.0"
