@@ -99,6 +99,9 @@ Rails.application.routes.draw do
           end
         end
         resource :workspace, only: [:show, :update], controller: :workspace
+        resource :stripe, only: [], controller: :stripe do
+          post :connect, on: :collection
+        end
       end
 
       namespace :storefront do
