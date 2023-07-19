@@ -195,7 +195,7 @@ RSpec.describe 'api/v1/storefront/orders', type: :request do
         end
 
         context 'when default_payment_gateway is Stripe' do
-          before { workspace.update(default_payment_gateway: 'Stripe', stripe_charges_enabled: true) }
+          before { workspace.update(default_payment_gateway: 'Stripe', stripe_account_id: '123', stripe_charges_enabled: true) }
 
           run_test! do |response|
             response_body = JSON.parse(response.body)

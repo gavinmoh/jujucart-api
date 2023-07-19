@@ -10,7 +10,7 @@ RSpec.describe 'api/v1/user/workspace', type: :request do
       response(200, 'successful') do
         tags 'User Workspace'
         produces 'application/json'
-        security [ { bearerAuth: nil } ]
+        security [{ bearerAuth: nil }]
 
         run_test!
       end
@@ -20,7 +20,7 @@ RSpec.describe 'api/v1/user/workspace', type: :request do
       tags 'User Workspace'
       produces 'application/json'
       consumes 'application/json'
-      security [ { bearerAuth: nil } ]
+      security [{ bearerAuth: nil }]
 
       parameter name: :data, in: :body, schema: {
         type: :object,
@@ -36,14 +36,15 @@ RSpec.describe 'api/v1/user/workspace', type: :request do
               order_reward_amount: { type: :integer },
               maximum_redeemed_coin_rate: { type: :float },
               invoice_size: { type: :string },
-              company_phone_number: { type: :string }, 
-              company_email: { type: :string }, 
-              company_name: { type: :string }, 
-              company_address: { type: :string }, 
-              bank_name: { type: :string }, 
+              company_phone_number: { type: :string },
+              company_email: { type: :string },
+              company_name: { type: :string },
+              company_address: { type: :string },
+              bank_name: { type: :string },
               bank_account_number: { type: :string },
-              bank_holder_name: { type: :string }, 
-              receipt_footer: { type: :string }
+              bank_holder_name: { type: :string },
+              receipt_footer: { type: :string },
+              default_payment_gateway: { type: :string, enum: %w[Billplz Stripe] }
             }
           }
         }
@@ -51,7 +52,7 @@ RSpec.describe 'api/v1/user/workspace', type: :request do
 
       response(200, 'successful', save_request_example: :data) do
         let(:data) { { workspace: attributes_for(:workspace) } }
-        
+
         run_test!
       end
 
@@ -64,10 +65,9 @@ RSpec.describe 'api/v1/user/workspace', type: :request do
           other_user.user_workspaces.destroy_all
           other_user.user_workspaces.create(workspace: user.current_workspace)
         end
-        
+
         run_test!
       end
     end
-    
   end
 end
