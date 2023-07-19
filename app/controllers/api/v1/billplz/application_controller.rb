@@ -1,4 +1,5 @@
 class Api::V1::Billplz::ApplicationController < ApplicationController
+  include PaymentRedirectable
   before_action :set_payment
 
   def return
@@ -45,7 +46,7 @@ class Api::V1::Billplz::ApplicationController < ApplicationController
 
     def set_payment
       # jujucart_payment_id is intentional to prevent conflict with params from billplz
-      @payment = Payment.find(params[:jujucart_payment_id])
+      @payment = Payment.billplz.find(params[:jujucart_payment_id])
     end
 
     def extract_params
@@ -54,13 +55,5 @@ class Api::V1::Billplz::ApplicationController < ApplicationController
 
     def verify_signature(payload, signature)
       Billplz::Signature.verify(payload, signature)
-    end
-
-    def redirect_host
-      if @payment.created_source == @payment.order.store.hostname
-        @payment.order.store.hostname
-      else
-        "#{@payment.order.store.subdomain}.#{Setting.main_domain}"
-      end
     end
 end
