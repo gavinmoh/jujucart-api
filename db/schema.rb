@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_07_19_063428) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_19_090003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -31,6 +31,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_19_063428) do
     t.string "role"
     t.string "profile_photo"
     t.uuid "workspace_id"
+    t.string "stripe_customer_id"
     t.index ["email", "type", "workspace_id"], name: "index_accounts_on_email_and_type_and_workspace_id", unique: true, where: "((email IS NOT NULL) AND ((email)::text <> ''::text))"
     t.index ["phone_number", "type", "workspace_id"], name: "index_accounts_on_phone_number_and_type_and_workspace_id", unique: true, where: "((phone_number IS NOT NULL) AND ((phone_number)::text <> ''::text))"
     t.index ["reset_password_token"], name: "index_accounts_on_reset_password_token", unique: true
@@ -521,7 +522,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_19_063428) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "stripe_account_id"
-    t.boolean "stripe_charged_enabled", default: false
+    t.boolean "stripe_charges_enabled", default: false
     t.string "default_payment_gateway"
     t.index ["created_by_id"], name: "index_workspaces_on_created_by_id"
     t.index ["nanoid"], name: "index_workspaces_on_nanoid", unique: true
