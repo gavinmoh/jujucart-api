@@ -14,6 +14,10 @@ Rails.application.routes.draw do
         post :callback, to: 'application#callback'
       end
 
+      namespace :stripe do
+        post :callback, to: 'application#callback'
+      end
+
       namespace :admin do
         resources :workspaces
       end
