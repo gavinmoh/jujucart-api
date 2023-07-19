@@ -1,4 +1,6 @@
 class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationController
+  include Billplzable
+  include Stripeable
   before_action :authenticate_customer!, only: [:index, :complete]
   before_action :set_order, only: [:show, :update, :destroy, :complete, :checkout, :apply_coupon, :remove_coupon]
   before_action :set_orders, only: [:index]
@@ -50,7 +52,7 @@ class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationCo
     transaction_success = false
     ActiveRecord::Base.transaction do
       transaction_success = @order.checkout!
-      create_billplz_payment if transaction_success
+      create_pending_payment if transaction_success
     end
 
     if transaction_success
@@ -136,42 +138,16 @@ class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationCo
       params.require(:code)
     end
 
-    def create_billplz_payment
-      return if @order.pending_billplz_payment.present?
-
-      collection = billplz_collection
-      uuid = SecureRandom.uuid
-      bill = create_billplz_bill(collection, uuid)
-      @order.payments.create(
-        id: uuid,
-        payment_type: :online,
-        service_provider: 'Billplz',
-        transaction_reference: bill.id,
-        billplz: bill,
-        created_source: request.host
-      )
-    end
-
-    def billplz_collection
-      if current_store.billplz_collection_id.present?
-        Billplz::Collection.get(current_store.billplz_collection_id)
-      else
-        Billplz::Collection.create(title: "#{current_store.name} - #{current_store.nanoid}")
+    def create_pending_payment
+      case current_workspace.default_payment_gateway
+      when 'Billplz'
+        create_billplz_payment(@order)
+      when 'Stripe'
+        if current_workspace.stripe_account_id.present? && current_workspace.stripe_charges_enabled?
+          create_stripe_payment(@order)
+        else
+          create_billplz_payment(@order) # fallback to billplz
+        end
       end
-    end
-
-    def create_billplz_bill(collection, uuid)
-      Billplz::Bill.create(
-        collection.id,
-        @order.customer&.email || @order.customer_email,
-        @order.customer&.phone_number || @order.customer_phone_number,
-        @order.customer&.name || @order.customer_name,
-        @order.total_cents,
-        api_v1_billplz_callback_url(uuid),
-        "Order ##{@order.nanoid}",
-        redirect_url: api_v1_billplz_return_url(uuid),
-        reference_1_label: 'order_id',
-        reference_1: @order.nanoid
-      )
     end
 end
