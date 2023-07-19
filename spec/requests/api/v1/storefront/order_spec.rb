@@ -4,8 +4,17 @@ RSpec.describe 'api/v1/storefront/orders', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:customer) }
   let(:Authorization) { bearer_token_for(user) }
+  let(:workspace) { user.workspace }
   let!(:store) { create(:store, workspace: user.workspace, store_type: 'online', hostname: 'www.example.com') }
   let(:id) { create(:order, :guest_order, store_id: store.id, workspace: user.workspace).id }
+
+  before do
+    StripeMock.start
+  end
+
+  after do
+    StripeMock.stop
+  end
 
   path '/api/v1/storefront/orders' do
     get('list orders') do
@@ -175,7 +184,25 @@ RSpec.describe 'api/v1/storefront/orders', type: :request do
       let(:id) { create(:order, :guest_order, :with_line_items, store_id: store.id, workspace: user.workspace).id }
 
       response(200, 'successful') do
-        run_test!
+        context 'when default_payment_gateway is Billplz' do
+          before { workspace.update(default_payment_gateway: 'Billplz') }
+
+          run_test! do |response|
+            response_body = JSON.parse(response.body)
+            expect(response_body['order']['status']).to eq('pending_payment')
+            expect(response_body['order']['payment_url']).to be_present
+          end
+        end
+
+        context 'when default_payment_gateway is Stripe' do
+          before { workspace.update(default_payment_gateway: 'Stripe', stripe_charges_enabled: true) }
+
+          run_test! do |response|
+            response_body = JSON.parse(response.body)
+            expect(response_body['order']['status']).to eq('pending_payment')
+            expect(response_body['order']['payment_url']).to be_present
+          end
+        end
       end
 
       response(403, 'forbidden') do

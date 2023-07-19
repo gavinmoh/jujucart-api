@@ -6,7 +6,7 @@ class Api::V1::Storefront::OrderSerializer < ActiveModel::Serializer
              :shipped_at, :completed_at, :cancelled_at, :failed_at, :created_by_id, :redeemed_coin, :redeemed_coin_value,
              :voided_at, :refunded_at, :customer_name, :customer_email, :customer_phone_number
   attributes :created_at, :updated_at
-  attribute :billplz_url, if: -> { object.pending_payment? }
+  attribute :payment_url, if: -> { object.pending_payment? }
 
   has_one :store
   has_one :order_coupon
@@ -15,7 +15,14 @@ class Api::V1::Storefront::OrderSerializer < ActiveModel::Serializer
   has_many :payments
   has_many :order_attachments
 
-  def billplz_url
-    object.pending_billplz_payment&.billplz&.dig('url')
+  def payment_url
+    case object.workspace.default_payment_gateway
+    when 'Billplz'
+      return object.pending_billplz_payment&.billplz&.dig('url')
+    when 'Stripe'
+      return object.pending_stripe_payment&.stripe&.dig('url')
+    end
+
+    nil
   end
 end
