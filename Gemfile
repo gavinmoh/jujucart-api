@@ -68,7 +68,7 @@ group :test do
   # only enable if it is necessary
   gem "webmock", "~> 3.14"
   gem "sinatra", "~> 2.2"
-  gem 'stripe-ruby-mock', '~> 3.1.0.rc3', require: 'stripe_mock'
+  gem 'stripe-ruby-mock', git: 'https://github.com/stripe-ruby-mock/stripe-ruby-mock', require: 'stripe_mock'
 end
 
 group :production do

@@ -1,3 +1,12 @@
+GIT
+  remote: https://github.com/stripe-ruby-mock/stripe-ruby-mock
+  revision: 3c7a5db6a5dde3203d387dde0255611e508022f0
+  specs:
+    stripe-ruby-mock (3.1.0.rc3)
+      dante (>= 0.2.0)
+      multi_json (~> 1.0)
+      stripe (> 5, < 6)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -415,10 +424,6 @@ GEM
     smarter_csv (1.8.4)
     ssrf_filter (1.0.7)
     stripe (5.55.0)
-    stripe-ruby-mock (3.1.0.rc3)
-      dante (>= 0.2.0)
-      multi_json (~> 1.0)
-      stripe (> 5, < 6)
     thor (1.2.2)
     thwait (0.2.0)
       e2mmap
@@ -498,7 +503,7 @@ DEPENDENCIES
   sinatra (~> 2.2)
   smarter_csv
   stripe (~> 5.0)
-  stripe-ruby-mock (~> 3.1.0.rc3)
+  stripe-ruby-mock!
   tzinfo-data
   webmock (~> 3.14)
   wicked_pdf (~> 2.6)
