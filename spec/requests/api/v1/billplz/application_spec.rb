@@ -1,7 +1,7 @@
 require 'swagger_helper'
 
 RSpec.describe 'api/v1/billplz/', type: :request do
-  let(:workspace) { create(:workspace) }
+  let(:workspace) { create(:workspace, default_payment_gateway: 'Billplz') }
   let(:store) { create(:store, workspace: workspace, store_type: 'online', hostname: 'www.example.com') }
   let(:order) { create(:order, :with_line_items, workspace: workspace, store_id: store.id, customer_id: nil) }
   let(:payment) { order.pending_billplz_payment }

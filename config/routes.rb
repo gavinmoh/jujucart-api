@@ -16,6 +16,7 @@ Rails.application.routes.draw do
 
       namespace :stripe do
         post :callback, to: 'application#callback'
+        get '/return/:payment_id', to: 'application#return', as: :return
       end
 
       namespace :admin do
