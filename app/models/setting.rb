@@ -2,7 +2,7 @@
 class Setting < RailsSettings::Base
   cache_prefix { "v1" }
 
-  field :web_host, default: ENV.fetch('WEB_HOST', "https://www.jujucart.com"), type: :string
+  field :web_host, default: ENV.fetch('WEB_HOST', "https:/app.jujucart.com"), type: :string
   field :main_domain, default: ENV.fetch('MAIN_DOMAIN', "jujucart.com"), type: :string
 
   field :google_bearer_token, default: "", type: :string

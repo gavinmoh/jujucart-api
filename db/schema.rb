@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_07_18_080742) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_19_063428) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -520,9 +520,13 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_18_080742) do
     t.string "nanoid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "stripe_account_id"
+    t.boolean "stripe_charged_enabled", default: false
+    t.string "default_payment_gateway"
     t.index ["created_by_id"], name: "index_workspaces_on_created_by_id"
     t.index ["nanoid"], name: "index_workspaces_on_nanoid", unique: true
     t.index ["owner_id"], name: "index_workspaces_on_owner_id"
+    t.index ["stripe_account_id"], name: "index_workspaces_on_stripe_account_id", unique: true
     t.index ["subdomain"], name: "index_workspaces_on_subdomain", unique: true
   end
 

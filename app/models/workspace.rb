@@ -28,33 +28,41 @@ class Workspace < ApplicationRecord
   ]
 
   validates :subdomain,
-    uniqueness: true,
-    exclusion: { in: %w(www us ca jp app my), message: "%{value} is reserved." },
-    if: -> { self.subdomain.present? }
+            uniqueness: true,
+            exclusion: { in: %w[www us ca jp app my], message: "%<value>s is reserved." },
+            if: -> { subdomain.present? }
 
-  validates :web_host, format: { with: URI::DEFAULT_PARSER.make_regexp, message: "is not a valid URL" }, if: -> { self.web_host.present? }
-  validates :coin_to_cash_rate, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }, if: -> { self.coin_to_cash_rate.present? }
-  validates :order_reward_amount, numericality: { greater_than_or_equal_to: 0 }, if: -> { self.order_reward_amount.present? }
-  validates :maximum_redeemed_coin_rate, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }, if: -> { self.maximum_redeemed_coin_rate.present? }
+  validates :web_host, format: { with: URI::DEFAULT_PARSER.make_regexp, message: "is not a valid URL" }, if: -> { web_host.present? }
+  validates :coin_to_cash_rate, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }, if: -> { coin_to_cash_rate.present? }
+  validates :order_reward_amount, numericality: { greater_than_or_equal_to: 0 }, if: -> { order_reward_amount.present? }
+  validates :maximum_redeemed_coin_rate, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }, if: -> { maximum_redeemed_coin_rate.present? }
+  validates :default_payment_gateway, presence: true, inclusion: { in: %w[Stripe Billplz] }
 
+  before_validation :set_default_payment_gateway, on: :create
   before_validation :set_owner_id, on: :create
   before_validation :set_default_settings, on: :create
 
   after_commit :create_default_store, on: :create
 
   private
+
+    def set_default_payment_gateway
+      self.default_payment_gateway = 'Billplz' if default_payment_gateway.blank?
+    end
+
     def set_owner_id
-      self.owner_id = self.created_by_id if self.owner_id.nil?
+      self.owner_id = created_by_id if owner_id.nil?
     end
 
     def set_default_settings
-      self.coin_to_cash_rate = 0.01 if self.coin_to_cash_rate.blank?
-      self.order_reward_amount = 0 if self.order_reward_amount.blank?
-      self.maximum_redeemed_coin_rate = 0.5 if self.maximum_redeemed_coin_rate.blank?
-      self.invoice_size = 'A4' if self.invoice_size.blank?
+      self.coin_to_cash_rate = 0.01 if coin_to_cash_rate.blank?
+      self.order_reward_amount = 0 if order_reward_amount.blank?
+      self.maximum_redeemed_coin_rate = 0.5 if maximum_redeemed_coin_rate.blank?
+      self.invoice_size = 'A4' if invoice_size.blank?
     end
 
     def create_default_store
-      self.stores.create!(name: "Default Store")
+      store_name = owner.present? ? "#{owner.name} Store" : 'Default Store'
+      stores.create!(name: store_name)
     end
 end
