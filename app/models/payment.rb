@@ -11,11 +11,16 @@ class Payment < ApplicationRecord
 
   store_accessor :data, [
     :revenue_monster, :payment_method, :terminal_id, :billplz, :service_provider,
-    :created_source
+    :created_source, :stripe
   ]
 
   # validates :transaction_reference, presence: true, if: -> { self.cash? }
   validates :transaction_reference, uniqueness: true, allow_blank: true
+  validates :service_provider, inclusion: { in: %w[Billplz Stripe RevenueMonster] }, allow_blank: true
+
+  scope :billplz, -> { where("data ->> 'service_provider' = ?", 'Billplz') }
+  scope :stripe, -> { where("data ->> 'service_provider' = ?", 'Stripe') }
+  scope :revenue_monster, -> { where("data ->> 'service_provider' = ?", 'RevenueMonster') }
 
   before_validation :set_workspace_id
 
