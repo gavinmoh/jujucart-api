@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  devise_for :storefronts, only: [:passwords]
   devise_for :admins, only: []
   devise_for :users,  only: []
   devise_for :customers, only: []
@@ -117,6 +118,9 @@ Rails.application.routes.draw do
           resource :passwords, only: [:create, :update]
         end
 
+        resource :accounts, only: [:show, :update] do
+          put :password, on: :collection
+        end
         resource :store, only: [:show], controller: :store
         resources :products, only: [:index, :show] do
           get :all, on: :collection
