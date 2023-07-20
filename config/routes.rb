@@ -110,6 +110,11 @@ Rails.application.routes.draw do
       end
 
       namespace :storefront do
+        devise_scope :customer do
+          post 'sign_up' => 'registrations#create'
+          resource :passwords, only: [:create, :update]
+        end
+
         resource :store, only: [:show], controller: :store
         resources :products, only: [:index, :show] do
           get :all, on: :collection
