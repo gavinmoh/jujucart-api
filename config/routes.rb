@@ -111,6 +111,8 @@ Rails.application.routes.draw do
 
       namespace :storefront do
         devise_scope :customer do
+          post   'sign_in'  => 'sessions#create'
+          delete 'sign_out' => 'sessions#destroy'
           post 'sign_up' => 'registrations#create'
           resource :passwords, only: [:create, :update]
         end

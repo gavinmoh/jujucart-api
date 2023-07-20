@@ -1,6 +1,4 @@
 class Customer < Account
-  devise :recoverable, request_keys: [:workspace_id]
-
   belongs_to :workspace
 
   has_one :wallet, dependent: :nullify
@@ -20,10 +18,6 @@ class Customer < Account
   after_commit :create_wallet, on: :create
 
   scope :query, ->(keyword) { where('name ILIKE :keyword OR phone_number ILIKE :keyword OR email ILIKE :keyword', { keyword: "%#{keyword}%" }) }
-
-  def self.find_for_database_authentication(warden_conditions)
-    where(email: warden_conditions[:email], workspace_id: warden_conditions[:workspace_id]).first
-  end
 
   def reset_password_link(token)
     "#{Current.request_host}/user/reset_password?token=#{token}"

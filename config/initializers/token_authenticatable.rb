@@ -6,14 +6,16 @@ TokenAuthenticatable.configure do |config|
 
   # mandatory, otherwise no token will be dispatched
   config.creator_requests = [
-    [ 'POST', '/api/v1/admin/sign_in' ],
-    [ 'POST', '/api/v1/user' ],
-    [ 'POST', '/api/v1/user/sign_in' ]
+    ['POST', '/api/v1/admin/sign_in'],
+    ['POST', '/api/v1/user'],
+    ['POST', '/api/v1/user/sign_in'],
+    ['POST', '/api/v1/storefront/sign_in']
   ]
 
   # mandatory, otherwise sign out will not have any effect
   config.revoker_requests = [
-    [ 'DELETE', '/api/v1/admin/sign_out' ],
-    [ 'DELETE', '/api/v1/user/sign_out' ]
+    ['DELETE', '/api/v1/admin/sign_out'],
+    ['DELETE', '/api/v1/user/sign_out'],
+    ['DELETE', '/api/v1/customer/sign_out']
   ]
 end
