@@ -11,7 +11,7 @@ class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationCo
   end
 
   def show
-    render json: @order, adapter: :json, include: ['*', 'line_items.product']
+    render json: @order, adapter: :json, include: ['*', 'line_items.product'], include: ['*', 'line_items.product']
   end
 
   def create
@@ -23,7 +23,7 @@ class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationCo
     pundit_authorize(@order)
 
     if @order.save
-      render json: @order, adapter: :json
+      render json: @order, adapter: :json, include: ['*', 'line_items.product'], include: ['*', 'line_items.product']
     else
       render json: ErrorResponse.new(@order), status: :unprocessable_entity
     end
@@ -31,7 +31,7 @@ class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationCo
 
   def update
     if @order.update(update_params)
-      render json: @order, adapter: :json
+      render json: @order, adapter: :json, include: ['*', 'line_items.product']
     else
       render json: ErrorResponse.new(@order), status: :unprocessable_entity
     end
@@ -58,7 +58,7 @@ class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationCo
 
     if transaction_success
       @order.reload
-      render json: @order, adapter: :json
+      render json: @order, adapter: :json, include: ['*', 'line_items.product']
     else
       render json: ErrorResponse.new(@order), status: :unprocessable_entity
     end
@@ -66,7 +66,7 @@ class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationCo
 
   def complete
     if @order.completed? || @order.complete!
-      render json: @order, adapter: :json
+      render json: @order, adapter: :json, include: ['*', 'line_items.product']
     else
       render json: ErrorResponse.new(@order), status: :unprocessable_entity
     end
@@ -79,7 +79,7 @@ class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationCo
     @order_coupon.code = coupon_code_params
     if @order_coupon.save!
       @order.reload
-      render json: @order, adapter: :json
+      render json: @order, adapter: :json, include: ['*', 'line_items.product']
     else
       ErrorResponse.new(@order_coupon)
     end
@@ -93,7 +93,7 @@ class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationCo
       OrderCoupon.where(order: @order).destroy_all
     end
     @order.reload
-    render json: @order, adapter: :json
+    render json: @order, adapter: :json, include: ['*', 'line_items.product']
   end
 
   private

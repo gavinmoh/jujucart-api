@@ -16,6 +16,7 @@ class Api::V1::Storefront::OrderSerializer < ActiveModel::Serializer
   attribute :payment_url, if: -> { object.pending_payment? }
 
   has_one :store
+  has_one :customer, serializer: Api::V1::Storefront::UserInfoSerializer
   has_one :order_coupon
   has_many :line_items
   has_one :success_payment
