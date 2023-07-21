@@ -4,10 +4,10 @@ class Api::V1::Storefront::OrderPolicy < ApplicationPolicy
   end
 
   def show?
-    if @user.present?
-      @order.customer_id == @user.id
+    if @record.customer_id.present?
+      @record.customer_id == @user&.id
     else
-      (@record.delivery? or @record.pickup?) and @record.customer_id.nil?
+      @record.delivery? or @record.pickup?
     end
   end
 
