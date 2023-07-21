@@ -21,7 +21,7 @@ module Billplzable
     if current_store.billplz_collection_id.present?
       Billplz::Collection.get(current_store.billplz_collection_id)
     else
-      Billplz::Collection.create(title: "#{current_store.name} - #{current_store.nanoid}")
+      Billplz::Collection.create("#{current_store.name} - #{current_store.nanoid}")
     end
   end
 

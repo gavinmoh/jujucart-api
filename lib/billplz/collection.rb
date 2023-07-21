@@ -28,7 +28,7 @@ module Billplz
     end
 
     def self.parse_collections(response)
-      parsed = JSON.parse(response.body)
+      parsed = response.is_a?(Hash) ? response : JSON.parse(response)
       Collections.new(
         parsed['collections'].map { |collection| parse_collection(collection) },
         parsed['page'].to_i
