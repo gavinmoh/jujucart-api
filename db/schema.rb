@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_07_19_090003) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_21_040516) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -278,14 +278,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_19_090003) do
     t.boolean "is_flagged"
     t.string "flagged_reason"
     t.uuid "store_id"
-    t.string "unit_number"
-    t.string "street_address1"
-    t.string "street_address2"
-    t.string "postcode"
-    t.string "city"
-    t.string "state"
-    t.decimal "latitude", precision: 10, scale: 6
-    t.decimal "longitude", precision: 10, scale: 6
+    t.string "delivery_address_unit_number"
+    t.string "delivery_address_street_address1"
+    t.string "delivery_address_street_address2"
+    t.string "delivery_address_postcode"
+    t.string "delivery_address_city"
+    t.string "delivery_address_state"
+    t.decimal "delivery_address_latitude", precision: 10, scale: 6
+    t.decimal "delivery_address_longitude", precision: 10, scale: 6
     t.string "courier_name"
     t.string "tracking_number"
     t.bigint "reward_coin", default: 0
@@ -305,9 +305,22 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_19_090003) do
     t.datetime "voided_at"
     t.datetime "refunded_at"
     t.uuid "workspace_id"
-    t.string "customer_name"
-    t.string "customer_email"
-    t.string "customer_phone_number"
+    t.string "delivery_address_contact_name"
+    t.string "delivery_address_contact_email"
+    t.string "delivery_address_contact_phone_number"
+    t.string "billing_address_unit_number"
+    t.string "billing_address_street_address1"
+    t.string "billing_address_street_address2"
+    t.string "billing_address_postcode"
+    t.string "billing_address_city"
+    t.string "billing_address_state"
+    t.string "billing_address_country"
+    t.decimal "billing_address_latitude", precision: 10, scale: 6
+    t.decimal "billing_address_longitude", precision: 10, scale: 6
+    t.string "billing_address_contact_name"
+    t.string "billing_address_contact_email"
+    t.string "billing_address_contact_phone_number"
+    t.string "delivery_address_country"
     t.index ["created_by_id"], name: "index_orders_on_created_by_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["nanoid"], name: "index_orders_on_nanoid", unique: true

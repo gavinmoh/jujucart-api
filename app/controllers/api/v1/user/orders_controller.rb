@@ -259,9 +259,15 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
 
     def manual_order_params
       params.require(:order).permit(
-        :customer_id, :store_id, :is_flagged, :flagged_reason, :unit_number, :street_address1,
-        :street_address2, :postcode, :city, :state, :latitude, :longitude, :courier_name,
-        :tracking_number, :order_type,
+        :customer_id, :store_id, :is_flagged, :flagged_reason, :courier_name, :tracking_number, :order_type,
+        :billing_address_unit_number, :billing_address_street_address1, :billing_address_street_address2,
+        :billing_address_postcode, :billing_address_city, :billing_address_state, :billing_address_country,
+        :billing_address_latitude, :billing_address_longitude, :billing_address_contact_name,
+        :billing_address_contact_email, :billing_address_contact_phone_number,
+        :delivery_address_unit_number, :delivery_address_street_address1, :delivery_address_street_address2,
+        :delivery_address_postcode, :delivery_address_city, :delivery_address_state, :delivery_address_country,
+        :delivery_address_latitude, :delivery_address_longitude, :delivery_address_contact_name,
+        :delivery_address_contact_email, :delivery_address_contact_phone_number,
         line_items_attributes: [:id, :product_id, :quantity, :name, :unit_price, :_destroy],
         order_attachments_attributes: [:id, :name, :file, :_destroy]
       )
@@ -269,8 +275,15 @@ class Api::V1::User::OrdersController < Api::V1::User::ApplicationController
 
     def update_params
       params.require(:order).permit(
-        :is_flagged, :flagged_reason, :unit_number, :street_address1, :street_address2,
-        :postcode, :city, :state, :latitude, :longitude, :courier_name, :tracking_number,
+        :is_flagged, :flagged_reason, :courier_name, :tracking_number,
+        :billing_address_unit_number, :billing_address_street_address1, :billing_address_street_address2,
+        :billing_address_postcode, :billing_address_city, :billing_address_state, :billing_address_country,
+        :billing_address_latitude, :billing_address_longitude, :billing_address_contact_name,
+        :billing_address_contact_email, :billing_address_contact_phone_number,
+        :delivery_address_unit_number, :delivery_address_street_address1, :delivery_address_street_address2,
+        :delivery_address_postcode, :delivery_address_city, :delivery_address_state, :delivery_address_country,
+        :delivery_address_latitude, :delivery_address_longitude, :delivery_address_contact_name,
+        :delivery_address_contact_email, :delivery_address_contact_phone_number,
         order_attachments_attributes: [:id, :name, :file, :_destroy]
       )
     end

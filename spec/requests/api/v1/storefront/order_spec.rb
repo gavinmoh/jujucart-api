@@ -109,18 +109,31 @@ RSpec.describe 'api/v1/storefront/orders', type: :request do
           order: {
             type: :object,
             properties: {
-              unit_number: { type: :string },
-              street_address1: { type: :string },
-              street_address2: { type: :string },
-              postcode: { type: :string },
-              city: { type: :string },
-              state: { type: :string },
-              latitude: { type: :float },
-              longitude: { type: :float },
+              billing_address_unit_number: { type: :string },
+              billing_address_street_address1: { type: :string },
+              billing_address_street_address2: { type: :string },
+              billing_address_postcode: { type: :string },
+              billing_address_city: { type: :string },
+              billing_address_state: { type: :string },
+              billing_address_country: { type: :string },
+              billing_address_latitude: { type: :number },
+              billing_address_longitude: { type: :number },
+              billing_address_contact_name: { type: :string },
+              billing_address_contact_email: { type: :string },
+              billing_address_contact_phone_number: { type: :string },
+              delivery_address_unit_number: { type: :string },
+              delivery_address_street_address1: { type: :string },
+              delivery_address_street_address2: { type: :string },
+              delivery_address_postcode: { type: :string },
+              delivery_address_city: { type: :string },
+              delivery_address_state: { type: :string },
+              delivery_address_country: { type: :string },
+              delivery_address_latitude: { type: :number },
+              delivery_address_longitude: { type: :number },
+              delivery_address_contact_name: { type: :string },
+              delivery_address_contact_email: { type: :string },
+              delivery_address_contact_phone_number: { type: :string },
               redeemed_coin: { type: :integer },
-              customer_name: { type: :string },
-              customer_email: { type: :string },
-              customer_phone_number: { type: :string },
               order_attachments_attributes: {
                 type: :array,
                 items: {
@@ -139,7 +152,7 @@ RSpec.describe 'api/v1/storefront/orders', type: :request do
       }
 
       let(:data) do
-        { order: attributes_for(:order).slice(:street_address1, :street_address2)
+        { order: attributes_for(:order).slice(:delivery_street_address1, :delivery_street_address2)
                                        .merge(order_attachments_attributes: [
                                                 attributes_for(:order_attachment).slice(:name, :file)
                                               ]) }
@@ -178,8 +191,44 @@ RSpec.describe 'api/v1/storefront/orders', type: :request do
     put('checkout orders') do
       tags 'Storefront Orders'
       produces 'application/json'
-      # consumes 'application/json'
+      consumes 'application/json'
       # security [{ bearerAuth: nil }]
+
+      parameter name: :data, in: :body, required: false, schema: {
+        type: :object,
+        properties: {
+          order: {
+            type: :object,
+            properties: {
+              billing_address_unit_number: { type: :string },
+              billing_address_street_address1: { type: :string },
+              billing_address_street_address2: { type: :string },
+              billing_address_postcode: { type: :string },
+              billing_address_city: { type: :string },
+              billing_address_state: { type: :string },
+              billing_address_country: { type: :string },
+              billing_address_latitude: { type: :number },
+              billing_address_longitude: { type: :number },
+              billing_address_contact_name: { type: :string },
+              billing_address_contact_email: { type: :string },
+              billing_address_contact_phone_number: { type: :string },
+              delivery_address_unit_number: { type: :string },
+              delivery_address_street_address1: { type: :string },
+              delivery_address_street_address2: { type: :string },
+              delivery_address_postcode: { type: :string },
+              delivery_address_city: { type: :string },
+              delivery_address_state: { type: :string },
+              delivery_address_country: { type: :string },
+              delivery_address_latitude: { type: :number },
+              delivery_address_longitude: { type: :number },
+              delivery_address_contact_name: { type: :string },
+              delivery_address_contact_email: { type: :string },
+              delivery_address_contact_phone_number: { type: :string },
+              redeemed_coin: { type: :integer }
+            }
+          }
+        }
+      }
 
       let(:id) { create(:order, :guest_order, :with_line_items, store_id: store.id, workspace: user.workspace).id }
 

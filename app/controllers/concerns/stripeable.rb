@@ -48,7 +48,7 @@ module Stripeable
     if order.customer.present?
       payload[:customer] = find_or_create_stripe_customer_id(order)
     else
-      payload[:customer_email] = order.customer_email
+      payload[:customer_email] = order.billing_address_contact_email
     end
 
     Stripe::Checkout::Session.create(payload)

@@ -28,9 +28,9 @@ module Billplzable
   def create_billplz_bill(order, collection, uuid)
     Billplz::Bill.create(
       collection.id,
-      order.customer&.email || order.customer_email,
-      order.customer&.phone_number || order.customer_phone_number,
-      order.customer&.name || order.customer_name,
+      order.customer&.email || order.billing_address_contact_email,
+      order.customer&.phone_number || order.billing_address_contact_phone_number,
+      order.customer&.name || order.billing_address_contact_name,
       order.total_cents,
       api_v1_billplz_callback_url(uuid),
       "Order ##{order.nanoid}",

@@ -46,6 +46,7 @@ class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationCo
   end
 
   def checkout
+    @order.assign_attributes(checkout_params) if params[:order].present?
     @order.customer = current_customer if @order.customer.blank?
     @order.created_by = current_customer if @order.created_by.blank?
 
@@ -127,10 +128,28 @@ class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationCo
 
     def update_params
       params.require(:order).permit(
-        :unit_number, :street_address1, :street_address2,
-        :postcode, :city, :state, :latitude, :longitude,
-        :customer_name, :customer_email, :customer_phone_number,
+        :billing_address_unit_number, :billing_address_street_address1, :billing_address_street_address2,
+        :billing_address_postcode, :billing_address_city, :billing_address_state, :billing_address_country,
+        :billing_address_latitude, :billing_address_longitude, :billing_address_contact_name,
+        :billing_address_contact_email, :billing_address_contact_phone_number,
+        :delivery_address_unit_number, :delivery_address_street_address1, :delivery_address_street_address2,
+        :delivery_address_postcode, :delivery_address_city, :delivery_address_state, :delivery_address_country,
+        :delivery_address_latitude, :delivery_address_longitude, :delivery_address_contact_name,
+        :delivery_address_contact_email, :delivery_address_contact_phone_number,
         order_attachments_attributes: [:id, :name, :file, :_destroy]
+      )
+    end
+
+    def checkout_params
+      params.require(:order).permit(
+        :billing_address_unit_number, :billing_address_street_address1, :billing_address_street_address2,
+        :billing_address_postcode, :billing_address_city, :billing_address_state, :billing_address_country,
+        :billing_address_latitude, :billing_address_longitude, :billing_address_contact_name,
+        :billing_address_contact_email, :billing_address_contact_phone_number,
+        :delivery_address_unit_number, :delivery_address_street_address1, :delivery_address_street_address2,
+        :delivery_address_postcode, :delivery_address_city, :delivery_address_state, :delivery_address_country,
+        :delivery_address_latitude, :delivery_address_longitude, :delivery_address_contact_name,
+        :delivery_address_contact_email, :delivery_address_contact_phone_number
       )
     end
 

@@ -224,23 +224,23 @@ RSpec.describe Order, type: :model do
       end
     end
 
-    describe '#display_address' do
+    describe '#display_delivery_address' do
       let!(:order) { build(:order) }
 
       it 'returns display address' do
-        expect(order.display_address).to eq("#{order.unit_number}, #{order.street_address1}, #{order.street_address2}, #{order.postcode}, #{order.city}, #{order.state}")
-        order.unit_number = ''
-        expect(order.display_address).to eq("#{order.street_address1}, #{order.street_address2}, #{order.postcode}, #{order.city}, #{order.state}")
-        order.street_address2 = ''
-        expect(order.display_address).to eq("#{order.street_address1}, #{order.postcode}, #{order.city}, #{order.state}")
-        order.postcode = ''
-        expect(order.display_address).to eq("#{order.street_address1}, #{order.city}, #{order.state}")
-        order.city = ''
-        expect(order.display_address).to eq("#{order.street_address1}, #{order.state}")
-        order.state = ''
-        expect(order.display_address).to eq("#{order.street_address1}")
-        order.street_address1 = ''
-        expect(order.display_address).to eq('')
+        expect(order.display_delivery_address).to eq("#{order.delivery_address_unit_number}, #{order.delivery_address_street_address1}, #{order.delivery_address_street_address2}, #{order.delivery_address_postcode}, #{order.delivery_address_city}, #{order.delivery_address_state}")
+        order.delivery_address_unit_number = ''
+        expect(order.display_delivery_address).to eq("#{order.delivery_address_street_address1}, #{order.delivery_address_street_address2}, #{order.delivery_address_postcode}, #{order.delivery_address_city}, #{order.delivery_address_state}")
+        order.delivery_address_street_address2 = ''
+        expect(order.display_delivery_address).to eq("#{order.delivery_address_street_address1}, #{order.delivery_address_postcode}, #{order.delivery_address_city}, #{order.delivery_address_state}")
+        order.delivery_address_postcode = ''
+        expect(order.display_delivery_address).to eq("#{order.delivery_address_street_address1}, #{order.delivery_address_city}, #{order.delivery_address_state}")
+        order.delivery_address_city = ''
+        expect(order.display_delivery_address).to eq("#{order.delivery_address_street_address1}, #{order.delivery_address_state}")
+        order.delivery_address_state = ''
+        expect(order.display_delivery_address).to eq("#{order.delivery_address_street_address1}")
+        order.delivery_address_street_address1 = ''
+        expect(order.display_delivery_address).to eq('')
       end
     end
 
@@ -248,12 +248,12 @@ RSpec.describe Order, type: :model do
       let!(:order) { create(:order) }
 
       it 'returns true if coordinates changed' do
-        order.assign_attributes(latitude: 1, longitude: 1)
+        order.assign_attributes(delivery_address_latitude: 1, delivery_address_longitude: 1)
         expect(order.send(:coordinates_changed?)).to be(true)
       end
 
       it 'returns false if coordinates not changed' do
-        order.assign_attributes(unit_number: '123')
+        order.assign_attributes(delivery_address_unit_number: '123')
         expect(order.send(:coordinates_changed?)).to be(false)
       end
     end
@@ -262,12 +262,12 @@ RSpec.describe Order, type: :model do
       let!(:order) { create(:order) }
 
       it 'returns true if coordinates complete' do
-        order.update(latitude: 1, longitude: 1)
+        order.update(delivery_address_latitude: 1, delivery_address_longitude: 1)
         expect(order.send(:coordinates_complete?)).to be(true)
       end
 
       it 'returns false if coordinates not complete' do
-        order.update(latitude: nil, longitude: 1)
+        order.update(delivery_address_latitude: nil, delivery_address_longitude: 1)
         expect(order.send(:coordinates_complete?)).to be(false)
       end
     end

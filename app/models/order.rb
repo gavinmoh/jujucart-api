@@ -123,8 +123,15 @@ class Order < ApplicationRecord
     save!
   end
 
-  def display_address
-    [unit_number, street_address1, street_address2, postcode, city, state].compact_blank.join(', ')
+  def display_delivery_address
+    [
+      delivery_address_unit_number,
+      delivery_address_street_address1,
+      delivery_address_street_address2,
+      delivery_address_postcode,
+      delivery_address_city,
+      delivery_address_state
+    ].compact_blank.join(', ')
   end
 
   private
@@ -249,11 +256,11 @@ class Order < ApplicationRecord
     end
 
     def coordinates_changed?
-      (changed & %w[latitude longitude]).any?
+      (changed & %w[delivery_address_latitude delivery_address_longitude]).any?
     end
 
     def coordinates_complete?
-      latitude.present? and longitude.present?
+      delivery_address_latitude.present? and delivery_address_longitude.present?
     end
 
     def create_reward_transaction
