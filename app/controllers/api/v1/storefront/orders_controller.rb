@@ -99,7 +99,7 @@ class Api::V1::Storefront::OrdersController < Api::V1::Storefront::ApplicationCo
   private
 
     def set_order
-      @order = Order.where(workspace_id: current_workspace.id).find(params[:id])
+      @order = Order.includes({ line_items: :product }).where(workspace_id: current_workspace.id).find(params[:id])
       pundit_authorize(@order) if @order
     end
 
