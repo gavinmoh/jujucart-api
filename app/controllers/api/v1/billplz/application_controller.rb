@@ -14,11 +14,11 @@ class Api::V1::Billplz::ApplicationController < ApplicationController
     BillplzReconcilationWorker.perform_async(@payment.id)
     redirect_url = if extracted[:billplz][:paid] == 'true' && extracted[:billplz][:transaction_status] == 'completed'
                      @payment.mark_as_success! if @payment.may_mark_as_success?
-                     URI.parse("#{redirect_host}/order/payment_success?order_id=#{@payment.order_id}").to_s
+                     success_url
                    elsif extracted[:billplz][:transaction_status] == 'failed'
-                     URI.parse("#{redirect_host}/order/payment_fail?order_id=#{@payment.order_id}").to_s
+                     fail_url
                    else
-                     URI.parse("#{redirect_host}/order/payment_unknown?order_id=#{@payment.order_id}").to_s
+                     unknown_url
                    end
 
     redirect_to(redirect_url, allow_other_host: true)

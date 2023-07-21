@@ -10,18 +10,18 @@ module PaymentRedirectable
   end
 
   def cancel_url
-    URI.parse("#{redirect_host}/order/payment_cancel?order_id=#{@payment.order_id}").to_s
+    URI.parse("https://#{redirect_host}/order/payment_cancel?order_id=#{@payment.order_id}").to_s
   end
 
   def fail_url
-    URI.parse("#{redirect_host}/order/payment_fail?order_id=#{@payment.order_id}").to_s
+    URI.parse("https://#{redirect_host}/order/payment_fail?order_id=#{@payment.order_id}").to_s
   end
 
   def unknown_url
-    URI.parse("#{redirect_host}/order/payment_unknown?order_id=#{@payment.order_id}").to_s
+    URI.parse("https://#{redirect_host}/order/payment_unknown?order_id=#{@payment.order_id}").to_s
   end
 
   def success_url
-    URI.parse("#{redirect_host}/order/payment_success?order_id=#{@payment.order_id}").to_s
+    URI.parse("https://#{redirect_host}/order/payment_success?order_id=#{@payment.order_id}").to_s
   end
 end
