@@ -20,7 +20,12 @@ class Customer < Account
   scope :query, ->(keyword) { where('name ILIKE :keyword OR phone_number ILIKE :keyword OR email ILIKE :keyword', { keyword: "%#{keyword}%" }) }
 
   def reset_password_link(token)
-    "#{Current.request_host}/user/reset_password?token=#{token}"
+    request_referer_host = begin
+      URI.parse(Current.request_referer).host
+    rescue StandardError
+      nil
+    end
+    "#{request_referer_host}/user/reset_password?token=#{token}"
   end
 
   protected

@@ -2,10 +2,17 @@ require 'swagger_helper'
 
 RSpec.describe 'api/v1/stripe/', type: :request do
   let(:workspace) { create(:workspace, stripe_account_id: '123', stripe_charges_enabled: true, default_payment_gateway: 'Stripe') }
-  let(:store) { create(:store, workspace: workspace, store_type: 'online', hostname: 'www.example.com') }
+  let(:store) { create(:store, workspace: workspace, store_type: 'online') }
   let(:order) { create(:order, :with_line_items, workspace: workspace, store_id: store.id, customer_id: nil) }
   let(:payment) { order.pending_stripe_payment }
   let(:payment_id) { payment.id }
+
+  # mocking is required here because storefront API was called to checkout the order
+  let(:mock_request) { instance_double(ActionDispatch::Request) }
+
+  before do
+    allow(mock_request).to receive(:referer).and_return("https://#{store.hostname}/")
+  end
 
   before do
     StripeMock.start

@@ -12,7 +12,7 @@ module Stripeable
       service_provider: 'Stripe',
       transaction_reference: checkout_session.id,
       stripe: checkout_session,
-      created_source: request.host
+      created_source: request_referer_host
     )
   end
 
@@ -68,5 +68,11 @@ module Stripeable
     )
     customer.update(stripe_customer_id: customer.id)
     stripe_customer
+  end
+
+  def request_referer_host
+    URI.parse(request.referer).host
+  rescue URI::InvalidURIError
+    nil
   end
 end

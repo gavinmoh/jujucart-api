@@ -2,9 +2,14 @@ require 'swagger_helper'
 
 RSpec.describe 'api/v1/storefront/accounts', type: :request do
   # change the create(:user) to respective user model name
-  let(:store) { create(:store, store_type: 'online', hostname: 'www.example.com') }
+  let(:mock_request) { instance_double(ActionDispatch::Request) }
+  let(:store) { create(:store, store_type: 'online') }
   let(:user) { create(:customer, workspace: store.workspace) }
   let(:Authorization) { bearer_token_for(user) }
+
+  before do
+    allow(mock_request).to receive(:referer).and_return("https://#{store.hostname}/")
+  end
 
   path '/api/v1/storefront/accounts/' do
     get('show accounts') do

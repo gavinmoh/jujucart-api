@@ -13,7 +13,7 @@ module Billplzable
       service_provider: 'Billplz',
       transaction_reference: bill.id,
       billplz: bill,
-      created_source: request.host
+      created_source: request_referer_host
     )
   end
 
@@ -38,5 +38,11 @@ module Billplzable
       reference_1_label: 'order_id',
       reference_1: order.nanoid
     )
+  end
+
+  def request_referer_host
+    URI.parse(request.referer).host
+  rescue StandardError
+    nil
   end
 end

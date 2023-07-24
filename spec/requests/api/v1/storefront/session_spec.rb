@@ -1,8 +1,13 @@
 require 'swagger_helper'
 
 RSpec.describe 'api/v1/storefront/sessions', type: :request do
-  let!(:store) { create(:store, store_type: 'online', hostname: 'www.example.com') }
+  let!(:store) { create(:store, store_type: 'online') }
   let(:customer) { create(:customer, workspace: store.workspace, password: 'password') }
+  let(:mock_request) { instance_double(ActionDispatch::Request) }
+
+  before do
+    allow(mock_request).to receive(:referer).and_return("https://#{store.hostname}/")
+  end
 
   path '/api/v1/storefront/sign_in' do
     post('Sign in') do

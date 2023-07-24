@@ -6,7 +6,7 @@ module SetCurrentRequestDetails
       Current.request_id = request.uuid
       Current.user_agent = request.user_agent
       Current.ip_address = request.ip
-      Current.request_host = request.host
+      Current.request_referer = request.referer
     end
   end
 end

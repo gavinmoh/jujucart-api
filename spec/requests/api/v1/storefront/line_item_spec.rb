@@ -4,10 +4,15 @@ RSpec.describe 'api/v1/storefront/line_items', type: :request do
   # change the create(:user) to respective user model name
   let(:user) { create(:customer) }
   let(:Authorization) { bearer_token_for(user) }
-  let!(:store) { create(:store, workspace: user.workspace, store_type: 'online', hostname: 'www.example.com') }
+  let!(:store) { create(:store, workspace: user.workspace, store_type: 'online') }
   let(:order) { create(:order, :guest_order, store_id: store.id, workspace: user.workspace) }
   let(:order_id) { order.id }
   let(:id) { create(:line_item, order_id: order_id).id }
+  let(:mock_request) { instance_double(ActionDispatch::Request) }
+
+  before do
+    allow(mock_request).to receive(:referer).and_return("https://#{store.hostname}/")
+  end
 
   path '/api/v1/storefront/orders/{order_id}/line_items' do
     parameter name: 'order_id', in: :path, type: :string, description: 'order_id'

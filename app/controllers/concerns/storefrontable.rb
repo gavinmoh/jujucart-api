@@ -8,10 +8,10 @@ module Storefrontable
   def set_store
     @store = if request.headers["X-STORE-ID"].present?
                Store.online.find(request.headers["X-STORE-ID"])
-             elsif request.host.ends_with?(".#{Setting.main_domain}")
+             elsif request_referer_host&.ends_with?(".#{Setting.main_domain}")
                Store.online.find_by!(subdomain: request.subdomain)
              else
-               Store.online.find_by!(hostname: request.host)
+               Store.online.find_by!(hostname: request_referer_host)
              end
   rescue ActiveRecord::RecordNotFound
     render json: {
@@ -26,5 +26,11 @@ module Storefrontable
 
   def current_workspace
     current_store.workspace
+  end
+
+  def request_referer_host
+    URI.parse(request.referer).host
+  rescue URI::InvalidURIError
+    nil
   end
 end

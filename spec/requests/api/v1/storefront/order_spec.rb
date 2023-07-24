@@ -5,10 +5,12 @@ RSpec.describe 'api/v1/storefront/orders', type: :request do
   let(:user) { create(:customer) }
   let(:Authorization) { bearer_token_for(user) }
   let(:workspace) { user.workspace }
-  let!(:store) { create(:store, workspace: user.workspace, store_type: 'online', hostname: 'www.example.com') }
+  let!(:store) { create(:store, workspace: user.workspace, store_type: 'online') }
   let(:id) { create(:order, :guest_order, store_id: store.id, workspace: user.workspace).id }
-
+  let(:mock_request) { instance_double(ActionDispatch::Request) }
+  
   before do
+    allow(mock_request).to receive(:referer).and_return("https://#{store.hostname}/")
     StripeMock.start
   end
 

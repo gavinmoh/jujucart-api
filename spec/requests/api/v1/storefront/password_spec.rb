@@ -1,7 +1,12 @@
 require 'swagger_helper'
 
 RSpec.describe 'api/v1/storefront/passwords', type: :request do
-  let!(:store) { create(:store, store_type: 'online', hostname: 'www.example.com') }
+  let!(:store) { create(:store, store_type: 'online') }
+  let(:mock_request) { instance_double(ActionDispatch::Request) }
+
+  before do
+    allow(mock_request).to receive(:referer).and_return("https://#{store.hostname}/")
+  end
 
   path '/api/v1/storefront/passwords' do
     post('Send Reset Password Token') do
